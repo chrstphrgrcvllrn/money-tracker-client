@@ -2,12 +2,12 @@ export type Expense = {
   _id?: string;
   name: string;
   amount: number;
-  paid?: boolean;
+  paid: boolean;
 };
 
 export type SalaryEntry = {
   _id: string;
-  month: string;
-  salary?: number;
+  date: string;
+  expectedSalary: number;
   expenses: Expense[];
 };

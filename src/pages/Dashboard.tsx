@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Loan } from "../types/loans.type";
 import { getLoans } from "../api/loan";
 
