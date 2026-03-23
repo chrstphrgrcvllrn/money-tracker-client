@@ -112,21 +112,21 @@ export default function LoanPage() {
   }
 
   return (
-    <div className="p-4 max-w-md mx-auto font-sans text-gray-800">
+    <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-black">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
         <h1 className="text-lg font-semibold">Loans</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-3 py-1 bg-black text-white rounded-lg text-sm"
+          className="px-[0.7rem] py-[0.3rem] bg-[#94C93D] font-bold text-[#000] border border-[#94C93D] rounded-4xl text-sm"
         >
-          + Add Loan
+          + 
         </button>
       </div>
 
       {/* ADD LOAN FORM */}
       {showForm && (
-        <div className="mb-6 p-4 bg-white rounded-xl shadow-sm space-y-3">
+        <div className="mb-6 p-4 bg-none border-[#94C93D] rounded-xl shadow-sm space-y-3">
           <input
             type="text"
             placeholder="Loan name"
@@ -162,23 +162,23 @@ export default function LoanPage() {
       )}
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-white rounded-xl shadow-sm text-center">
+      <div className="mb-6 p-4 bg-mist-900 rounded-xl shadow-sm text-center">
         <p className="text-gray-400 text-sm">Total Remaining</p>
-        <p className="text-[2.5rem] font-bold text-red-600">
+        <p className="text-[2.5rem] font-bold text-[#94C93D]">
           {totalRemaining.toLocaleString()}
         </p>
       </div>
 
-      <div className="mb-6 p-2 bg-white rounded-xl shadow-sm flex justify-between w-full">
+      <div className="mb-6 p-2 bg-mist-900 border border-[#] rounded-xl shadow-sm flex justify-between w-full">
         <div>
-          <p className="text-gray-400 text-sm">Total Loan</p>
-          <p className="text-md font-medium">
+          <p className="text-[#94C93D] text-sm">Total Loan</p>
+          <p className="text-md font-medium text-white">
             {totalInitial.toLocaleString()}
           </p>
         </div>
         <div>
-          <p className="text-gray-400 text-sm">Total Paid</p>
-          <p className="text-md font-medium">
+          <p className="text-[#94C93D] text-sm">Total Paid</p>
+          <p className="text-md font-medium text-white">
             {totalPaid.toLocaleString()}
           </p>
         </div>
@@ -197,19 +197,19 @@ export default function LoanPage() {
           return (
             <div
               key={loan._id}
-              className="bg-white rounded-xl shadow-sm overflow-hidden"
+              className="bg-mist-900   rounded-xl shadow-sm overflow-hidden"
             >
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
                 onClick={() => toggleExpand(index)}
               >
                 <div className="text-left">
-                    <p className="font-medium text-[1.2rem]">{loan.name}</p>
+                    <p className="font-medium text-[1.2rem] text-[#fff]">{loan.name}</p>
 
-                    <div className="text-xs text-gray-500 space-y-0.5">
+                    <div className="text-xs text-[#94C93D] space-y-0.5">
                       <p>
                         Paid:{" "}
-                        <span className="text-gray-600 font-medium">
+                        <span className="text-[#fff] font-medium">
                           {paid.toLocaleString()}
                         </span>
                       </p>
@@ -222,7 +222,7 @@ export default function LoanPage() {
                     </div>
                   </div>
 
-                <p className="font-bold text-red-600">
+                <p className="font-bold text-[#94C93D]">
                   {remaining.toLocaleString()}
                 </p>
               </button>

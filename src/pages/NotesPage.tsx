@@ -44,16 +44,16 @@ const NotesPage: React.FC = () => {
   // };
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 p-6  ">
+    <div className="text-xs max-w-md mx-auto mt-8 p-6  bg-black">
       {/* <h1 className="text-xl font-bold mb-4">My Notes</h1> */}
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 h-[7vh]">
         <input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter note"
-          className="flex-1 border px-2 py-1 rounded border-gray-200"
+          className="flex-1  bg-mist-900 px-2 py-1 rounded   text-white"
         />
 
         <select
@@ -61,7 +61,7 @@ const NotesPage: React.FC = () => {
           onChange={(e) =>
             setCategory(e.target.value as Note["category"])
           }
-          className="border px-2 py-1 rounded border-gray-200"
+          className="bg-mist-900 px-2 py-1 rounded  text-[#fff]"
         >
           <option value="work">Work</option>
           <option value="personal">Personal</option>
@@ -70,7 +70,7 @@ const NotesPage: React.FC = () => {
 
         <button
           onClick={addNote}
-          className="bg-blue-500 text-white px-2 py-1 rounded"
+          className="bg-[#94C93D] text-black font-bold px-2 py-1 rounded"
         >
           Add
         </button>
@@ -80,21 +80,21 @@ const NotesPage: React.FC = () => {
         {notes.map((note) => (
           <li
             key={note._id}
-            className={`flex justify-between items-center p-2 border border-gray-200 rounded ${
+            className={`flex justify-between items-center p-2 bg-mist-900 rounded ${
               note.done ? "text-gray-300 line-through" : ""
             }`}
           >
             <div>
-              <span className="font-medium">{note.text}</span>{" "}
+              <span className="font-medium text-white">{note.text}</span>{" "}
               <span className="text-gray-500">
-                [{note.category}]
+                {note.category}
               </span>
             </div>
 
             <div className="flex gap-2">
               <button
                 onClick={() => handleToggle(note._id)}
-                className="text-sm px-2 py-1 border rounded"
+                className="text-sm px-2 py-1   rounded   text-mist-500"
               >
                 {note.done ? "Undo" : "Done"}
               </button>
