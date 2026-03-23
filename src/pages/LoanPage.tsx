@@ -164,7 +164,7 @@ export default function LoanPage() {
       {/* SUMMARY */}
       <div className="mb-6 p-4 bg-white rounded-xl shadow-sm text-center">
         <p className="text-gray-400 text-sm">Total Remaining</p>
-        <p className="text-2xl font-bold text-red-600">
+        <p className="text-[2.5rem] font-bold text-red-600">
           {totalRemaining.toLocaleString()}
         </p>
       </div>
@@ -204,7 +204,7 @@ export default function LoanPage() {
                 onClick={() => toggleExpand(index)}
               >
                 <div className="text-left">
-                    <p className="font-medium">{loan.name}</p>
+                    <p className="font-medium text-[1.2rem]">{loan.name}</p>
 
                     <div className="text-xs text-gray-500 space-y-0.5">
                       <p>
