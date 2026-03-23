@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { SalaryEntry } from "../types/salary.type";
 
-const API_URL = "http://localhost:5000/api/salary";
+// const API_URL = "http://localhost:5000/api/salary";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/salary`;
 
 // GET
 export const fetchSalaries = async (): Promise<SalaryEntry[]> => {

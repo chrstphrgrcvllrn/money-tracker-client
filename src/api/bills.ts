@@ -1,6 +1,7 @@
 import type { MonthlyBills, Bill } from "../types/bills.type";
 
-const API_URL = "http://localhost:5000/api/bills";
+// const API_URL = "http://localhost:5000/api/bills";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/bills`;
 
 // GET all months with bills
 export const getMonthlyBills = async (): Promise<MonthlyBills[]> => {

@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { Note } from "../types/notes.type";
 
-const API_URL = "http://localhost:5000/api/notes";
+// const API_URL = "http://localhost:5000/api/notes";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/notes`;
 
 // Get all notes
 export const getNotes = async (): Promise<Note[]> => {
