@@ -115,7 +115,7 @@ export default function LoanPage() {
     <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-black">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold">Loans</h1>
+        <h1 className="text-lg font-semibold text-[#94C93D]">Loans</h1>
         <button
           onClick={() => setShowForm(!showForm)}
           className="px-[0.7rem] py-[0.3rem] bg-[#94C93D] font-bold text-[#000] border border-[#94C93D] rounded-4xl text-sm"
@@ -126,13 +126,13 @@ export default function LoanPage() {
 
       {/* ADD LOAN FORM */}
       {showForm && (
-        <div className="mb-6 p-4 bg-none border-[#94C93D] rounded-xl shadow-sm space-y-3">
+        <div className="mb-6 p-4 bg-mist-900   rounded-xl shadow-sm space-y-3">
           <input
             type="text"
             placeholder="Loan name"
             value={newLoanName}
             onChange={(e) => setNewLoanName(e.target.value)}
-            className="w-full border px-3 py-2 rounded-lg text-sm"
+            className="w-full  px-3 py-2 rounded-lg text-sm text-white"
           />
 
           <input
@@ -140,7 +140,7 @@ export default function LoanPage() {
             placeholder="Initial amount"
             value={newLoanAmount}
             onChange={(e) => setNewLoanAmount(e.target.value)}
-            className="w-full border px-3 py-2 rounded-lg text-sm"
+            className="w-full  px-3 py-2 rounded-lg text-sm text-white"
           />
 
           <div className="flex justify-end space-x-2">
@@ -171,14 +171,14 @@ export default function LoanPage() {
 
       <div className="mb-6 p-2 bg-mist-900 border border-[#] rounded-xl shadow-sm flex justify-between w-full">
         <div>
-          <p className="text-[#94C93D] text-sm">Total Loan</p>
-          <p className="text-md font-medium text-white">
+          <p className="text-[#fff] text-sm">Total Loan</p>
+          <p className="text-md font-medium text-[#94C93D]">
             {totalInitial.toLocaleString()}
           </p>
         </div>
         <div>
-          <p className="text-[#94C93D] text-sm">Total Paid</p>
-          <p className="text-md font-medium text-white">
+          <p className="text-[#fff] text-sm">Total Paid</p>
+          <p className="text-md font-medium text-[#94C93D]">
             {totalPaid.toLocaleString()}
           </p>
         </div>
@@ -246,7 +246,7 @@ export default function LoanPage() {
                   )}
 
                   {/* Add Payment */}
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-3 space-y-2 bg-mist-900">
                     <input
                       type="number"
                       placeholder="Enter payment"
@@ -257,12 +257,12 @@ export default function LoanPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full border px-3 py-2 rounded-lg text-sm"
+                      className="w-full border px-3 py-2 rounded-lg text-sm text-white"
                     />
 
                     <button
                       onClick={() => handleAddPayment(loan._id, index)}
-                      className="w-full bg-black text-white py-2 rounded-lg text-sm"
+                      className="w-full bg-[#94C93D] text-black font-bold py-2 rounded-lg text-sm"
                     >
                       Add Payment
                     </button>
