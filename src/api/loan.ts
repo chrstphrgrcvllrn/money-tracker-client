@@ -1,7 +1,16 @@
 import type { Loan } from "../types/loans.type";
 
 // const API_URL = "http://localhost:5000/api/loans";
-const API_URL = `${import.meta.env.VITE_API_URL}/api/loans`;
+// const API_URL = `${import.meta.env.VITE_API_URL}/api/loans`;
+
+
+const API_URL = import.meta.env.NODE_ENV === 'production'
+  ? `${import.meta.env.VITE_PROD_API_URL}/api/loans` // actual site
+  : `${import.meta.env.VITE_DEV_API_URL}/api/loans` ; // local/dev
+
+
+console.log("API_URL:", API_URL);
+
 
 // GET loans
 export const getLoans = async (): Promise<Loan[]> => {

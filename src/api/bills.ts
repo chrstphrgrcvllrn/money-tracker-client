@@ -1,8 +1,15 @@
 import type { MonthlyBills, Bill } from "../types/bills.type";
 
 // const API_URL = "http://localhost:5000/api/bills";
-const API_URL = `${import.meta.env.VITE_API_URL}/api/bills`;
+// const API_URL = `${import.meta.env.VITE_API_URL}/api/bills`;
 
+
+const API_URL = import.meta.env.NODE_ENV === 'production'
+  ? `${import.meta.env.VITE_PROD_API_URL}/api/bills` // actual site
+  : `${import.meta.env.VITE_DEV_API_URL}/api/bills` ; // local/dev
+
+
+console.log("API_URL:", API_URL);
 // GET all months with bills
 export const getMonthlyBills = async (): Promise<MonthlyBills[]> => {
   const res = await fetch(API_URL);
