@@ -4,7 +4,7 @@ import {
   getNotes,
   createNote,
   toggleNote,
-  deleteNote,
+  // deleteNote,
 } from "../api/note";
 
 const NotesPage: React.FC = () => {
@@ -38,10 +38,10 @@ const NotesPage: React.FC = () => {
     fetchNotes();
   };
 
-  const handleDelete = async (id: string) => {
-    await deleteNote(id);
-    fetchNotes();
-  };
+  // const handleDelete = async (id: string) => {
+  //   await deleteNote(id);
+  //   fetchNotes();
+  // };
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 p-6  ">
