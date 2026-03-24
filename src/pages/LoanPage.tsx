@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Loan } from "../types/loans.type";
 import { getLoans, createLoan, addTransaction } from "../api/loan";
 
@@ -14,6 +14,10 @@ export default function LoanPage() {
 
   // Payment inputs
   const [paymentInputs, setPaymentInputs] = useState<{
+    [key: number]: string;
+  }>({});
+
+  const [paymentDates, setPaymentDates] = useState<{
     [key: number]: string;
   }>({});
 
@@ -66,14 +70,16 @@ export default function LoanPage() {
     }
   };
 
-  // ✅ Add Payment
+  // ✅ Add Payment (with manual date)
   const handleAddPayment = async (loanId: string, index: number) => {
     const amount = paymentInputs[index];
-    if (!amount) return;
+    const date = paymentDates[index];
+
+    if (!amount || !date) return;
 
     const transaction = {
-      date: new Date().toLocaleDateString(),
-      amount: Number(amount),
+      date: date, // ✅ manual date
+      amount: Number(amount), // supports + / -
       type: "payment",
     };
 
@@ -87,6 +93,7 @@ export default function LoanPage() {
       );
 
       setPaymentInputs((prev) => ({ ...prev, [index]: "" }));
+      setPaymentDates((prev) => ({ ...prev, [index]: "" }));
     } catch (err) {
       console.error(err);
     }
@@ -101,11 +108,25 @@ export default function LoanPage() {
   const totalPaid = loans.reduce(
     (sum, loan) =>
       sum +
-      loan.transactions.reduce((s, t) => s + Number(t.amount), 0),
+      loan.transactions.reduce(
+        (s, t) => s + (t.amount > 0 ? Number(t.amount) : 0),
+        0
+      ),
     0
   );
 
-  const totalRemaining = totalInitial - totalPaid;
+  const totalAdjustments = loans.reduce(
+    (sum, loan) =>
+      sum +
+      loan.transactions.reduce(
+        (s, t) => s + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
+        0
+      ),
+    0
+  );
+
+  const totalRemaining =
+    totalInitial + totalAdjustments - totalPaid;
 
   if (loading) {
     return <div className="p-4 text-center">Loading...</div>;
@@ -118,66 +139,77 @@ export default function LoanPage() {
         <h1 className="text-lg font-semibold text-[#94C93D]">Loans</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#94C93D] font-bold text-[#000] border border-[#94C93D] rounded-4xl text-sm"
+          className="px-[0.7rem] py-[0.3rem] bg-[#94C93D] font-bold text-black rounded-4xl text-sm"
         >
-          + 
+          +
         </button>
       </div>
 
-      {/* ADD LOAN FORM */}
-      {showForm && (
-        <div className="mb-6 p-4 bg-mist-900   rounded-xl shadow-sm space-y-3">
-          <input
-            type="text"
-            placeholder="Loan name"
-            value={newLoanName}
-            onChange={(e) => setNewLoanName(e.target.value)}
-            className="w-full  px-3 py-2 rounded-lg text-sm text-white"
-          />
+    {/* ADD LOAN MODAL */}
+{showForm && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    
+    {/* Modal Box */}
+    <div className="w-full max-w-sm p-5 bg-mist-900 rounded-xl space-y-3 shadow-lg">
+      
+      <h2 className="text-white text-lg font-semibold">
+        Add Loan
+      </h2>
 
-          <input
-            type="number"
-            placeholder="Initial amount"
-            value={newLoanAmount}
-            onChange={(e) => setNewLoanAmount(e.target.value)}
-            className="w-full  px-3 py-2 rounded-lg text-sm text-white"
-          />
+      <input
+        type="text"
+        placeholder="Loan name"
+        value={newLoanName}
+        onChange={(e) => setNewLoanName(e.target.value)}
+        className="w-full px-3 py-2 rounded-lg text-sm text-white
+                   border border-gray-600 focus:border-[#94C93D]/30 focus:outline-none"
+      />
 
-          <div className="flex justify-end space-x-2">
-            <button
-              onClick={() => setShowForm(false)}
-              className="px-3 py-1 text-sm text-gray-500"
-            >
-              Cancel
-            </button>
+      <input
+        type="number"
+        placeholder="Initial amount"
+        value={newLoanAmount}
+        onChange={(e) => setNewLoanAmount(e.target.value)}
+        className="w-full px-3 py-2 rounded-lg text-sm text-white
+                   border border-gray-600 focus:border-[#94C93D]/30 focus:outline-none"
+      />
 
-            <button
-              onClick={handleAddLoan}
-              className="px-3 py-1 bg-black text-white rounded-lg text-sm"
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="flex justify-end space-x-2 pt-2">
+        <button
+          onClick={() => setShowForm(false)}
+          className="px-3 py-1 text-sm text-gray-400"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleAddLoan}
+          className="px-3 py-1 bg-[#94C93D] text-black font-semibold rounded-lg text-sm"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-mist-900 rounded-xl shadow-sm text-center">
+      <div className="mb-6 p-4 bg-mist-900 rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Remaining</p>
         <p className="text-[2.5rem] font-bold text-[#94C93D]">
           {totalRemaining.toLocaleString()}
         </p>
       </div>
 
-      <div className="mb-6 p-2 bg-mist-900 border border-[#] rounded-xl shadow-sm flex justify-between w-full">
+      <div className="mb-6 p-2 bg-mist-900 rounded-xl flex justify-between">
         <div>
-          <p className="text-[#fff] text-sm">Total Loan</p>
+          <p className="text-white text-sm">Total Loan</p>
           <p className="text-md font-medium text-[#94C93D]">
             {totalInitial.toLocaleString()}
           </p>
         </div>
         <div>
-          <p className="text-[#fff] text-sm">Total Paid</p>
+          <p className="text-white text-sm">Total Paid</p>
           <p className="text-md font-medium text-[#94C93D]">
             {totalPaid.toLocaleString()}
           </p>
@@ -188,39 +220,40 @@ export default function LoanPage() {
       <div className="space-y-3">
         {loans.map((loan, index) => {
           const paid = loan.transactions.reduce(
-            (sum, t) => sum + Number(t.amount),
+            (sum, t) => sum + (t.amount > 0 ? Number(t.amount) : 0),
             0
           );
 
-          const remaining = loan.initialAmount - paid;
+          const adjustments = loan.transactions.reduce(
+            (sum, t) =>
+              sum + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
+            0
+          );
+
+          const remaining =
+            loan.initialAmount + adjustments - paid;
 
           return (
             <div
               key={loan._id}
-              className="bg-mist-900   rounded-xl shadow-sm overflow-hidden"
+              className="bg-mist-900 rounded-xl overflow-hidden"
             >
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
                 onClick={() => toggleExpand(index)}
               >
                 <div className="text-left">
-                    <p className="font-medium text-[1.2rem] text-[#fff]">{loan.name}</p>
+                  <p className="font-medium text-[1.2rem] text-white">
+                    {loan.name}
+                  </p>
 
-                    <div className="text-xs text-[#94C93D] space-y-0.5">
-                      <p>
-                        Paid:{" "}
-                        <span className="text-[#fff] font-medium">
-                          {paid.toLocaleString()}
-                        </span>
-                      </p>
-                      {/* <p>
-                        Remaining:{" "}
-                        <span className="text-red-600 font-medium">
-                          {remaining.toLocaleString()}
-                        </span>
-                      </p> */}
-                    </div>
-                  </div>
+                  <p className="text-xs text-[#94C93D]">
+                    Paid:{" "}
+                    <span className="text-white font-medium">
+                      {paid.toLocaleString()}
+                    </span>
+                  </p>
+                </div>
 
                 <p className="font-bold text-[#94C93D]">
                   {remaining.toLocaleString()}
@@ -228,28 +261,50 @@ export default function LoanPage() {
               </button>
 
               {expanded === index && (
-                <div className="border-t px-4 py-3 bg-gray-50">
+                <div className="border-t px-4 py-3">
                   {/* Transactions */}
                   {loan.transactions.length === 0 ? (
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-white">
                       No payments yet
                     </p>
                   ) : (
-                    <ul className="text-xs space-y-1">
+                    <ul className="text-xs text-white space-y-1">
                       {loan.transactions.map((t, i) => (
-                        <li key={i} className="flex justify-between">
+                        <li
+                          key={i}
+                          className="flex justify-between"
+                        >
                           <span>{t.date}</span>
-                          <span>-{t.amount.toLocaleString()}</span>
+                          <span>
+                            {t.amount > 0 ? "-" : "+"}
+                            {Math.abs(t.amount).toLocaleString()}
+                          </span>
                         </li>
                       ))}
                     </ul>
                   )}
 
                   {/* Add Payment */}
-                  <div className="mt-3 space-y-2 bg-mist-900">
+                  <div className="mt-3 space-y-2">
+                    {/* Date Input */}
+                    <input
+                      type="date"
+                      value={paymentDates[index] || ""}
+                      onChange={(e) =>
+                        setPaymentDates((prev) => ({
+                          ...prev,
+                          [index]: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-mist-700
+                                  border border-gray-600 focus:border-[#94C93D]/30 focus:outline-none
+                      "
+                    />
+
+                    {/* Amount Input */}
                     <input
                       type="number"
-                      placeholder="Enter payment"
+                      placeholder="Enter amount (+ / -)"
                       value={paymentInputs[index] || ""}
                       onChange={(e) =>
                         setPaymentInputs((prev) => ({
@@ -257,11 +312,14 @@ export default function LoanPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full border px-3 py-2 rounded-lg text-sm text-white"
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-mist-700
+                                  border border-gray-600 focus:border-[#94C93D]/30 focus:outline-none"
                     />
 
                     <button
-                      onClick={() => handleAddPayment(loan._id, index)}
+                      onClick={() =>
+                        handleAddPayment(loan._id, index)
+                      }
                       className="w-full bg-[#94C93D] text-black font-bold py-2 rounded-lg text-sm"
                     >
                       Add Payment
