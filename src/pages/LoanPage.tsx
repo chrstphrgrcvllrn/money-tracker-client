@@ -2,17 +2,21 @@ import { useEffect, useState } from "react";
 import type { Loan } from "../types/loans.type";
 import { getLoans, createLoan, addTransaction } from "../api/loan";
 
+import {
+  BanknotesIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from "@heroicons/react/24/outline";
+
 export default function LoanPage() {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Add Loan
   const [showForm, setShowForm] = useState(false);
   const [newLoanName, setNewLoanName] = useState("");
   const [newLoanAmount, setNewLoanAmount] = useState("");
 
-  // Payment inputs
   const [paymentInputs, setPaymentInputs] = useState<{
     [key: number]: string;
   }>({});
@@ -20,6 +24,9 @@ export default function LoanPage() {
   const [paymentDates, setPaymentDates] = useState<{
     [key: number]: string;
   }>({});
+
+  // ✅ NEW: toggle visibility
+  const [showAmounts, setShowAmounts] = useState(true);
 
   useEffect(() => {
     const fetchLoans = async () => {
@@ -48,7 +55,9 @@ export default function LoanPage() {
     setExpanded(expanded === index ? null : index);
   };
 
-  // ✅ Add Loan
+  const mask = (value: number) =>
+    "*".repeat(value.toLocaleString().length);
+
   const handleAddLoan = async () => {
     if (!newLoanName || !newLoanAmount) return;
 
@@ -70,7 +79,6 @@ export default function LoanPage() {
     }
   };
 
-  // ✅ Add Payment (with manual date)
   const handleAddPayment = async (loanId: string, index: number) => {
     const amount = paymentInputs[index];
     const date = paymentDates[index];
@@ -78,8 +86,8 @@ export default function LoanPage() {
     if (!amount || !date) return;
 
     const transaction = {
-      date: date, // ✅ manual date
-      amount: Number(amount), // supports + / -
+      date: date,
+      amount: Number(amount),
       type: "payment",
     };
 
@@ -99,7 +107,6 @@ export default function LoanPage() {
     }
   };
 
-  // Totals
   const totalInitial = loans.reduce(
     (sum, loan) => sum + loan.initialAmount,
     0
@@ -133,87 +140,86 @@ export default function LoanPage() {
   }
 
   return (
-    <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-black">
+    <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-[#111111]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-[#F2F211]">Loans</h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#F2F211] font-bold text-black rounded-4xl text-sm"
-        >
-          +
-        </button>
+        <h1 className="text-lg font-semibold text-[#01E777]">
+          Loans
+        </h1>
+
+        <div className="flex items-center gap-3">
+          {/* Toggle Amount Visibility */}
+          <button
+            onClick={() => setShowAmounts((prev) => !prev)}
+            className="text-gray-400"
+          >
+            {showAmounts ? (
+              <EyeSlashIcon className="w-5 h-5" />
+            ) : (
+              <EyeIcon className="w-5 h-5" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-[0.7rem] py-[0.3rem] bg-[#F2F211] font-bold text-black rounded-4xl text-sm"
+          >
+            +
+          </button>
+        </div>
       </div>
 
-    {/* ADD LOAN MODAL */}
-{showForm && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-    
-    {/* Modal Box */}
-    <div className="w-full max-w-sm p-5 bg-mist-900 rounded-xl space-y-3 shadow-lg">
-      
-      <h2 className="text-white text-lg font-semibold">
-        Add Loan
-      </h2>
+      {/* ADD LOAN MODAL */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
+          <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-white text-lg font-semibold">
+              Add Loan
+            </h2>
 
-      <input
-        type="text"
-        placeholder="Loan name"
-        value={newLoanName}
-        onChange={(e) => setNewLoanName(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg text-sm text-white
-                   border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
-      />
+            <input
+              type="text"
+              placeholder="Loan name"
+              value={newLoanName}
+              onChange={(e) => setNewLoanName(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
+            />
 
-      <input
-        type="number"
-        placeholder="Initial amount"
-        value={newLoanAmount}
-        onChange={(e) => setNewLoanAmount(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg text-sm text-white
-                   border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
-      />
+            <input
+              type="number"
+              placeholder="Initial amount"
+              value={newLoanAmount}
+              onChange={(e) => setNewLoanAmount(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
+            />
 
-      <div className="flex justify-end space-x-2 pt-2">
-        <button
-          onClick={() => setShowForm(false)}
-          className="px-3 py-1 text-sm text-gray-400"
-        >
-          Cancel
-        </button>
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                onClick={() => setShowForm(false)}
+                className="px-3 py-1 text-sm text-gray-400"
+              >
+                Cancel
+              </button>
 
-        <button
-          onClick={handleAddLoan}
-          className="px-3 py-1 bg-[#F2F211] text-black font-semibold rounded-lg text-sm"
-        >
-          Save
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+              <button
+                onClick={handleAddLoan}
+                className="px-3 py-1 bg-[#F2F211] text-black font-semibold rounded-lg text-sm"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-mist-900 rounded-xl text-center">
+      <div className="mb-6 p-4 bg-[#1d1d1d] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Remaining</p>
-        <p className="text-[2.5rem] font-bold text-[#F2F211]">
-          {totalRemaining.toLocaleString()}
+        <p className="text-[2.5rem] font-bold text-[#01E777]">
+          {showAmounts
+            ? totalRemaining.toLocaleString()
+            : mask(totalRemaining)}
         </p>
-      </div>
-
-      <div className="mb-6 p-2 bg-mist-900 rounded-xl flex justify-between">
-        <div>
-          <p className="text-white text-sm">Total Loan</p>
-          <p className="text-md font-medium text-[#F2F211]">
-            {totalInitial.toLocaleString()}
-          </p>
-        </div>
-        <div>
-          <p className="text-white text-sm">Total Paid</p>
-          <p className="text-md font-medium text-[#F2F211]">
-            {totalPaid.toLocaleString()}
-          </p>
-        </div>
       </div>
 
       {/* LIST */}
@@ -236,33 +242,42 @@ export default function LoanPage() {
           return (
             <div
               key={loan._id}
-              className="bg-mist-900 rounded-xl overflow-hidden"
+              className="bg-[#1d1d1d] rounded-xl overflow-hidden"
             >
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
                 onClick={() => toggleExpand(index)}
               >
-                <div className="text-left">
-                  <p className="font-medium text-[1.2rem] text-white">
-                    {loan.name}
-                  </p>
+                <div className="flex items-center gap-3 text-left">
+                  <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center">
+                    <BanknotesIcon className="w-5 h-5 text-[#01E777]" />
+                  </div>
 
-                  <p className="text-xs text-[#F2F211]">
-                    Paid:{" "}
-                    <span className="text-white font-medium">
-                      {paid.toLocaleString()}
-                    </span>
-                  </p>
+                  <div>
+                    <p className="font-medium text-[1.2rem] text-white">
+                      {loan.name}
+                    </p>
+
+                    <p className="text-xs text-[#01E777]">
+                      Paid:{" "}
+                      <span className="text-white font-medium">
+                        {showAmounts
+                          ? paid.toLocaleString()
+                          : mask(paid)}
+                      </span>
+                    </p>
+                  </div>
                 </div>
 
-                <p className="font-bold text-[#F2F211]">
-                  {remaining.toLocaleString()}
+                <p className="font-bold text-[#01E777]">
+                  {showAmounts
+                    ? remaining.toLocaleString()
+                    : mask(remaining)}
                 </p>
               </button>
 
               {expanded === index && (
                 <div className="border-t px-4 py-3">
-                  {/* Transactions */}
                   {loan.transactions.length === 0 ? (
                     <p className="text-xs text-white">
                       No payments yet
@@ -270,10 +285,7 @@ export default function LoanPage() {
                   ) : (
                     <ul className="text-xs text-white space-y-1">
                       {loan.transactions.map((t, i) => (
-                        <li
-                          key={i}
-                          className="flex justify-between"
-                        >
+                        <li key={i} className="flex justify-between">
                           <span>{t.date}</span>
                           <span>
                             {t.amount > 0 ? "-" : "+"}
@@ -284,9 +296,7 @@ export default function LoanPage() {
                     </ul>
                   )}
 
-                  {/* Add Payment */}
                   <div className="mt-3 space-y-2">
-                    {/* Date Input */}
                     <input
                       type="date"
                       value={paymentDates[index] || ""}
@@ -296,12 +306,9 @@ export default function LoanPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-mist-700
-                                  border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none
-                      "
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
                     />
 
-                    {/* Amount Input */}
                     <input
                       type="number"
                       placeholder="Enter amount (+ / -)"
@@ -312,8 +319,7 @@ export default function LoanPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-mist-700
-                                  border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
                     />
 
                     <button

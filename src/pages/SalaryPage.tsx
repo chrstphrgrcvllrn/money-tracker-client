@@ -199,7 +199,7 @@ export default function SalaryPage() {
   };
 
   return (
-    <div className="p-4 bg-black min-h-screen">
+    <div className="p-4 bg-[#111111] min-h-screen">
       <button
         onClick={handleAddSalary}
         className="mb-6 px-4 py-2 bg-[#94C93D] text-black font-bold rounded shadow hover:bg-blue-600"
@@ -219,7 +219,7 @@ export default function SalaryPage() {
         const isEditingAll = editingAllEntryId === entry._id;
 
         return (
-          <div key={entry._id} className="mb-6 bg-mist-900 shadow rounded p-4">
+          <div key={entry._id} className="mb-6 bg-[#1d1d1d] shadow rounded p-4">
             <div className="flex justify-between items-center mb-2">
               <h2 className="font-semibold text-lg text-white">{entry.date}</h2>
 

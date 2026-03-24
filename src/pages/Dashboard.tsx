@@ -80,15 +80,15 @@ const Dashboard = () => {
     totalSavingsWithdrawals;
 
   return (
-    <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-black min-h-screen space-y-4">
+    <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-[#111111] min-h-screen space-y-4">
       {/* HEADER */}
       <h1 className="text-lg font-semibold text-white mb-2">
         Dashboard
       </h1>
 
       {/* LOANS CARD */}
-      <div className="bg-mist-900 rounded-xl p-4 space-y-2">
-        <p className="text-[#F2F211] text-sm">Loans</p>
+      <div className="bg-[#1d1d1d] rounded-xl p-4 space-y-2">
+        <p className="text-[#01E777] text-sm">Loans</p>
 
         <p className="text-[2rem] font-bold text-white">
           {totalLoanRemaining.toLocaleString()}
@@ -96,14 +96,14 @@ const Dashboard = () => {
 
         <div className="flex justify-between">
           <div>
-            <p className="text-xs text-[#F2F211]">Total</p>
+            <p className="text-xs text-[#01E777]">Total</p>
             <p className="text-white font-medium">
               {totalLoanInitial.toLocaleString()}
             </p>
           </div>
 
           <div>
-            <p className="text-xs text-[#F2F211]">Paid</p>
+            <p className="text-xs text-[#01E777]">Paid</p>
             <p className="text-white font-medium">
               {totalLoanPaid.toLocaleString()}
             </p>
@@ -112,30 +112,30 @@ const Dashboard = () => {
       </div>
 
       {/* SAVINGS CARD */}
-      <div className="bg-mist-900 rounded-xl p-4 space-y-2">
-        <p className="text-[#F2F211] text-sm">Savings</p>
+      <div className="bg-[#1d1d1d] rounded-xl p-4 space-y-2">
+        <p className="text-[#01E777] text-sm">Savings</p>
 
-        <p className="text-[2rem] font-bold text-[#F2F211]">
+        <p className="text-[2rem] font-bold text-[#01E777]">
           {totalSavingsBalance.toLocaleString()}
         </p>
 
         <div className="flex justify-between">
           <div>
-            <p className="text-xs text-[#F2F211]">Total</p>
+            <p className="text-xs text-[#01E777]">Total</p>
             <p className="text-white font-medium">
               {totalSavingsInitial.toLocaleString()}
             </p>
           </div>
 
           <div>
-            <p className="text-xs text-[#F2F211]">Deposits</p>
+            <p className="text-xs text-[#01E777]">Deposits</p>
             <p className="text-white font-medium">
               {totalSavingsDeposits.toLocaleString()}
             </p>
           </div>
 
           <div>
-            <p className="text-xs text-[#F2F211]">Withdrawals</p>
+            <p className="text-xs text-[#01E777]">Withdrawals</p>
             <p className="text-white font-medium">
               {totalSavingsWithdrawals.toLocaleString()}
             </p>

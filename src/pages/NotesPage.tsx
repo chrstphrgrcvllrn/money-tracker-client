@@ -44,7 +44,7 @@ const NotesPage: React.FC = () => {
   // };
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 p-6  bg-black">
+    <div className="text-xs max-w-md mx-auto mt-8 p-6  bg-[#111111]">
       {/* <h1 className="text-xl font-bold mb-4">My Notes</h1> */}
 
       <div className="flex gap-2 mb-4 h-[7vh]">
@@ -53,7 +53,7 @@ const NotesPage: React.FC = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter note"
-          className="flex-1  bg-mist-900 px-2 py-1 rounded   text-white"
+          className="flex-1  bg-[#1d1d1d] px-2 py-1 rounded   text-white"
         />
 
         <select
@@ -61,7 +61,7 @@ const NotesPage: React.FC = () => {
           onChange={(e) =>
             setCategory(e.target.value as Note["category"])
           }
-          className="bg-mist-900 px-2 py-1 rounded  text-[#fff]"
+          className="bg-[#1d1d1d] px-2 py-1 rounded  text-[#fff]"
         >
           <option value="work">Work</option>
           <option value="personal">Personal</option>
@@ -80,7 +80,7 @@ const NotesPage: React.FC = () => {
         {notes.map((note) => (
           <li
             key={note._id}
-            className={`flex justify-between items-center p-2 bg-mist-900 rounded ${
+            className={`flex justify-between items-center p-2 bg-[#1d1d1d] rounded ${
               note.done ? "text-gray-600 line-through" : ""
             }`}
           >

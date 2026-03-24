@@ -13,13 +13,14 @@ export default function BottomNavBar() {
     { name: "Home", path: "/", icon: HomeIcon },
     { name: "Loans", path: "/loans", icon: BanknotesIcon },
     { name: "Savings", path: "/savings", icon: BuildingLibraryIcon },
+    { name: "Notes", path: "/notes", icon: DocumentTextIcon },
     { name: "Salary", path: "/salary", icon: CurrencyDollarIcon },
     { name: "Bills", path: "/bills", icon: ReceiptPercentIcon },
-    { name: "Notes", path: "/notes", icon: DocumentTextIcon },
+
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-black border-t border-mist-900 flex justify-around py-3 z-50 px-4">
+    <nav className="fixed bottom-0 left-0 w-full bg-[#111111] border-t border-[#1d1d1d] flex justify-around py-3 z-50 px-4">
       {navItems.map((item) => {
         const Icon = item.icon;
 
@@ -29,7 +30,7 @@ export default function BottomNavBar() {
             to={item.path}
             className={({ isActive }) =>
               `flex flex-col items-center text-xs ${
-                isActive ? "text-[#F2F211]" : "text-gray-400"
+                isActive ? "text-[#01E777]" : "text-gray-400"
               }`
             }
           >

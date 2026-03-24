@@ -6,6 +6,11 @@ import {
   addSavingsTransaction,
 } from "../api/savings";
 
+import {
+  EyeIcon,
+  EyeSlashIcon,
+} from "@heroicons/react/24/outline";
+
 export default function SavingsPage() {
   const [savings, setSavings] = useState<Savings[]>([]);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -19,6 +24,9 @@ export default function SavingsPage() {
     {}
   );
   const [dateInputs, setDateInputs] = useState<Record<number, string>>({});
+
+  // ✅ NEW: toggle visibility
+  const [showAmounts, setShowAmounts] = useState(true);
 
   useEffect(() => {
     const fetchSavings = async () => {
@@ -48,6 +56,9 @@ export default function SavingsPage() {
   const toggleExpand = (index: number) => {
     setExpanded((prev) => (prev === index ? null : index));
   };
+
+  const mask = (value: number) =>
+    "*".repeat(value.toLocaleString().length);
 
   const handleAddSavings = async () => {
     if (!newSavingsName || !newSavingsAmount) return;
@@ -143,25 +154,39 @@ export default function SavingsPage() {
   }
 
   return (
-    <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-black">
+    <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-[#111111]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-[#F2F211]">
+        <h1 className="text-lg font-semibold text-[#01E777]">
           Savings
         </h1>
 
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#F2F211] font-bold text-black rounded-4xl text-sm"
-        >
-          +
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Toggle */}
+          <button
+            onClick={() => setShowAmounts((prev) => !prev)}
+            className="text-gray-400"
+          >
+            {showAmounts ? (
+              <EyeSlashIcon className="w-5 h-5" />
+            ) : (
+              <EyeIcon className="w-5 h-5" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-[0.7rem] py-[0.3rem] bg-[#F2F211] font-bold text-black rounded-4xl text-sm"
+          >
+            +
+          </button>
+        </div>
       </div>
 
       {/* MODAL */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="w-full max-w-sm p-5 bg-mist-900 rounded-xl space-y-3 shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
+          <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
             <h2 className="text-white text-lg font-semibold">
               Add Savings
             </h2>
@@ -202,10 +227,12 @@ export default function SavingsPage() {
       )}
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-mist-900 rounded-xl text-center">
+      <div className="mb-6 p-4 bg-[#1d1d1d] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Balance</p>
-        <p className="text-[2.5rem] font-bold text-[#F2F211]">
-          {totalBalance.toLocaleString()}
+        <p className="text-[2.5rem] font-bold text-[#01E777]">
+          {showAmounts
+            ? totalBalance.toLocaleString()
+            : mask(totalBalance)}
         </p>
       </div>
 
@@ -230,39 +257,39 @@ export default function SavingsPage() {
           return (
             <div
               key={item._id}
-              className="bg-mist-900 rounded-xl overflow-hidden"
+              className="bg-[#1d1d1d] rounded-xl overflow-hidden"
             >
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
                 onClick={() => toggleExpand(index)}
               >
                 <div className="flex items-center gap-3 text-left">
-                  
-                  {/* ICON (initial only) */}
                   <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center">
                     <span className="text-white font-semibold">
                       {item.name?.charAt(0).toUpperCase()}
                     </span>
                   </div>
 
-                  {/* TEXT */}
                   <div>
                     <p className="font-medium text-[1.2rem] text-white">
                       {item.name}
                     </p>
 
-                    <p className="text-xs text-[#F2F211]">
+                    <p className="text-xs text-[#01E777]">
                       Deposits:{" "}
                       <span className="text-white font-medium">
-                        {deposits.toLocaleString()}
+                        {showAmounts
+                          ? deposits.toLocaleString()
+                          : mask(deposits)}
                       </span>
                     </p>
                   </div>
                 </div>
 
-                {/* BALANCE */}
-                <p className="font-bold text-[#F2F211]">
-                  {balance.toLocaleString()}
+                <p className="font-bold text-[#01E777]">
+                  {showAmounts
+                    ? balance.toLocaleString()
+                    : mask(balance)}
                 </p>
               </button>
 
