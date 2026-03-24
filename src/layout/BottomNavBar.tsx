@@ -4,9 +4,11 @@ export default function BottomNavBar() {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Loans", path: "/loans" },
+    { name: "Savings", path: "/savings" },
     { name: "Salary", path: "/salary" },
     { name: "Bills", path: "/bills" },
     { name: "Notes", path: "/notes" },
+
   ];
 
   return (
@@ -17,7 +19,7 @@ export default function BottomNavBar() {
           to={item.path}
           className={({ isActive }) =>
             `flex flex-col items-center text-sm ${
-              isActive ? "text-[#94C93D]" : "text-gray-400"
+              isActive ? "text-[#CEE36E]" : "text-gray-400"
             }`
           }
         >
