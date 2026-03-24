@@ -81,11 +81,15 @@ const NotesPage: React.FC = () => {
           <li
             key={note._id}
             className={`flex justify-between items-center p-2 bg-mist-900 rounded ${
-              note.done ? "text-gray-300 line-through" : ""
+              note.done ? "text-gray-600 line-through" : ""
             }`}
           >
             <div>
-              <span className="font-medium text-white">{note.text}</span>{" "}
+              <span className={`font-medium text-white${
+              note.done ? "text-gray-600 line-through" : ""
+            }`}
+              
+              >{note.text}</span>{" "}
               <span className="text-gray-500">
                 {note.category}
               </span>
