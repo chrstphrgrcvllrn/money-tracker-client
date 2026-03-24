@@ -146,13 +146,13 @@ export default function SavingsPage() {
     <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-black">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-[#CEE36E]">
+        <h1 className="text-lg font-semibold text-[#F2F211]">
           Savings
         </h1>
 
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#CEE36E] font-bold text-black rounded-4xl text-sm"
+          className="px-[0.7rem] py-[0.3rem] bg-[#F2F211] font-bold text-black rounded-4xl text-sm"
         >
           +
         </button>
@@ -171,7 +171,7 @@ export default function SavingsPage() {
               placeholder="Savings name"
               value={newSavingsName}
               onChange={(e) => setNewSavingsName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#CEE36E]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
             />
 
             <input
@@ -179,7 +179,7 @@ export default function SavingsPage() {
               placeholder="Initial amount"
               value={newSavingsAmount}
               onChange={(e) => setNewSavingsAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#CEE36E]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
             />
 
             <div className="flex justify-end space-x-2 pt-2">
@@ -192,7 +192,7 @@ export default function SavingsPage() {
 
               <button
                 onClick={handleAddSavings}
-                className="px-3 py-1 bg-[#CEE36E] text-black font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#F2F211] text-black font-semibold rounded-lg text-sm"
               >
                 Save
               </button>
@@ -204,7 +204,7 @@ export default function SavingsPage() {
       {/* SUMMARY */}
       <div className="mb-6 p-4 bg-mist-900 rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Balance</p>
-        <p className="text-[2.5rem] font-bold text-[#CEE36E]">
+        <p className="text-[2.5rem] font-bold text-[#F2F211]">
           {totalBalance.toLocaleString()}
         </p>
       </div>
@@ -251,7 +251,7 @@ export default function SavingsPage() {
                       {item.name}
                     </p>
 
-                    <p className="text-xs text-[#CEE36E]">
+                    <p className="text-xs text-[#F2F211]">
                       Deposits:{" "}
                       <span className="text-white font-medium">
                         {deposits.toLocaleString()}
@@ -261,7 +261,7 @@ export default function SavingsPage() {
                 </div>
 
                 {/* BALANCE */}
-                <p className="font-bold text-[#CEE36E]">
+                <p className="font-bold text-[#F2F211]">
                   {balance.toLocaleString()}
                 </p>
               </button>
@@ -290,7 +290,7 @@ export default function SavingsPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#CEE36E]/30 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
                     />
 
                     <input
@@ -303,14 +303,14 @@ export default function SavingsPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#CEE36E]/30 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
                     />
 
                     <button
                       onClick={() =>
                         handleAddTransaction(item._id, index)
                       }
-                      className="w-full bg-[#CEE36E] text-black font-bold py-2 rounded-lg text-sm"
+                      className="w-full bg-[#F2F211] text-black font-bold py-2 rounded-lg text-sm"
                     >
                       Add Transaction
                     </button>

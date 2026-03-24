@@ -70,7 +70,7 @@ const NotesPage: React.FC = () => {
 
         <button
           onClick={addNote}
-          className="bg-[#CEE36E] text-black font-bold px-2 py-1 rounded"
+          className="bg-[#F2F211] text-black font-bold px-2 py-1 rounded"
         >
           Add
         </button>

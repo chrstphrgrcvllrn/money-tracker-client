@@ -29,7 +29,7 @@ export default function BottomNavBar() {
             to={item.path}
             className={({ isActive }) =>
               `flex flex-col items-center text-xs ${
-                isActive ? "text-[#CEE36E]" : "text-gray-400"
+                isActive ? "text-[#F2F211]" : "text-gray-400"
               }`
             }
           >
