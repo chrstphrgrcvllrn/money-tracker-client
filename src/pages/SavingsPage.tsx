@@ -238,19 +238,11 @@ export default function SavingsPage() {
               >
                 <div className="flex items-center gap-3 text-left">
                   
-                  {/* ICON (company icon) */}
-                  <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center overflow-hidden">
-                    {item.companyIcon ? (
-                      <img
-                        src={item.companyIcon}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-white font-semibold">
-                        {item.name?.charAt(0).toUpperCase()}
-                      </span>
-                    )}
+                  {/* ICON (initial only) */}
+                  <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center">
+                    <span className="text-white font-semibold">
+                      {item.name?.charAt(0).toUpperCase()}
+                    </span>
                   </div>
 
                   {/* TEXT */}
