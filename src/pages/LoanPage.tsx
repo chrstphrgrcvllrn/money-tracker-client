@@ -140,10 +140,10 @@ export default function LoanPage() {
   }
 
   return (
-    <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-[#111111]">
+    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans text-gray-800 bg-[#111111]">
       {/* HEADER */}
-      <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-[#01E777]">
+      <div className="mb-4 flex justify-between items-start">
+        <h1 className="text-lg font-semibold text-white">
           Loans
         </h1>
 
@@ -162,7 +162,7 @@ export default function LoanPage() {
 
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-[0.7rem] py-[0.3rem] bg-[#F2F211] font-bold text-black rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem] bg-[#01E777] font-bold text-black rounded-4xl text-sm"
           >
             +
           </button>
@@ -182,7 +182,7 @@ export default function LoanPage() {
               placeholder="Loan name"
               value={newLoanName}
               onChange={(e) => setNewLoanName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
             />
 
             <input
@@ -190,7 +190,7 @@ export default function LoanPage() {
               placeholder="Initial amount"
               value={newLoanAmount}
               onChange={(e) => setNewLoanAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
             />
 
             <div className="flex justify-end space-x-2 pt-2">
@@ -203,7 +203,7 @@ export default function LoanPage() {
 
               <button
                 onClick={handleAddLoan}
-                className="px-3 py-1 bg-[#F2F211] text-black font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#01E777] text-black font-semibold rounded-lg text-sm"
               >
                 Save
               </button>
@@ -306,7 +306,7 @@ export default function LoanPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
                     />
 
                     <input
@@ -319,14 +319,14 @@ export default function LoanPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#F2F211]/30 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
                     />
 
                     <button
                       onClick={() =>
                         handleAddPayment(loan._id, index)
                       }
-                      className="w-full bg-[#F2F211] text-black font-bold py-2 rounded-lg text-sm"
+                      className="w-full bg-[#01E777] text-black font-bold py-2 rounded-lg text-sm"
                     >
                       Add Payment
                     </button>

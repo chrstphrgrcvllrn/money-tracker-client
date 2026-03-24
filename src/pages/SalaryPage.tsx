@@ -11,14 +11,22 @@ export default function SalaryPage() {
   const [editingAllEntryId, setEditingAllEntryId] = useState<string | null>(null);
   const [editedExpenses, setEditedExpenses] = useState<Expense[]>([]);
 
+  // ✅ MODAL STATE
+  const [showForm, setShowForm] = useState(false);
+  const [newSalaryDate, setNewSalaryDate] = useState("");
+  const [newSalaryAmount, setNewSalaryAmount] = useState("");
+
+  const format = (value: any) =>
+    Number(value || 0).toLocaleString();
+
   useEffect(() => {
     const load = async () => {
       const data = await fetchSalaries();
 
-      // ✅ normalize expenses to always be an array
       const normalized = data.map((entry) => ({
         ...entry,
         expenses: Array.isArray(entry.expenses) ? entry.expenses : [],
+        salary: entry.salary ?? 0,
       }));
 
       setSalaryData(normalized);
@@ -27,27 +35,32 @@ export default function SalaryPage() {
     load();
   }, []);
 
+  // ✅ ADD SALARY (MODAL)
   const handleAddSalary = async () => {
-    const date = prompt("Enter date (e.g., May 1)");
-    const salary = Number(prompt("Enter expected salary"));
+    if (!newSalaryDate || !newSalaryAmount) return;
 
-    if (date && !isNaN(salary)) {
-      const newEntry = await createSalary({
-        date,
-        expectedSalary: salary,
-        expenses: [],
-      });
+    const salary = Number(newSalaryAmount);
+    if (isNaN(salary)) return;
 
-      setSalaryData((prev) => [
-        ...prev,
-        {
-          ...newEntry,
-          expenses: Array.isArray(newEntry.expenses)
-            ? newEntry.expenses
-            : [],
-        },
-      ]);
-    }
+    const newEntry = await createSalary({
+      date: newSalaryDate,
+      salary,
+      expenses: [],
+    });
+
+    setSalaryData((prev) => [
+      ...prev,
+      {
+        ...newEntry,
+        expenses: Array.isArray(newEntry.expenses)
+          ? newEntry.expenses
+          : [],
+      },
+    ]);
+
+    setNewSalaryDate("");
+    setNewSalaryAmount("");
+    setShowForm(false);
   };
 
   const handleEditSalary = async (id: string) => {
@@ -55,19 +68,25 @@ export default function SalaryPage() {
     if (!entry) return;
 
     const newSalary = Number(
-      prompt("Update expected salary", entry.expectedSalary.toString())
+      prompt("Update salary", String(entry.salary))
     );
 
     if (!isNaN(newSalary)) {
       const updated = await updateSalary(id, {
-        expectedSalary: newSalary,
+        salary: newSalary,
       });
 
       setSalaryData((prev) =>
-        prev.map((s) => (s._id === id ? {
-          ...updated,
-          expenses: Array.isArray(updated.expenses) ? updated.expenses : [],
-        } : s))
+        prev.map((s) =>
+          s._id === id
+            ? {
+                ...updated,
+                expenses: Array.isArray(updated.expenses)
+                  ? updated.expenses
+                  : [],
+              }
+            : s
+        )
       );
     }
   };
@@ -199,35 +218,110 @@ export default function SalaryPage() {
   };
 
   return (
-    <div className="p-4 bg-[#111111] min-h-screen">
-      <button
-        onClick={handleAddSalary}
-        className="mb-6 px-4 py-2 bg-[#94C93D] text-black font-bold rounded shadow hover:bg-blue-600"
-      >
-        Add Salary
-      </button>
+    <div className="px-6 pb-6 mt-8 bg-[#111111] min-h-screen">
 
+<div className="mb-4 flex justify-between items-start">
+        <h1 className="text-lg font-semibold text-white">
+          Salary
+        </h1>
+
+        <div className="flex items-center gap-3">
+         
+
+          {/* ✅ + BUTTON */}
+      <button
+        onClick={() => setShowForm(true)}
+        title="Add Salary"
+        className="mb-0 px-[0.7rem] py-[0.3rem] bg-[#01E777] text-black font-bold rounded-4xl text-sm"
+      >
+        +
+      </button>
+        </div>
+      </div>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+      {/* ✅ ADD SALARY MODAL */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
+          <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-white text-lg font-semibold">
+              Add Salary
+            </h2>
+
+            <input
+              type="text"
+              placeholder="Date (e.g., May 2026)"
+              value={newSalaryDate}
+              onChange={(e) => setNewSalaryDate(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+            />
+
+            <input
+              type="number"
+              placeholder="Salary amount"
+              value={newSalaryAmount}
+              onChange={(e) => setNewSalaryAmount(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+            />
+
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                onClick={() => setShowForm(false)}
+                className="px-3 py-1 text-sm text-gray-400"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleAddSalary}
+                className="px-3 py-1 bg-[#01E777] text-black font-semibold rounded-lg text-sm"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LIST */}
       {salaryData.map((entry) => {
-        const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
+        const expenses = Array.isArray(entry.expenses)
+          ? entry.expenses
+          : [];
 
         const totalExpenses = expenses.reduce(
-          (sum, exp) => sum + exp.amount,
+          (sum, exp) => sum + Number(exp.amount || 0),
           0
         );
 
-        const remaining = entry.expectedSalary - totalExpenses;
+        const remaining =
+          Number(entry.salary || 0) - totalExpenses;
+
         const isEditingAll = editingAllEntryId === entry._id;
 
         return (
-          <div key={entry._id} className="mb-6 bg-[#1d1d1d] shadow rounded p-4">
+          <div key={entry._id} className="mb-6 bg-[#1d1d1d] shadow rounded-xl p-4">
             <div className="flex justify-between items-center mb-2">
-              <h2 className="font-semibold text-lg text-white">{entry.date}</h2>
+              <h2 className="font-semibold text-lg text-white">
+                {entry.date}
+              </h2>
 
-              <div className="flex gap-2">
+              <div className="flex gap-4">
                 {!isEditingAll && expenses.length > 0 && (
                   <button
                     onClick={() => handleEditAllExpenses(entry._id)}
-                    className="text-gray-600 text-sm"
+                    className="text-gray-500 text-sm"
                   >
                     Edit
                   </button>
@@ -235,7 +329,7 @@ export default function SalaryPage() {
 
                 <button
                   onClick={() => handleAddExpense(entry._id)}
-                  className="text-gray-600 text-sm"
+                  className="text-gray-500 text-sm"
                 >
                   Add
                 </button>
@@ -245,13 +339,13 @@ export default function SalaryPage() {
             <div className="flex justify-between text-gray-500 mb-2">
               <span>Salary</span>
               <button onClick={() => handleEditSalary(entry._id)}>
-                <span className="font-semibold text-blue-600">
-                  {(entry.expectedSalary ?? 0).toLocaleString()}
+                <span className="font-semibold text-[#01E777]">
+                  {format(entry.salary)}
                 </span>
               </button>
             </div>
 
-            <ul className="border border-gray-600 rounded divide-y divide-gray-300 text-xs">
+            <ul className="border border-gray-800 rounded divide-y divide-mist-900 text-xs">
               {expenses.map((expense, idx) => (
                 <li
                   key={idx}
@@ -268,13 +362,15 @@ export default function SalaryPage() {
                           setEditedExpenses(newExpenses);
                         }
                       }}
-                      className="flex-1 border px-2 py-1 rounded"
+                      className="flex-1 border border-mist-900 px-2 py-1 rounded text-white"
                     />
                   ) : (
                     <span
                       onClick={() => handleTogglePaid(entry._id, idx)}
                       className={`flex-1 break-words cursor-pointer ${
-                        expense.paid ? "line-through text-gray-300" : ""
+                        expense.paid
+                          ? "line-through text-gray-500"
+                          : "text-white"
                       }`}
                     >
                       {expense.name}
@@ -292,22 +388,24 @@ export default function SalaryPage() {
                           setEditedExpenses(newExpenses);
                         }
                       }}
-                      className="w-24 text-right border px-2 py-1 rounded"
+                      className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-white"
                     />
                   ) : (
-                    <span
-                      className={`w-24 text-right font-medium ${
-                        expense.paid ? "line-through text-gray-400" : ""
+                    <span className={`w-24 text-right font-medium
+                      ${
+                        expense.paid
+                          ? "line-through text-gray-500"
+                          : "text-white"
                       }`}
-                    >
-                      {expense.amount.toLocaleString()}
+                      >
+                      {format(expense.amount)}
                     </span>
                   )}
 
                   {isEditingAll && (
                     <button
                       onClick={() => handleDeleteExpense(entry._id, idx)}
-                      className="px-2 py-1 text-gray-500 text-sm border rounded"
+                      className="px-2 py-1 text-white text-sm border border-mist-900 rounded"
                     >
                       Delete
                     </button>
@@ -320,13 +418,13 @@ export default function SalaryPage() {
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleSaveAllExpenses(entry._id)}
-                  className="px-3 py-1 bg-green-200 rounded text-sm"
+                  className="px-3 py-1 bg-[#01E777] font-bold rounded text-sm"
                 >
                   Save All
                 </button>
                 <button
                   onClick={handleCancelEditAll}
-                  className="px-3 py-1 bg-red-200 rounded text-sm"
+                  className="px-3 py-1 bg-[#01E777] font-bold rounded text-sm"
                 >
                   Cancel
                 </button>
@@ -335,18 +433,12 @@ export default function SalaryPage() {
 
             <div className="flex justify-between font-semibold pt-2 mb-2">
               <span className="text-gray-500">Total</span>
-              <span className="text-red-600">
-                {totalExpenses.toLocaleString()}
-              </span>
+              <span className="text-white">{format(totalExpenses)}</span>
             </div>
 
             <div className="flex justify-between font-semibold">
               <span></span>
-              <span
-                className={remaining >= 0 ? "text-green-600" : "text-red-600"}
-              >
-                {remaining.toLocaleString()}
-              </span>
+              <span className="text-white">{format(remaining)}</span>
             </div>
           </div>
         );

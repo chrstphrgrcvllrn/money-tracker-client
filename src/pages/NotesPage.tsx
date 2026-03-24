@@ -6,11 +6,18 @@ import {
   toggleNote,
   // deleteNote,
 } from "../api/note";
+// import { CheckIcon } from "@heroicons/react/24/outline";
 
+import { CheckIcon } from "@heroicons/react/24/solid";
 const NotesPage: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [text, setText] = useState("");
   const [category, setCategory] = useState<Note["category"]>("work");
+
+  // ✅ default is pending
+  const [activeTab, setActiveTab] = useState<
+    "all" | "done" | "pending" | "work" | "personal" | "others" | "to buy"
+  >("pending");
 
   const fetchNotes = async () => {
     const data = await getNotes();
@@ -43,17 +50,36 @@ const NotesPage: React.FC = () => {
   //   fetchNotes();
   // };
 
-  return (
-    <div className="text-xs max-w-md mx-auto mt-8 p-6  bg-[#111111]">
-      {/* <h1 className="text-xl font-bold mb-4">My Notes</h1> */}
+  const filteredNotes = notes.filter((note) => {
+    if (activeTab === "done") return note.done;
+    if (activeTab === "pending") return !note.done;
+    if (activeTab === "work") return note.category === "work";
+    if (activeTab === "personal") return note.category === "personal";
+    if (activeTab === "others") return note.category === "others";
+    if (activeTab ===    "to buy") return note.category ===  "to buy";
+ 
+    return true;
+  });
 
+  return (
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#111111]">
+      {/* HEADER */}
+      <div className="mb-4 flex justify-between items-center">
+        <h1 className="text-lg font-semibold text-white">
+          Notes
+        </h1>
+
+        <div className="flex items-center gap-3"></div>
+      </div>
+
+      {/* INPUT */}
       <div className="flex gap-2 mb-4 h-[7vh]">
         <input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter note"
-          className="flex-1  bg-[#1d1d1d] px-2 py-1 rounded   text-white"
+          className="flex-1 bg-[#1d1d1d] px-2 py-1 rounded text-white"
         />
 
         <select
@@ -61,47 +87,79 @@ const NotesPage: React.FC = () => {
           onChange={(e) =>
             setCategory(e.target.value as Note["category"])
           }
-          className="bg-[#1d1d1d] px-2 py-1 rounded  text-[#fff]"
+          className="bg-[#1d1d1d] px-2 py-1 rounded text-[#fff]"
         >
           <option value="work">Work</option>
           <option value="personal">Personal</option>
+          <option value="to buy">To Buy</option>
           <option value="others">Others</option>
         </select>
 
         <button
           onClick={addNote}
-          className="bg-[#F2F211] text-black font-bold px-2 py-1 rounded"
+          className="bg-[#01E777] text-black font-bold px-2 py-1 rounded"
         >
           Add
         </button>
       </div>
 
+      {/* TABS */}
+      <div className="flex gap-2 mb-4">
+        {["pending", "work", "personal",  "to buy", "done"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab as any)}
+            className={`px-2 py-1 rounded-xl text-xs capitalize ${
+              activeTab === tab
+                ? "bg-[#01E777] text-black font-bold"
+                : "bg-[#1d1d1d] text-gray-400"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* LIST */}
       <ul className="space-y-2 text-sm">
-        {notes.map((note) => (
+        {filteredNotes.map((note) => (
           <li
             key={note._id}
-            className={`flex justify-between items-center p-2 bg-[#1d1d1d] rounded ${
-              note.done ? "text-gray-600 line-through" : ""
+            className={`flex justify-between items-center p-2 bg-[#1d1d1d] rounded-xl ${
+              note.done ? "text-gray-700 line-through" : ""
             }`}
           >
             <div>
-              <span className={`font-medium text-white${
-              note.done ? "text-gray-600 line-through" : ""
-            }`}
-              
-              >{note.text}</span>{" "}
-              <span className="text-gray-500">
-                {note.category}
+              <span
+                className={`font-medium ${
+                  note.done ? "text-gray-700 line-through" : "text-white"
+                }`}
+              >
+                {note.text}
               </span>
             </div>
 
             <div className="flex gap-2">
-              <button
+              {/* <button
                 onClick={() => handleToggle(note._id)}
-                className="text-sm px-2 py-1   rounded   text-mist-500"
+                className="text-sm px-2 py-1 rounded text-mist-500"
               >
                 {note.done ? "Undo" : "Done"}
               </button>
+ */}
+
+          <button
+            onClick={() => handleToggle(note._id)}
+            className="flex items-center justify-center px-2 py-1 rounded text-mist-500 hover:text-[#01E777]"
+          >
+            <CheckIcon
+              className={`w-5 h-5 ${
+                note.done ? "text-[#01E777]" : "text-gray-500"
+              }`}
+            />
+          </button>
+
+              
 
               {/* <button
                 onClick={() => handleDelete(note._id)}
