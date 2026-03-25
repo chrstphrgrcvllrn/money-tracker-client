@@ -1,24 +1,30 @@
 import { useEffect, useState } from "react";
 import type { Loan } from "../types/loans.type";
 import type { Savings } from "../types/savings.type";
+import type { Expense } from "../types/expenses.type";
+
 import { getLoans } from "../api/loan";
 import { getSavings } from "../api/savings";
+import { fetchExpenses } from "../api/expenses";
 
 const Dashboard = () => {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [savings, setSavings] = useState<Savings[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [loanData, savingsData] = await Promise.all([
+        const [loanData, savingsData, expenseData] = await Promise.all([
           getLoans(),
           getSavings(),
+          fetchExpenses(),
         ]);
 
         setLoans(loanData || []);
         setSavings(Array.isArray(savingsData) ? savingsData : [savingsData]);
+        setExpenses(expenseData || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -33,6 +39,27 @@ const Dashboard = () => {
     return <div className="p-4 text-center text-white">Loading...</div>;
   }
 
+  // ================= DATE HELPERS =================
+  const now = new Date();
+
+  const isThisWeek = (date: Date) => {
+    const start = new Date(now);
+    start.setDate(now.getDate() - now.getDay());
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 7);
+
+    return date >= start && date < end;
+  };
+
+  const isThisMonth = (date: Date) =>
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear();
+
+  const isThisYear = (date: Date) =>
+    date.getFullYear() === now.getFullYear();
+
   // ================= LOANS =================
   const totalLoanInitial = loans.reduce(
     (sum, loan) => sum + (loan.initialAmount || 0),
@@ -42,10 +69,7 @@ const Dashboard = () => {
   const totalLoanPaid = loans.reduce(
     (sum, loan) =>
       sum +
-      (loan.transactions?.reduce(
-        (s, t) => s + (t.amount || 0),
-        0
-      ) || 0),
+      (loan.transactions?.reduce((s, t) => s + (t.amount || 0), 0) || 0),
     0
   );
 
@@ -79,66 +103,75 @@ const Dashboard = () => {
     totalSavingsDeposits -
     totalSavingsWithdrawals;
 
+  // ================= EXPENSES =================
+  const totalExpenses = expenses.reduce(
+    (sum, expense) => sum + (expense.amount || 0),
+    0
+  );
+
+  // ================= TIME FILTERED =================
+  const weeklyExpenses = expenses.reduce((sum, expense) => {
+    if (!expense.createdAt) return sum;
+    const date = new Date(expense.createdAt);
+    return isThisWeek(date) ? sum + expense.amount : sum;
+  }, 0);
+
+  const monthlyExpenses = expenses.reduce((sum, expense) => {
+    if (!expense.createdAt) return sum;
+    const date = new Date(expense.createdAt);
+    return isThisMonth(date) ? sum + expense.amount : sum;
+  }, 0);
+
+  const yearlyExpenses = expenses.reduce((sum, expense) => {
+    if (!expense.createdAt) return sum;
+    const date = new Date(expense.createdAt);
+    return isThisYear(date) ? sum + expense.amount : sum;
+  }, 0);
+
   return (
     <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-[#111111] min-h-screen space-y-4">
-      {/* HEADER */}
       <h1 className="text-lg font-semibold text-white mb-2">
         Dashboard
       </h1>
 
-      {/* LOANS CARD */}
+      {/* LOANS */}
       <div className="bg-[#1d1d1d] rounded-xl p-4 space-y-2">
         <p className="text-[#01E777] text-sm">Loans</p>
-
         <p className="text-[2rem] font-bold text-white">
           {totalLoanRemaining.toLocaleString()}
         </p>
-
-        <div className="flex justify-between">
-          <div>
-            <p className="text-xs text-[#01E777]">Total</p>
-            <p className="text-white font-medium">
-              {totalLoanInitial.toLocaleString()}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-xs text-[#01E777]">Paid</p>
-            <p className="text-white font-medium">
-              {totalLoanPaid.toLocaleString()}
-            </p>
-          </div>
-        </div>
       </div>
 
-      {/* SAVINGS CARD */}
+      {/* SAVINGS */}
       <div className="bg-[#1d1d1d] rounded-xl p-4 space-y-2">
         <p className="text-[#01E777] text-sm">Savings</p>
-
         <p className="text-[2rem] font-bold text-[#01E777]">
           {totalSavingsBalance.toLocaleString()}
         </p>
+      </div>
 
-        <div className="flex justify-between">
+      {/* EXPENSES */}
+      <div className="bg-[#1d1d1d] rounded-xl p-4 space-y-2">
+        <p className="text-[#01E777] text-sm">Expenses</p>
+
+        <p className="text-[2rem] font-bold text-white">
+          {totalExpenses.toLocaleString()}
+        </p>
+
+        <div className="flex justify-between text-sm">
           <div>
-            <p className="text-xs text-[#01E777]">Total</p>
-            <p className="text-white font-medium">
-              {totalSavingsInitial.toLocaleString()}
-            </p>
+            <p className="text-[#01E777]">Week</p>
+            <p className="text-white">{weeklyExpenses.toLocaleString()}</p>
           </div>
 
           <div>
-            <p className="text-xs text-[#01E777]">Deposits</p>
-            <p className="text-white font-medium">
-              {totalSavingsDeposits.toLocaleString()}
-            </p>
+            <p className="text-[#01E777]">Month</p>
+            <p className="text-white">{monthlyExpenses.toLocaleString()}</p>
           </div>
 
           <div>
-            <p className="text-xs text-[#01E777]">Withdrawals</p>
-            <p className="text-white font-medium">
-              {totalSavingsWithdrawals.toLocaleString()}
-            </p>
+            <p className="text-[#01E777]">Year</p>
+            <p className="text-white">{yearlyExpenses.toLocaleString()}</p>
           </div>
         </div>
       </div>

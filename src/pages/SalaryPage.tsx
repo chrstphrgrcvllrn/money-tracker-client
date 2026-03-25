@@ -218,7 +218,7 @@ export default function SalaryPage() {
   };
 
   return (
-    <div className="px-6 pb-6 mt-8 bg-[#111111] min-h-screen">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#111111]">
 
 <div className="mb-4 flex justify-between items-start">
         <h1 className="text-lg font-semibold text-white">
