@@ -1,13 +1,12 @@
 export type Bill = {
-  _id?: string;
   name: string;
   amount: number;
-  datePaid: string;
-  status: "Paid" | "Pending";
+  dueDate: string;
+  paid: boolean;
 };
 
-export type MonthlyBills = {
-  _id?: string;
-  month: string;
+export type BillsEntry = {
+  _id: string;
+  month: string; // e.g. "May 2026"
   bills: Bill[];
 };
