@@ -15,6 +15,7 @@ export default function BottomNavBar() {
     { name: "Savings", path: "/savings", icon: BuildingLibraryIcon },
     { name: "Notes", path: "/notes", icon: DocumentTextIcon },
     { name: "Salary", path: "/salary", icon: CurrencyDollarIcon },
+    { name: "Expenses", path: "/expenses", icon: ReceiptPercentIcon },
     { name: "Bills", path: "/bills", icon: ReceiptPercentIcon },
 
   ];
