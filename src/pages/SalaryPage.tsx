@@ -436,10 +436,16 @@ export default function SalaryPage() {
               <span className="text-white">{format(totalExpenses)}</span>
             </div>
 
-            <div className="flex justify-between font-semibold">
-              <span></span>
-              <span className="text-white">{format(remaining)}</span>
-            </div>
+           <div className="flex justify-between font-semibold">
+            <span></span>
+            <span
+              className={`${
+                remaining < 0 ? "text-red-500" : "text-white"
+              }`}
+            >
+              {format(remaining)}
+            </span>
+          </div>
           </div>
         );
       })}

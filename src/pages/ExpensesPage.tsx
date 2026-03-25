@@ -3,16 +3,18 @@ import {
   fetchExpenses,
   createExpense,
   toggleExpense,
+  updateExpense,
+  deleteExpense,
 } from "../api/expenses";
 
-import { CheckIcon } from "@heroicons/react/24/solid";
+import { CheckIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 type Expense = {
   _id: string;
   text: string;
   amount: number;
   done: boolean;
-  createdAt: string; // required for totals
+  createdAt: string;
 };
 
 const ExpensesPage: React.FC = () => {
@@ -20,6 +22,8 @@ const ExpensesPage: React.FC = () => {
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
   const [showModal, setShowModal] = useState(false);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<"pending" | "done">("pending");
 
@@ -32,22 +36,52 @@ const ExpensesPage: React.FC = () => {
     loadExpenses();
   }, []);
 
-  const addExpense = async () => {
+  // =========================
+  // ADD OR UPDATE
+  // =========================
+  const handleSave = async () => {
     if (!text.trim() || !amount) return;
 
-    await createExpense({
-      text: text.trim(),
-      amount: Number(amount),
-    });
+    if (editingId) {
+      await updateExpense(editingId, {
+        text: text.trim(),
+        amount: Number(amount),
+      });
+    } else {
+      await createExpense({
+        text: text.trim(),
+        amount: Number(amount),
+      });
+    }
 
-    setText("");
-    setAmount("");
-    setShowModal(false);
+    resetForm();
     loadExpenses();
   };
 
+  const resetForm = () => {
+    setText("");
+    setAmount("");
+    setEditingId(null);
+    setShowModal(false);
+  };
+
+  // =========================
+  // ACTIONS
+  // =========================
   const handleToggle = async (id: string) => {
     await toggleExpense(id);
+    loadExpenses();
+  };
+
+  const handleEdit = (exp: Expense) => {
+    setText(exp.text);
+    setAmount(String(exp.amount));
+    setEditingId(exp._id);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteExpense(id);
     loadExpenses();
   };
 
@@ -65,7 +99,7 @@ const ExpensesPage: React.FC = () => {
     const d = new Date(dateStr);
 
     const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday start
+    startOfWeek.setDate(today.getDate() - today.getDay());
 
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
@@ -181,16 +215,35 @@ const ExpensesPage: React.FC = () => {
               </span>
             </div>
 
-            <button
-              onClick={() => handleToggle(exp._id)}
-              className="flex items-center justify-center px-2 py-1 rounded hover:text-[#01E777]"
-            >
-              <CheckIcon
-                className={`w-5 h-5 ${
-                  exp.done ? "text-[#01E777]" : "text-gray-500"
-                }`}
-              />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* EDIT */}
+              <button
+                onClick={() => handleEdit(exp)}
+                className="text-gray-400 hover:text-blue-400"
+              >
+                <PencilIcon className="w-4 h-4" />
+              </button>
+
+              {/* DELETE */}
+              <button
+                onClick={() => handleDelete(exp._id)}
+                className="text-gray-400 hover:text-red-500"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+
+              {/* TOGGLE */}
+              <button
+                onClick={() => handleToggle(exp._id)}
+                className="flex items-center justify-center"
+              >
+                <CheckIcon
+                  className={`w-5 h-5 ${
+                    exp.done ? "text-[#01E777]" : "text-gray-500"
+                  }`}
+                />
+              </button>
+            </div>
           </li>
         ))}
       </ul>
@@ -199,7 +252,9 @@ const ExpensesPage: React.FC = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
           <div className="bg-[#1d1d1d] p-4 rounded-xl w-[90%] max-w-sm">
-            <h2 className="text-white mb-3 font-semibold">Add Expense</h2>
+            <h2 className="text-white mb-3 font-semibold">
+              {editingId ? "Edit Expense" : "Add Expense"}
+            </h2>
 
             <input
               type="text"
@@ -219,17 +274,17 @@ const ExpensesPage: React.FC = () => {
 
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setShowModal(false)}
+                onClick={resetForm}
                 className="px-3 py-1 text-gray-400"
               >
                 Cancel
               </button>
 
               <button
-                onClick={addExpense}
+                onClick={handleSave}
                 className="bg-[#01E777] text-black px-3 py-1 rounded font-bold"
               >
-                Save
+                {editingId ? "Update" : "Save"}
               </button>
             </div>
           </div>
