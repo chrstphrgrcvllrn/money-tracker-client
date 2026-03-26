@@ -6,10 +6,7 @@ import {
   addSavingsTransaction,
 } from "../api/savings";
 
-import {
-  EyeIcon,
-  EyeSlashIcon,
-} from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 export default function SavingsPage() {
   const [savings, setSavings] = useState<Savings[]>([]);
@@ -24,24 +21,20 @@ export default function SavingsPage() {
     {}
   );
   const [dateInputs, setDateInputs] = useState<Record<number, string>>({});
+  const [transactionType, setTransactionType] = useState<Record<number, "+" | "-">>({});
 
-  // ✅ NEW: toggle visibility
+  // ✅ toggle visibility
   const [showAmounts, setShowAmounts] = useState(true);
 
   useEffect(() => {
     const fetchSavings = async () => {
       try {
         const data = await getSavings();
-
-        const normalized: Savings[] = Array.isArray(data)
-          ? data
-          : [data];
-
+        const normalized: Savings[] = Array.isArray(data) ? data : [data];
         const withTransactions = normalized.map((item) => ({
           ...item,
           transactions: item.transactions ?? [],
         }));
-
         setSavings(withTransactions);
       } catch (err) {
         console.error(err);
@@ -49,7 +42,6 @@ export default function SavingsPage() {
         setLoading(false);
       }
     };
-
     fetchSavings();
   }, []);
 
@@ -71,7 +63,6 @@ export default function SavingsPage() {
 
     try {
       const saved = await createSavings(newItem);
-
       setSavings((prev) => [
         ...prev,
         {
@@ -90,25 +81,23 @@ export default function SavingsPage() {
 
   const handleAddTransaction = async (
     savingsId: string,
-    index: number
+    index: number,
+    type: "+" | "-"
   ) => {
     const amount = amountInputs[index];
     const date = dateInputs[index];
-
     if (!amount || !date) return;
+
+    const value = type === "-" ? -Math.abs(Number(amount)) : Number(amount);
 
     const transaction = {
       date,
-      amount: Number(amount),
+      amount: value,
       type: "transaction",
     };
 
     try {
-      const updated = await addSavingsTransaction(
-        savingsId,
-        transaction
-      );
-
+      const updated = await addSavingsTransaction(savingsId, transaction);
       setSavings((prev) =>
         prev.map((item) =>
           item._id === savingsId
@@ -119,6 +108,7 @@ export default function SavingsPage() {
 
       setAmountInputs((prev) => ({ ...prev, [index]: "" }));
       setDateInputs((prev) => ({ ...prev, [index]: "" }));
+      setTransactionType((prev) => ({ ...prev, [index]: "+" }));
     } catch (err) {
       console.error(err);
     }
@@ -139,15 +129,13 @@ export default function SavingsPage() {
 
   const totalWithdrawals = savings.reduce((sum, item) => {
     const withdrawals = (item.transactions ?? []).reduce(
-      (s, t) =>
-        s + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
+      (s, t) => s + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
       0
     );
     return sum + withdrawals;
   }, 0);
 
-  const totalBalance =
-    totalInitial + totalDeposits - totalWithdrawals;
+  const totalBalance = totalInitial + totalDeposits - totalWithdrawals;
 
   if (loading) {
     return <div className="p-4 text-center">Loading...</div>;
@@ -157,12 +145,9 @@ export default function SavingsPage() {
     <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans text-gray-800 bg-[#111111]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-start">
-        <h1 className="text-lg font-semibold text-white">
-          Savings
-        </h1>
+        <h1 className="text-lg font-semibold text-white">Savings</h1>
 
         <div className="flex items-center gap-3">
-          {/* Toggle */}
           <button
             onClick={() => setShowAmounts((prev) => !prev)}
             className="text-gray-400"
@@ -187,9 +172,7 @@ export default function SavingsPage() {
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
           <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-white text-lg font-semibold">
-              Add Savings
-            </h2>
+            <h2 className="text-white text-lg font-semibold">Add Savings</h2>
 
             <input
               type="text"
@@ -230,9 +213,7 @@ export default function SavingsPage() {
       <div className="mb-6 p-4 bg-[#1d1d1d] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Balance</p>
         <p className="text-[2.5rem] font-bold text-[#01E777]">
-          {showAmounts
-            ? totalBalance.toLocaleString()
-            : mask(totalBalance)}
+          {showAmounts ? totalBalance.toLocaleString() : mask(totalBalance)}
         </p>
       </div>
 
@@ -240,19 +221,16 @@ export default function SavingsPage() {
       <div className="space-y-3">
         {savings.map((item, index) => {
           const deposits = (item.transactions ?? []).reduce(
-            (sum, t) =>
-              sum + (t.amount > 0 ? Number(t.amount) : 0),
+            (sum, t) => sum + (t.amount > 0 ? Number(t.amount) : 0),
             0
           );
 
           const withdrawals = (item.transactions ?? []).reduce(
-            (sum, t) =>
-              sum + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
+            (sum, t) => sum + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
             0
           );
 
-          const balance =
-            item.initialAmount + deposits - withdrawals;
+          const balance = item.initialAmount + deposits - withdrawals;
 
           return (
             <div
@@ -278,18 +256,14 @@ export default function SavingsPage() {
                     <p className="text-xs text-[#01E777]">
                       Deposits:{" "}
                       <span className="text-white font-medium">
-                        {showAmounts
-                          ? deposits.toLocaleString()
-                          : mask(deposits)}
+                        {showAmounts ? deposits.toLocaleString() : mask(deposits)}
                       </span>
                     </p>
                   </div>
                 </div>
 
                 <p className="font-bold text-[#01E777]">
-                  {showAmounts
-                    ? balance.toLocaleString()
-                    : mask(balance)}
+                  {showAmounts ? balance.toLocaleString() : mask(balance)}
                 </p>
               </button>
 
@@ -312,30 +286,40 @@ export default function SavingsPage() {
                       type="date"
                       value={dateInputs[index] || ""}
                       onChange={(e) =>
-                        setDateInputs((prev) => ({
-                          ...prev,
-                          [index]: e.target.value,
-                        }))
+                        setDateInputs((prev) => ({ ...prev, [index]: e.target.value }))
                       }
                       className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
                     />
 
-                    <input
-                      type="number"
-                      placeholder="Enter amount"
-                      value={amountInputs[index] || ""}
-                      onChange={(e) =>
-                        setAmountInputs((prev) => ({
-                          ...prev,
-                          [index]: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
-                    />
+                    <div className="flex gap-2">
+                      <select
+                        value={transactionType[index] || "+"}
+                        onChange={(e) =>
+                          setTransactionType((prev) => ({
+                            ...prev,
+                            [index]: e.target.value as "+" | "-",
+                          }))
+                        }
+                        className="w-20 px-2 py-2 rounded-lg text-sm text-white bg-[#1d1d1d] border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+                      >
+                        <option value="+">+</option>
+                        <option value="-">-</option>
+                      </select>
+
+                      <input
+                        type="number"
+                        placeholder="Enter amount"
+                        value={amountInputs[index] || ""}
+                        onChange={(e) =>
+                          setAmountInputs((prev) => ({ ...prev, [index]: e.target.value }))
+                        }
+                        className="flex-1 px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+                      />
+                    </div>
 
                     <button
                       onClick={() =>
-                        handleAddTransaction(item._id, index)
+                        handleAddTransaction(item._id, index, transactionType[index] || "+")
                       }
                       className="w-full bg-[#01E777] text-black font-bold py-2 rounded-lg text-sm"
                     >

@@ -153,7 +153,7 @@ const ExpensesPage: React.FC = () => {
       </div>
 
       {/* TOTALS */}
-      <div className="mb-4 grid grid-cols-3 gap-2 text-xs">
+      <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
         <div className="bg-[#1d1d1d] p-2 rounded-xl">
           <p className="text-gray-400">Today</p>
           <p className="text-[#01E777] font-bold">
