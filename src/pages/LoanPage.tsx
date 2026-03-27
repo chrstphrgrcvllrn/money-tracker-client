@@ -93,29 +93,14 @@ export default function LoanPage() {
     }
   };
 
-  const totalInitial = loans.reduce((sum, loan) => sum + loan.initialAmount, 0);
-
-  const totalPaid = loans.reduce(
-    (sum, loan) =>
-      sum +
-      loan.transactions.reduce(
-        (s, t) => s + (t.amount > 0 ? Number(t.amount) : 0),
-        0
-      ),
-    0
-  );
-
-  const totalAdjustments = loans.reduce(
-    (sum, loan) =>
-      sum +
-      loan.transactions.reduce(
-        (s, t) => s + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
-        0
-      ),
-    0
-  );
-
-  const totalRemaining = totalInitial + totalAdjustments - totalPaid;
+  // Total remaining across all loans
+  const totalRemaining = loans.reduce((sum, loan) => {
+    const transactionsSum = loan.transactions.reduce(
+      (s, t) => s + Number(t.amount),
+      0
+    );
+    return sum + loan.initialAmount + transactionsSum;
+  }, 0);
 
   if (loading) {
     return <div className="p-4 text-center">Loading...</div>;
@@ -200,17 +185,8 @@ export default function LoanPage() {
       {/* LIST */}
       <div className="space-y-3">
         {loans.map((loan, index) => {
-          const paid = loan.transactions.reduce(
-            (sum, t) => sum + (t.amount > 0 ? Number(t.amount) : 0),
-            0
-          );
-
-          const adjustments = loan.transactions.reduce(
-            (sum, t) => sum + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
-            0
-          );
-
-          const remaining = loan.initialAmount + adjustments - paid;
+          const loanSum = loan.transactions.reduce((s, t) => s + Number(t.amount), 0);
+          const remaining = loan.initialAmount + loanSum;
 
           return (
             <div
@@ -232,7 +208,16 @@ export default function LoanPage() {
                     <p className="text-xs text-[#01E777]">
                       Paid:{" "}
                       <span className="text-white font-medium">
-                        {showAmounts ? paid.toLocaleString() : mask(paid)}
+                        {showAmounts
+                          ? loan.transactions
+                              .filter((t) => t.amount > 0)
+                              .reduce((s, t) => s + Number(t.amount), 0)
+                              .toLocaleString()
+                          : mask(
+                              loan.transactions
+                                .filter((t) => t.amount > 0)
+                                .reduce((s, t) => s + Number(t.amount), 0)
+                            )}
                       </span>
                     </p>
                   </div>
@@ -252,10 +237,7 @@ export default function LoanPage() {
                       {loan.transactions.map((t, i) => (
                         <li key={i} className="flex justify-between">
                           <span>{t.date}</span>
-                          <span>
-                            {t.amount > 0 ? "-" : "+"}
-                            {Math.abs(t.amount).toLocaleString()}
-                          </span>
+                          <span>{t.amount.toLocaleString()}</span>
                         </li>
                       ))}
                     </ul>
@@ -307,8 +289,8 @@ export default function LoanPage() {
                       onClick={() => {
                         const type = transactionTypes[index] || "+";
                         const value =
-                    Number(paymentInputs[index] || 0) *
-                      (type === "+" ? -1 : 1);
+                          Number(paymentInputs[index] || 0) *
+                          (type === "-" ? -1 : 1);
                         handleAddPayment(loan._id, index, value);
                       }}
                       className="w-full bg-[#01E777] text-black font-bold py-2 rounded-lg text-sm"
