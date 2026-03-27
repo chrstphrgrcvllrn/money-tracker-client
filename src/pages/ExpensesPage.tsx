@@ -93,8 +93,8 @@ const ExpensesPage: React.FC = () => {
   const isToday = (dateStr: string) =>
     new Date(dateStr).toDateString() === today.toDateString();
 
-  const isYesterday = (dateStr: string) =>
-    new Date(dateStr).toDateString() === yesterday.toDateString();
+  // const isYesterday = (dateStr: string) =>
+  //   new Date(dateStr).toDateString() === yesterday.toDateString();
 
   const isThisWeek = (dateStr: string) => {
     const d = new Date(dateStr);
