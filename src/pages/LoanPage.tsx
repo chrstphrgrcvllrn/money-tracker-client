@@ -17,29 +17,21 @@ export default function LoanPage() {
   const [newLoanName, setNewLoanName] = useState("");
   const [newLoanAmount, setNewLoanAmount] = useState("");
 
-  const [paymentInputs, setPaymentInputs] = useState<{
-    [key: number]: string;
-  }>({});
+  const [paymentInputs, setPaymentInputs] = useState<{ [key: number]: string }>({});
+  const [paymentDates, setPaymentDates] = useState<{ [key: number]: string }>({});
+  const [transactionTypes, setTransactionTypes] = useState<{ [key: number]: "+" | "-" }>({});
 
-  const [paymentDates, setPaymentDates] = useState<{
-    [key: number]: string;
-  }>({});
-
-  // ✅ NEW: toggle visibility
   const [showAmounts, setShowAmounts] = useState(true);
 
   useEffect(() => {
     const fetchLoans = async () => {
       try {
         const data = await getLoans();
-
         const normalized = Array.isArray(data) ? data : [data];
-
         const withTransactions = normalized.map((loan) => ({
           ...loan,
           transactions: loan.transactions ?? [],
         }));
-
         setLoans(withTransactions);
       } catch (err) {
         console.error(err);
@@ -70,7 +62,6 @@ export default function LoanPage() {
     try {
       const saved = await createLoan(newLoan);
       setLoans((prev) => [...prev, saved]);
-
       setNewLoanName("");
       setNewLoanAmount("");
       setShowForm(false);
@@ -79,38 +70,30 @@ export default function LoanPage() {
     }
   };
 
-  const handleAddPayment = async (loanId: string, index: number) => {
-    const amount = paymentInputs[index];
+  const handleAddPayment = async (loanId: string, index: number, amount: number) => {
     const date = paymentDates[index];
-
     if (!amount || !date) return;
 
     const transaction = {
-      date: date,
-      amount: Number(amount),
+      date,
+      amount,
       type: "payment",
     };
 
     try {
       const updatedLoan = await addTransaction(loanId, transaction);
-
       setLoans((prev) =>
-        prev.map((loan) =>
-          loan._id === loanId ? updatedLoan : loan
-        )
+        prev.map((loan) => (loan._id === loanId ? updatedLoan : loan))
       );
-
       setPaymentInputs((prev) => ({ ...prev, [index]: "" }));
       setPaymentDates((prev) => ({ ...prev, [index]: "" }));
+      setTransactionTypes((prev) => ({ ...prev, [index]: "+" }));
     } catch (err) {
       console.error(err);
     }
   };
 
-  const totalInitial = loans.reduce(
-    (sum, loan) => sum + loan.initialAmount,
-    0
-  );
+  const totalInitial = loans.reduce((sum, loan) => sum + loan.initialAmount, 0);
 
   const totalPaid = loans.reduce(
     (sum, loan) =>
@@ -132,8 +115,7 @@ export default function LoanPage() {
     0
   );
 
-  const totalRemaining =
-    totalInitial + totalAdjustments - totalPaid;
+  const totalRemaining = totalInitial + totalAdjustments - totalPaid;
 
   if (loading) {
     return <div className="p-4 text-center">Loading...</div>;
@@ -143,12 +125,9 @@ export default function LoanPage() {
     <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans text-gray-800 bg-[#111111]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-start">
-        <h1 className="text-lg font-semibold text-white">
-          Loans
-        </h1>
+        <h1 className="text-lg font-semibold text-white">Loans</h1>
 
         <div className="flex items-center gap-3">
-          {/* Toggle Amount Visibility */}
           <button
             onClick={() => setShowAmounts((prev) => !prev)}
             className="text-gray-400"
@@ -173,9 +152,7 @@ export default function LoanPage() {
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
           <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-white text-lg font-semibold">
-              Add Loan
-            </h2>
+            <h2 className="text-white text-lg font-semibold">Add Loan</h2>
 
             <input
               type="text"
@@ -216,9 +193,7 @@ export default function LoanPage() {
       <div className="mb-6 p-4 bg-[#1d1d1d] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Remaining</p>
         <p className="text-[2.5rem] font-bold text-[#01E777]">
-          {showAmounts
-            ? totalRemaining.toLocaleString()
-            : mask(totalRemaining)}
+          {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
         </p>
       </div>
 
@@ -231,13 +206,11 @@ export default function LoanPage() {
           );
 
           const adjustments = loan.transactions.reduce(
-            (sum, t) =>
-              sum + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
+            (sum, t) => sum + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
             0
           );
 
-          const remaining =
-            loan.initialAmount + adjustments - paid;
+          const remaining = loan.initialAmount + adjustments - paid;
 
           return (
             <div
@@ -254,34 +227,26 @@ export default function LoanPage() {
                   </div>
 
                   <div>
-                    <p className="font-medium text-[1.2rem] text-white">
-                      {loan.name}
-                    </p>
+                    <p className="font-medium text-[1.2rem] text-white">{loan.name}</p>
 
                     <p className="text-xs text-[#01E777]">
                       Paid:{" "}
                       <span className="text-white font-medium">
-                        {showAmounts
-                          ? paid.toLocaleString()
-                          : mask(paid)}
+                        {showAmounts ? paid.toLocaleString() : mask(paid)}
                       </span>
                     </p>
                   </div>
                 </div>
 
                 <p className="font-bold text-[#01E777]">
-                  {showAmounts
-                    ? remaining.toLocaleString()
-                    : mask(remaining)}
+                  {showAmounts ? remaining.toLocaleString() : mask(remaining)}
                 </p>
               </button>
 
               {expanded === index && (
                 <div className="border-t px-4 py-3">
                   {loan.transactions.length === 0 ? (
-                    <p className="text-xs text-white">
-                      No payments yet
-                    </p>
+                    <p className="text-xs text-white">No payments yet</p>
                   ) : (
                     <ul className="text-xs text-white space-y-1">
                       {loan.transactions.map((t, i) => (
@@ -296,7 +261,7 @@ export default function LoanPage() {
                     </ul>
                   )}
 
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-3 space-y-2 flex flex-col gap-2">
                     <input
                       type="date"
                       value={paymentDates[index] || ""}
@@ -309,23 +274,43 @@ export default function LoanPage() {
                       className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
                     />
 
-                    <input
-                      type="number"
-                      placeholder="Enter amount (+ / -)"
-                      value={paymentInputs[index] || ""}
-                      onChange={(e) =>
-                        setPaymentInputs((prev) => ({
-                          ...prev,
-                          [index]: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
-                    />
+                    <div className="flex gap-2">
+                      <select
+                        value={transactionTypes[index] || "+"}
+                        onChange={(e) =>
+                          setTransactionTypes((prev) => ({
+                            ...prev,
+                            [index]: e.target.value as "+" | "-",
+                          }))
+                        }
+                        className="px-3 py-2 rounded-lg text-sm text-white bg-[#1d1d1d] border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+                      >
+                        <option value="+">+</option>
+                        <option value="-">-</option>
+                      </select>
+
+                      <input
+                        type="number"
+                        placeholder="Enter amount"
+                        value={paymentInputs[index] || ""}
+                        onChange={(e) =>
+                          setPaymentInputs((prev) => ({
+                            ...prev,
+                            [index]: e.target.value,
+                          }))
+                        }
+                        className="flex-1 px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+                      />
+                    </div>
 
                     <button
-                      onClick={() =>
-                        handleAddPayment(loan._id, index)
-                      }
+                      onClick={() => {
+                        const type = transactionTypes[index] || "+";
+                        const value =
+                    Number(paymentInputs[index] || 0) *
+                      (type === "+" ? -1 : 1);
+                        handleAddPayment(loan._id, index, value);
+                      }}
                       className="w-full bg-[#01E777] text-black font-bold py-2 rounded-lg text-sm"
                     >
                       Add Payment

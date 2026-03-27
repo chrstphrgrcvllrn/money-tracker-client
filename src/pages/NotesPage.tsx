@@ -59,20 +59,19 @@ const NotesPage: React.FC = () => {
     return a.done ? 1 : -1; // undone first
   });
 
-  // Highlight [bracketed] text
-  const highlightBrackets = (text: string) => {
-    const parts = text.split(/(\[.*?\])/g);
-    return parts.map((part, idx) =>
-      part.startsWith("[") && part.endsWith("]") ? (
-        <span key={idx} className="text-[#01E777]">
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    );
-  };
-
+// Highlight [bracketed] text only if note is not done
+const highlightBrackets = (text: string, done: boolean) => {
+  const parts = text.split(/(\[.*?\])/g);
+  return parts.map((part, idx) =>
+    part.startsWith("[") && part.endsWith("]") && !done ? (
+      <span key={idx} className="text-[#01E777]">
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+};
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#111111]">
       {/* HEADER */}
@@ -114,7 +113,7 @@ const NotesPage: React.FC = () => {
 
       {/* TABS */}
       <div className="flex gap-2 mb-4">
-        {["pending", "work", "personal", "to buy", "done"].map((tab) => (
+        {["pending", "work", "personal", "others", "to buy", "done"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
@@ -144,7 +143,7 @@ const NotesPage: React.FC = () => {
                   note.done ? "text-gray-700 line-through" : "text-white"
                 }`}
               >
-                {highlightBrackets(note.text)}
+                  {highlightBrackets(note.text, note.done)}
               </span>
             </div>
 
