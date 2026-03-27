@@ -6,6 +6,7 @@ import {
   CurrencyDollarIcon,
   ReceiptPercentIcon,
   DocumentTextIcon,
+    CalculatorIcon,
 } from "@heroicons/react/24/outline";
 
 export default function BottomNavBar() {
@@ -17,6 +18,7 @@ export default function BottomNavBar() {
     { name: "Salary", path: "/salary", icon: CurrencyDollarIcon },
     { name: "Expenses", path: "/expenses", icon: ReceiptPercentIcon },
     { name: "Bills", path: "/bills", icon: ReceiptPercentIcon },
+     { name: "Calc", path: "/calculator", icon: CalculatorIcon },
 
   ];
 
