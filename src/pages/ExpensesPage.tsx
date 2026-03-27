@@ -22,9 +22,7 @@ const ExpensesPage: React.FC = () => {
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
   const [showModal, setShowModal] = useState(false);
-
   const [editingId, setEditingId] = useState<string | null>(null);
-
   const [activeTab, setActiveTab] = useState<"pending" | "done">("pending");
 
   const loadExpenses = async () => {
@@ -89,21 +87,21 @@ const ExpensesPage: React.FC = () => {
   // DATE HELPERS
   // =========================
   const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
 
-  const isToday = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toDateString() === today.toDateString();
-  };
+  const isToday = (dateStr: string) =>
+    new Date(dateStr).toDateString() === today.toDateString();
+
+  const isYesterday = (dateStr: string) =>
+    new Date(dateStr).toDateString() === yesterday.toDateString();
 
   const isThisWeek = (dateStr: string) => {
     const d = new Date(dateStr);
-
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
-
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
-
     return d >= startOfWeek && d <= endOfWeek;
   };
 
@@ -131,19 +129,36 @@ const ExpensesPage: React.FC = () => {
     .reduce((sum, e) => sum + e.amount, 0);
 
   // =========================
-  // FILTERED LIST
+  // FILTERED & SORTED LIST
   // =========================
-  const filteredExpenses = expenses.filter((exp) => {
-    if (activeTab === "done") return exp.done;
-    return !exp.done;
+  const filteredExpenses = expenses
+    .filter((exp) => (activeTab === "done" ? exp.done : !exp.done))
+    .sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+  // =========================
+  // GROUP EXPENSES BY DATE
+  // =========================
+  const groupedExpenses: Record<string, Expense[]> = {};
+  filteredExpenses.forEach((exp) => {
+    const dateKey = new Date(exp.createdAt).toDateString();
+    if (!groupedExpenses[dateKey]) groupedExpenses[dateKey] = [];
+    groupedExpenses[dateKey].push(exp);
   });
 
+  const sortedDates = Object.keys(groupedExpenses).sort(
+    (a, b) => new Date(b).getTime() - new Date(a).getTime()
+  );
+
+  // =========================
+  // RENDER
+  // =========================
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#111111]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
         <h1 className="text-lg font-semibold text-white">Expenses</h1>
-
         <button
           onClick={() => setShowModal(true)}
           className="bg-[#01E777] text-black font-bold px-3 py-1 rounded-full"
@@ -160,14 +175,12 @@ const ExpensesPage: React.FC = () => {
             ₱{totalToday.toLocaleString()}
           </p>
         </div>
-
         <div className="bg-[#1d1d1d] p-2 rounded-xl">
           <p className="text-gray-400">Week</p>
           <p className="text-[#01E777] font-bold">
             ₱{totalWeek.toLocaleString()}
           </p>
         </div>
-
         <div className="bg-[#1d1d1d] p-2 rounded-xl">
           <p className="text-gray-400">Month</p>
           <p className="text-[#01E777] font-bold">
@@ -193,57 +206,80 @@ const ExpensesPage: React.FC = () => {
         ))}
       </div>
 
-      {/* LIST */}
+      {/* LIST WITH DATE BARRIERS */}
       <ul className="space-y-2 text-sm">
-        {filteredExpenses.map((exp) => (
-          <li
-            key={exp._id}
-            className={`flex justify-between items-center p-2 bg-[#1d1d1d] rounded-xl ${
-              exp.done ? "text-gray-700 line-through" : ""
-            }`}
-          >
-            <div className="flex flex-col">
-              <span
-                className={`font-medium ${
-                  exp.done ? "text-gray-700" : "text-white"
+        {sortedDates.map((date) => (
+          <li key={date}>
+            {/* Date Barrier */}
+            <div className="text-gray-400 text-[10px] mb-1 font-semibold">
+              {date === today.toDateString()
+                ? "Today"
+                : date === yesterday.toDateString()
+                ? "Yesterday"
+                : new Date(date).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })}
+            </div>
+
+            {/* Expenses for this date */}
+            {groupedExpenses[date].map((exp) => (
+              <div
+                key={exp._id}
+                className={`flex justify-between items-center p-2 bg-[#1d1d1d] rounded-xl ${
+                  exp.done ? "text-gray-700 line-through" : ""
                 }`}
               >
-                {exp.text}
-              </span>
-              <span className="text-[#01E777] text-xs">
-                ₱{exp.amount.toLocaleString()}
-              </span>
-            </div>
+                <div className="flex flex-col">
+                  <span
+                    className={`font-medium ${
+                      exp.done ? "text-gray-700" : "text-white"
+                    }`}
+                  >
+                    {exp.text}
+                  </span>
+                  <span className="text-[#01E777] text-xs">
+                    ₱{exp.amount.toLocaleString()}
+                  </span>
+                  <span className="text-gray-600 text-[10px]">
+                    {new Date(exp.createdAt).toLocaleTimeString(undefined, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
 
-            <div className="flex items-center gap-2">
-              {/* EDIT */}
-              <button
-                onClick={() => handleEdit(exp)}
-                className="text-gray-400 hover:text-blue-400"
-              >
-                <PencilIcon className="w-4 h-4" />
-              </button>
+                <div className="flex items-center gap-2">
+                  {/* EDIT */}
+                  <button
+                    onClick={() => handleEdit(exp)}
+                    className="text-gray-400 hover:text-blue-400"
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                  </button>
 
-              {/* DELETE */}
-              <button
-                onClick={() => handleDelete(exp._id)}
-                className="text-gray-400 hover:text-red-500"
-              >
-                <TrashIcon className="w-4 h-4" />
-              </button>
+                  {/* DELETE */}
+                  <button
+                    onClick={() => handleDelete(exp._id)}
+                    className="text-gray-400 hover:text-red-500"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
 
-              {/* TOGGLE */}
-              <button
-                onClick={() => handleToggle(exp._id)}
-                className="flex items-center justify-center"
-              >
-                <CheckIcon
-                  className={`w-5 h-5 ${
-                    exp.done ? "text-[#01E777]" : "text-gray-500"
-                  }`}
-                />
-              </button>
-            </div>
+                  {/* TOGGLE */}
+                  <button
+                    onClick={() => handleToggle(exp._id)}
+                    className="flex items-center justify-center"
+                  >
+                    <CheckIcon
+                      className={`w-5 h-5 ${
+                        exp.done ? "text-[#01E777]" : "text-gray-500"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            ))}
           </li>
         ))}
       </ul>
@@ -273,10 +309,7 @@ const ExpensesPage: React.FC = () => {
             />
 
             <div className="flex justify-end gap-2">
-              <button
-                onClick={resetForm}
-                className="px-3 py-1 text-gray-400"
-              >
+              <button onClick={resetForm} className="px-3 py-1 text-gray-400">
                 Cancel
               </button>
 

@@ -6,15 +6,13 @@ import {
   toggleNote,
   // deleteNote,
 } from "../api/note";
-// import { CheckIcon } from "@heroicons/react/24/outline";
-
 import { CheckIcon } from "@heroicons/react/24/solid";
+
 const NotesPage: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [text, setText] = useState("");
   const [category, setCategory] = useState<Note["category"]>("work");
 
-  // ✅ default is pending
   const [activeTab, setActiveTab] = useState<
     "all" | "done" | "pending" | "work" | "personal" | "others" | "to buy"
   >("pending");
@@ -45,30 +43,41 @@ const NotesPage: React.FC = () => {
     fetchNotes();
   };
 
-  // const handleDelete = async (id: string) => {
-  //   await deleteNote(id);
-  //   fetchNotes();
-  // };
-
   const filteredNotes = notes.filter((note) => {
     if (activeTab === "done") return note.done;
     if (activeTab === "pending") return !note.done;
     if (activeTab === "work") return note.category === "work";
     if (activeTab === "personal") return note.category === "personal";
     if (activeTab === "others") return note.category === "others";
-    if (activeTab ===    "to buy") return note.category ===  "to buy";
- 
+    if (activeTab === "to buy") return note.category === "to buy";
     return true;
   });
+
+  // Sort undone first, done last
+  const sortedNotes = filteredNotes.sort((a, b) => {
+    if (a.done === b.done) return 0;
+    return a.done ? 1 : -1; // undone first
+  });
+
+  // Highlight [bracketed] text
+  const highlightBrackets = (text: string) => {
+    const parts = text.split(/(\[.*?\])/g);
+    return parts.map((part, idx) =>
+      part.startsWith("[") && part.endsWith("]") ? (
+        <span key={idx} className="text-[#01E777]">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#111111]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-white">
-          Notes
-        </h1>
-
+        <h1 className="text-lg font-semibold text-white">Notes</h1>
         <div className="flex items-center gap-3"></div>
       </div>
 
@@ -105,7 +114,7 @@ const NotesPage: React.FC = () => {
 
       {/* TABS */}
       <div className="flex gap-2 mb-4">
-        {["pending", "work", "personal",  "to buy", "done"].map((tab) => (
+        {["pending", "work", "personal", "to buy", "done"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
@@ -122,7 +131,7 @@ const NotesPage: React.FC = () => {
 
       {/* LIST */}
       <ul className="space-y-2 text-sm">
-        {filteredNotes.map((note) => (
+        {sortedNotes.map((note) => (
           <li
             key={note._id}
             className={`flex justify-between items-center p-2 bg-[#1d1d1d] rounded-xl ${
@@ -135,38 +144,21 @@ const NotesPage: React.FC = () => {
                   note.done ? "text-gray-700 line-through" : "text-white"
                 }`}
               >
-                {note.text}
+                {highlightBrackets(note.text)}
               </span>
             </div>
 
             <div className="flex gap-2">
-              {/* <button
+              <button
                 onClick={() => handleToggle(note._id)}
-                className="text-sm px-2 py-1 rounded text-mist-500"
+                className="flex items-center justify-center px-2 py-1 rounded text-mist-500 hover:text-[#01E777]"
               >
-                {note.done ? "Undo" : "Done"}
+                <CheckIcon
+                  className={`w-5 h-5 ${
+                    note.done ? "text-[#01E777]" : "text-gray-500"
+                  }`}
+                />
               </button>
- */}
-
-          <button
-            onClick={() => handleToggle(note._id)}
-            className="flex items-center justify-center px-2 py-1 rounded text-mist-500 hover:text-[#01E777]"
-          >
-            <CheckIcon
-              className={`w-5 h-5 ${
-                note.done ? "text-[#01E777]" : "text-gray-500"
-              }`}
-            />
-          </button>
-
-              
-
-              {/* <button
-                onClick={() => handleDelete(note._id)}
-                className="text-sm px-2 py-1 border rounded text-red-500"
-              >
-                Archived
-              </button> */}
             </div>
           </li>
         ))}
