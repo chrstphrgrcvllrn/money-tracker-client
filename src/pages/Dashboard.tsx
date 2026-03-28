@@ -61,19 +61,18 @@ const Dashboard = () => {
     date.getFullYear() === now.getFullYear();
 
   // ================= LOANS =================
-  const totalLoanInitial = loans.reduce(
-    (sum, loan) => sum + (loan.initialAmount || 0),
-    0
-  );
-
-  const totalLoanPaid = loans.reduce(
-    (sum, loan) =>
-      sum +
-      (loan.transactions?.reduce((s, t) => s + (t.amount || 0), 0) || 0),
-    0
-  );
-
-  const totalLoanRemaining = totalLoanInitial - totalLoanPaid;
+  const totalLoanRemaining = loans.reduce((sum, loan) => {
+    const remaining = (loan.transactions ?? []).reduce((rem, t) => {
+      if (t.amount < 0) {
+        // repayment → subtract absolute value
+        return rem - Math.abs(t.amount);
+      } else {
+        // positive amount → add to remaining
+        return rem + t.amount;
+      }
+    }, loan.initialAmount || 0);
+    return sum + remaining;
+  }, 0);
 
   // ================= SAVINGS =================
   const totalSavingsInitial = savings.reduce(
@@ -91,8 +90,7 @@ const Dashboard = () => {
 
   const totalSavingsWithdrawals = savings.reduce((sum, item) => {
     const withdrawals = (item.transactions ?? []).reduce(
-      (s, t) =>
-        s + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
+      (s, t) => s + (t.amount < 0 ? Math.abs(Number(t.amount)) : 0),
       0
     );
     return sum + withdrawals;
@@ -130,9 +128,7 @@ const Dashboard = () => {
 
   return (
     <div className="p-4 max-w-md mx-auto font-sans text-gray-800 bg-[#111111] min-h-screen space-y-4">
-      <h1 className="text-lg font-semibold text-white mb-2">
-        Dashboard
-      </h1>
+      <h1 className="text-lg font-semibold text-white mb-2">Dashboard</h1>
 
       {/* LOANS */}
       <div className="bg-[#1d1d1d] rounded-xl p-4 space-y-2">
@@ -145,7 +141,7 @@ const Dashboard = () => {
       {/* SAVINGS */}
       <div className="bg-[#1d1d1d] rounded-xl p-4 space-y-2">
         <p className="text-[#01E777] text-sm">Savings</p>
-        <p className="text-[2rem] font-bold text-[#01E777]">
+        <p className="text-[2rem] font-bold text-white">
           {totalSavingsBalance.toLocaleString()}
         </p>
       </div>

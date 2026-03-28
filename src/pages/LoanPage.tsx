@@ -30,7 +30,7 @@ export default function LoanPage() {
         const normalized = Array.isArray(data) ? data : [data];
         const withTransactions = normalized.map((loan) => ({
           ...loan,
-          transactions: loan.transactions ?? [],
+          transactions: Array.isArray(loan.transactions) ? loan.transactions : [],
         }));
         setLoans(withTransactions);
       } catch (err) {
@@ -74,32 +74,48 @@ export default function LoanPage() {
     const date = paymentDates[index];
     if (!amount || !date) return;
 
-    const transaction = {
-      date,
-      amount,
-      type: "payment",
-    };
+    const transaction = { date, amount, type: "payment" };
+
+    // Optimistic UI update
+    setLoans((prev) =>
+      prev.map((loan) =>
+        loan._id === loanId
+          ? { ...loan, transactions: [...(loan.transactions || []), transaction] }
+          : loan
+      )
+    );
 
     try {
-      const updatedLoan = await addTransaction(loanId, transaction);
-      setLoans((prev) =>
-        prev.map((loan) => (loan._id === loanId ? updatedLoan : loan))
-      );
-      setPaymentInputs((prev) => ({ ...prev, [index]: "" }));
-      setPaymentDates((prev) => ({ ...prev, [index]: "" }));
-      setTransactionTypes((prev) => ({ ...prev, [index]: "+" }));
+      await addTransaction(loanId, transaction);
     } catch (err) {
       console.error(err);
+      // Optionally: remove transaction if failed
+      setLoans((prev) =>
+        prev.map((loan) =>
+          loan._id === loanId
+            ? {
+                ...loan,
+                transactions: (loan.transactions || []).filter(
+                  (t) => t !== transaction
+                ),
+              }
+            : loan
+        )
+      );
     }
+
+    // Clear inputs
+    setPaymentInputs((prev) => ({ ...prev, [index]: "" }));
+    setPaymentDates((prev) => ({ ...prev, [index]: "" }));
+    setTransactionTypes((prev) => ({ ...prev, [index]: "+" }));
   };
 
-  // Total remaining across all loans
   const totalRemaining = loans.reduce((sum, loan) => {
-    const transactionsSum = loan.transactions.reduce(
+    const transactionsSum = (loan.transactions || []).reduce(
       (s, t) => s + Number(t.amount),
       0
     );
-    return sum + loan.initialAmount + transactionsSum;
+    return sum + Number(loan.initialAmount) + transactionsSum;
   }, 0);
 
   if (loading) {
@@ -185,12 +201,13 @@ export default function LoanPage() {
       {/* LIST */}
       <div className="space-y-3">
         {loans.map((loan, index) => {
-          const loanSum = loan.transactions.reduce((s, t) => s + Number(t.amount), 0);
-          const remaining = loan.initialAmount + loanSum;
+          const loanTransactions = loan.transactions || [];
+          const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
+          const remaining = Number(loan.initialAmount) + loanSum;
 
           return (
             <div
-              key={loan._id}
+              key={loan._id || index} 
               className="bg-[#1d1d1d] rounded-xl overflow-hidden"
             >
               <button
@@ -204,17 +221,16 @@ export default function LoanPage() {
 
                   <div>
                     <p className="font-medium text-[1.2rem] text-white">{loan.name}</p>
-
                     <p className="text-xs text-[#01E777]">
                       Paid:{" "}
                       <span className="text-white font-medium">
                         {showAmounts
-                          ? loan.transactions
+                          ? loanTransactions
                               .filter((t) => t.amount > 0)
                               .reduce((s, t) => s + Number(t.amount), 0)
                               .toLocaleString()
                           : mask(
-                              loan.transactions
+                              loanTransactions
                                 .filter((t) => t.amount > 0)
                                 .reduce((s, t) => s + Number(t.amount), 0)
                             )}
@@ -230,14 +246,23 @@ export default function LoanPage() {
 
               {expanded === index && (
                 <div className="border-t px-4 py-3">
-                  {loan.transactions.length === 0 ? (
+                  {loanTransactions.length === 0 ? (
                     <p className="text-xs text-white">No payments yet</p>
                   ) : (
                     <ul className="text-xs text-white space-y-1">
-                      {loan.transactions.map((t, i) => (
-                        <li key={i} className="flex justify-between">
-                          <span>{t.date}</span>
-                          <span>{t.amount.toLocaleString()}</span>
+                      {loanTransactions.map((t, i) => (
+                        <li
+                          key={`${t.date}-${t.amount}-${t.type}-${i}`}
+                          className="flex justify-between"
+                        >
+                          <span>
+                            {new Date(t.date).toLocaleDateString("en-PH", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
+                          <span>{Number(t.amount).toLocaleString("en-PH")}</span>
                         </li>
                       ))}
                     </ul>
@@ -288,9 +313,11 @@ export default function LoanPage() {
                     <button
                       onClick={() => {
                         const type = transactionTypes[index] || "+";
-                        const value =
-                          Number(paymentInputs[index] || 0) *
-                          (type === "-" ? -1 : 1);
+                        const rawValue = paymentInputs[index] || "0";
+                        const value = Number(rawValue) * (type === "-" ? -1 : 1);
+
+                        if (isNaN(value) || !paymentDates[index]) return;
+
                         handleAddPayment(loan._id, index, value);
                       }}
                       className="w-full bg-[#01E777] text-black font-bold py-2 rounded-lg text-sm"

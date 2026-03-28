@@ -40,19 +40,18 @@ export const createLoan = async (
 };
 
 // ADD transaction
-export const addTransaction = async (
-  loanId: string,
-  transaction: { date: string; amount: number; type: string }
-): Promise<Loan> => {
-  const res = await fetch(`${API_URL}/${loanId}/transactions`, {
+export const addTransaction = async (id: string, data: any) => {
+  const res = await fetch(`http://localhost:5000/api/loans/${id}/transactions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(transaction),
+    body: JSON.stringify(data),
   });
 
-  if (!res.ok) throw new Error("Failed to add transaction");
+  if (!res.ok) {
+    throw new Error("Failed to add transaction");
+  }
 
   return res.json();
 };

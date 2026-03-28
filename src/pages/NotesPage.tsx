@@ -43,15 +43,15 @@ const NotesPage: React.FC = () => {
     fetchNotes();
   };
 
-  const filteredNotes = notes.filter((note) => {
-    if (activeTab === "done") return note.done;
-    if (activeTab === "pending") return !note.done;
-    if (activeTab === "work") return note.category === "work";
-    if (activeTab === "personal") return note.category === "personal";
-    if (activeTab === "others") return note.category === "others";
-    if (activeTab === "to buy") return note.category === "to buy";
-    return true;
-  });
+const filteredNotes = notes.filter((note) => {
+  if (activeTab === "done") return note.done;
+  if (activeTab === "pending") return !note.done && note.category !== "others"; // <- exclude "others"
+  if (activeTab === "work") return note.category === "work";
+  if (activeTab === "personal") return note.category === "personal";
+  if (activeTab === "others") return note.category === "others";
+  if (activeTab === "to buy") return note.category === "to buy";
+  return true;
+});
 
   // Sort undone first, done last
   const sortedNotes = filteredNotes.sort((a, b) => {
