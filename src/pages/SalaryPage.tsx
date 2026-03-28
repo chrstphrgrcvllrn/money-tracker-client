@@ -10,28 +10,37 @@ export default function SalaryPage() {
   const [salaryData, setSalaryData] = useState<SalaryEntry[]>([]);
   const [editingAllEntryId, setEditingAllEntryId] = useState<string | null>(null);
   const [editedExpenses, setEditedExpenses] = useState<Expense[]>([]);
+
+  // ✅ MODAL STATE
   const [showForm, setShowForm] = useState(false);
   const [newSalaryDate, setNewSalaryDate] = useState("");
   const [newSalaryAmount, setNewSalaryAmount] = useState("");
-  const [activeTab, setActiveTab] = useState<"all" | "completed">("all");
+
+  // ✅ TAB STATE
+  const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
 
   const format = (value: any) => Number(value || 0).toLocaleString();
 
   useEffect(() => {
     const load = async () => {
       const data = await fetchSalaries();
+
       const normalized = data.map((entry) => ({
         ...entry,
         expenses: Array.isArray(entry.expenses) ? entry.expenses : [],
         salary: entry.salary ?? 0,
       }));
+
       setSalaryData(normalized);
     };
+
     load();
   }, []);
 
+  // ✅ ADD SALARY (MODAL)
   const handleAddSalary = async () => {
     if (!newSalaryDate || !newSalaryAmount) return;
+
     const salary = Number(newSalaryAmount);
     if (isNaN(salary)) return;
 
@@ -59,8 +68,10 @@ export default function SalaryPage() {
     if (!entry) return;
 
     const newSalary = Number(prompt("Update salary", String(entry.salary)));
+
     if (!isNaN(newSalary)) {
       const updated = await updateSalary(id, { salary: newSalary });
+
       setSalaryData((prev) =>
         prev.map((s) =>
           s._id === id
@@ -76,6 +87,7 @@ export default function SalaryPage() {
 
   const handleDeleteExpense = async (salaryId: string, index: number) => {
     if (!confirm("Delete this expense?")) return;
+
     const entry = salaryData.find((s) => s._id === salaryId);
     if (!entry) return;
 
@@ -83,10 +95,14 @@ export default function SalaryPage() {
     const updatedExpenses = expenses.filter((_, i) => i !== index);
 
     const updated = await updateSalary(salaryId, { expenses: updatedExpenses });
+
     setSalaryData((prev) =>
       prev.map((s) =>
         s._id === salaryId
-          ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+          ? {
+              ...updated,
+              expenses: Array.isArray(updated.expenses) ? updated.expenses : [],
+            }
           : s
       )
     );
@@ -95,22 +111,27 @@ export default function SalaryPage() {
   const handleAddExpense = async (salaryId: string) => {
     const name = prompt("Expense name");
     const amount = Number(prompt("Expense amount"));
-    if (!name || isNaN(amount)) return;
 
-    const entry = salaryData.find((s) => s._id === salaryId);
-    if (!entry) return;
+    if (name && !isNaN(amount)) {
+      const entry = salaryData.find((s) => s._id === salaryId);
+      if (!entry) return;
 
-    const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
-    const updatedExpenses = [...expenses, { name, amount, paid: false }];
-    const updated = await updateSalary(salaryId, { expenses: updatedExpenses });
+      const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
+      const updatedExpenses = [...expenses, { name, amount, paid: false }];
 
-    setSalaryData((prev) =>
-      prev.map((s) =>
-        s._id === salaryId
-          ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
-          : s
-      )
-    );
+      const updated = await updateSalary(salaryId, { expenses: updatedExpenses });
+
+      setSalaryData((prev) =>
+        prev.map((s) =>
+          s._id === salaryId
+            ? {
+                ...updated,
+                expenses: Array.isArray(updated.expenses) ? updated.expenses : [],
+              }
+            : s
+        )
+      );
+    }
   };
 
   const handleTogglePaid = async (salaryId: string, index: number) => {
@@ -123,10 +144,14 @@ export default function SalaryPage() {
     );
 
     const updated = await updateSalary(salaryId, { expenses: updatedExpenses });
+
     setSalaryData((prev) =>
       prev.map((s) =>
         s._id === salaryId
-          ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+          ? {
+              ...updated,
+              expenses: Array.isArray(updated.expenses) ? updated.expenses : [],
+            }
           : s
       )
     );
@@ -135,19 +160,26 @@ export default function SalaryPage() {
   const handleEditAllExpenses = (entryId: string) => {
     const entry = salaryData.find((s) => s._id === entryId);
     if (!entry) return;
+
+    const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
     setEditingAllEntryId(entryId);
-    setEditedExpenses([...entry.expenses]);
+    setEditedExpenses([...expenses]);
   };
 
   const handleSaveAllExpenses = async (entryId: string) => {
     const updated = await updateSalary(entryId, { expenses: editedExpenses });
+
     setSalaryData((prev) =>
       prev.map((s) =>
         s._id === entryId
-          ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+          ? {
+              ...updated,
+              expenses: Array.isArray(updated.expenses) ? updated.expenses : [],
+            }
           : s
       )
     );
+
     setEditingAllEntryId(null);
     setEditedExpenses([]);
   };
@@ -157,19 +189,19 @@ export default function SalaryPage() {
     setEditedExpenses([]);
   };
 
-  // Filter based on tab
-  const filteredSalaries = salaryData.filter((entry) => {
-    if (activeTab === "completed") {
-      return entry.expenses.length > 0 && entry.expenses.every((e) => e.paid);
-    }
-    return true; // "all" tab
+  // ✅ Filter salaries based on active tab
+  const displayedSalaries = salaryData.filter((entry) => {
+    const allPaid = entry.expenses.length > 0 && entry.expenses.every((e) => e.paid);
+
+    if (activeTab === "completed") return allPaid; // Only fully paid
+    if (activeTab === "active") return !allPaid;   // Only unpaid/partial
+    return true;
   });
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#111111]">
       <div className="mb-4 flex justify-between items-start">
         <h1 className="text-lg font-semibold text-white">Salary</h1>
-
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowForm(true)}
@@ -181,28 +213,65 @@ export default function SalaryPage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-4">
+      {/* ✅ Tabs */}
+      <div className="flex mb-4 gap-2">
         <button
-          onClick={() => setActiveTab("all")}
           className={`px-3 py-1 rounded ${
-            activeTab === "all" ? "bg-[#01E777] text-black" : "bg-gray-800 text-white"
+            activeTab === "active" ? "bg-[#01E777] text-black" : "bg-gray-700 text-white"
           }`}
+          onClick={() => setActiveTab("active")}
         >
-          All
+          Active
         </button>
         <button
-          onClick={() => setActiveTab("completed")}
           className={`px-3 py-1 rounded ${
-            activeTab === "completed" ? "bg-[#01E777] text-black" : "bg-gray-800 text-white"
+            activeTab === "completed" ? "bg-[#01E777] text-black" : "bg-gray-700 text-white"
           }`}
+          onClick={() => setActiveTab("completed")}
         >
           Completed
         </button>
       </div>
 
-      {/* Salary List */}
-      {filteredSalaries.map((entry) => {
+      {/* ✅ ADD SALARY MODAL */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
+          <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-white text-lg font-semibold">Add Salary</h2>
+            <input
+              type="text"
+              placeholder="Date (e.g., May 2026)"
+              value={newSalaryDate}
+              onChange={(e) => setNewSalaryDate(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+            />
+            <input
+              type="number"
+              placeholder="Salary amount"
+              value={newSalaryAmount}
+              onChange={(e) => setNewSalaryAmount(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+            />
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                onClick={() => setShowForm(false)}
+                className="px-3 py-1 text-sm text-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddSalary}
+                className="px-3 py-1 bg-[#01E777] text-black font-semibold rounded-lg text-sm"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LIST */}
+      {displayedSalaries.map((entry) => {
         const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
         const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
         const remaining = Number(entry.salary || 0) - totalExpenses;
@@ -212,13 +281,19 @@ export default function SalaryPage() {
           <div key={entry._id} className="mb-6 bg-[#1d1d1d] shadow rounded-xl p-4">
             <div className="flex justify-between items-center mb-2">
               <h2 className="font-semibold text-lg text-white">{entry.date}</h2>
-              <div className="flex gap-4">
+              <div className="flex gap-4 items-center">
                 {!isEditingAll && expenses.length > 0 && (
-                  <button onClick={() => handleEditAllExpenses(entry._id)} className="text-gray-500 text-sm">
+                  <button
+                    onClick={() => handleEditAllExpenses(entry._id)}
+                    className="text-gray-500 text-sm"
+                  >
                     Edit
                   </button>
                 )}
-                <button onClick={() => handleAddExpense(entry._id)} className="text-gray-500 text-sm">
+                <button
+                  onClick={() => handleAddExpense(entry._id)}
+                  className="text-gray-500 text-sm"
+                >
                   Add
                 </button>
               </div>
@@ -295,10 +370,16 @@ export default function SalaryPage() {
 
             {isEditingAll && (
               <div className="flex gap-2 mt-2">
-                <button onClick={() => handleSaveAllExpenses(entry._id)} className="px-3 py-1 bg-[#01E777] font-bold rounded text-sm">
+                <button
+                  onClick={() => handleSaveAllExpenses(entry._id)}
+                  className="px-3 py-1 bg-[#01E777] font-bold rounded text-sm"
+                >
                   Save All
                 </button>
-                <button onClick={handleCancelEditAll} className="px-3 py-1 bg-[#01E777] font-bold rounded text-sm">
+                <button
+                  onClick={handleCancelEditAll}
+                  className="px-3 py-1 bg-[#01E777] font-bold rounded text-sm"
+                >
                   Cancel
                 </button>
               </div>
@@ -311,7 +392,9 @@ export default function SalaryPage() {
 
             <div className="flex justify-between font-semibold">
               <span></span>
-              <span className={`${remaining < 0 ? "text-red-500" : "text-white"}`}>{format(remaining)}</span>
+              <span className={`${remaining < 0 ? "text-red-500" : "text-white"}`}>
+                {format(remaining)}
+              </span>
             </div>
           </div>
         );
