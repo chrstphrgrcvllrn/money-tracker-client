@@ -221,21 +221,21 @@ export default function LoanPage() {
 
                   <div>
                     <p className="font-medium text-[1.2rem] text-white">{loan.name}</p>
-                    <p className="text-xs text-[#01E777]">
-                      Paid:{" "}
-                      <span className="text-white font-medium">
-                        {showAmounts
-                          ? loanTransactions
-                              .filter((t) => t.amount > 0)
-                              .reduce((s, t) => s + Number(t.amount), 0)
-                              .toLocaleString()
-                          : mask(
-                              loanTransactions
-                                .filter((t) => t.amount > 0)
-                                .reduce((s, t) => s + Number(t.amount), 0)
-                            )}
-                      </span>
-                    </p>
+                   <p className="text-xs text-[#01E777]">
+  Paid:{" "}
+  <span className="text-white font-medium">
+    {showAmounts
+      ? loanTransactions
+          .filter((t) => t.amount < 0)
+          .reduce((s, t) => s + Math.abs(Number(t.amount)), 0)
+          .toLocaleString()
+      : mask(
+          loanTransactions
+            .filter((t) => t.amount < 0)
+            .reduce((s, t) => s + Math.abs(Number(t.amount)), 0)
+        )}
+  </span>
+</p>
                   </div>
                 </div>
 
