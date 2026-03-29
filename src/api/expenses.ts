@@ -10,6 +10,7 @@ const API_URL = import.meta.env.NODE_ENV === 'production'
 // =========================
 export const fetchExpenses = async () => {
   const res = await axios.get(API_URL);
+  console.log("Raw API response:", res.data); // <- here
   return res.data;
 };
 

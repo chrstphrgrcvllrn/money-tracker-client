@@ -269,17 +269,26 @@ export default function SavingsPage() {
 
               {expanded === index && (
                 <div className="border-t px-4 py-3">
-                  <ul className="text-xs text-white space-y-1">
-                    {(item.transactions ?? []).map((t, i) => (
-                      <li key={i} className="flex justify-between">
-                        <span>{t.date}</span>
-                        <span>
-                          {t.amount > 0 ? "+" : "-"}
-                          {Math.abs(t.amount).toLocaleString()}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                 <ul className="text-xs text-white space-y-1">
+                  {(item.transactions ?? []).map((t, i) => (
+                    <li key={i} className="flex justify-between">
+                      <span>{t.date}</span>
+
+                      <span
+                        className={`${
+                          t.amount < 0
+                            ? "text-red-400"
+                            : t.amount > 0
+                            ? "text-green-400"
+                            : "text-white"
+                        }`}
+                      >
+                        {t.amount > 0 ? "+" : "-"}
+                        {Math.abs(t.amount).toLocaleString()}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
 
                   <div className="mt-3 space-y-2">
                     <input

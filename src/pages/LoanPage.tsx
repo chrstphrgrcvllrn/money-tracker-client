@@ -249,23 +249,30 @@ export default function LoanPage() {
                   {loanTransactions.length === 0 ? (
                     <p className="text-xs text-white">No payments yet</p>
                   ) : (
-                    <ul className="text-xs text-white space-y-1">
-                      {loanTransactions.map((t, i) => (
-                        <li
-                          key={`${t.date}-${t.amount}-${t.type}-${i}`}
-                          className="flex justify-between"
-                        >
-                          <span>
-                            {new Date(t.date).toLocaleDateString("en-PH", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </span>
-                          <span>{Number(t.amount).toLocaleString("en-PH")}</span>
-                        </li>
-                      ))}
-                    </ul>
+                   <ul className="text-xs text-white space-y-1">
+                  {loanTransactions.map((t, i) => (
+                    <li
+                      key={`${t.date}-${t.amount}-${t.type}-${i}`}
+                      className="flex justify-between"
+                    >
+                      <span>
+                        {new Date(t.date).toLocaleDateString("en-PH", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+
+                      <span
+                        className={`${
+                          Number(t.amount) < 0 ? "text-red-400" : "text-white"
+                        }`}
+                      >
+                        {Number(t.amount).toLocaleString("en-PH")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
                   )}
 
                   <div className="mt-3 space-y-2 flex flex-col gap-2">
