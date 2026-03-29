@@ -41,7 +41,7 @@ export const createLoan = async (
 
 // ADD transaction
 export const addTransaction = async (id: string, data: any) => {
-  const res = await fetch(`${API_URL}/api/loans/${id}/transactions`, {
+  const res = await fetch(`${API_URL}/${id}/transactions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
