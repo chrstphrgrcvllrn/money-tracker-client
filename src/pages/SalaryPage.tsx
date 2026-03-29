@@ -8,6 +8,7 @@ import {
 } from "../api/salary";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import { TrashIcon } from "@heroicons/react/24/solid";
 
 export default function SalaryPage() {
   const [salaryData, setSalaryData] = useState<SalaryEntry[]>([]);
@@ -31,6 +32,9 @@ export default function SalaryPage() {
 
   // ✅ TAB STATE
   const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
+
+
+  
 
   const format = (value: any) => Number(value || 0).toLocaleString();
 
@@ -277,6 +281,32 @@ const handleCloseSnackbar = () => setSnackbarOpen(false);
 // ✅ SNACKBAR COMPONENT IN R
 
 
+// Function to update salary "date" (name)
+const handleEditSalaryName = async (id: string) => {
+  const entry = salaryData.find((s) => s._id === id);
+  if (!entry) return;
+
+  // Prompt user for new name/date
+  const newDate = prompt("Update salary name/date", entry.date);
+  if (!newDate) return;
+
+  try {
+    // Call API to update the salary date
+    const updated = await updateSalary(id, { date: newDate });
+
+    // Update local state
+    setSalaryData((prev) =>
+      prev.map((s) =>
+        s._id === id ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] } : s
+      )
+    );
+
+    showSnackbar("Salary name updated!", "success"); // optional feedback
+  } catch (err) {
+    showSnackbar("Failed to update salary name.", "error");
+    console.error(err);
+  }
+};
 
 
 
@@ -424,7 +454,13 @@ const handleCloseSnackbar = () => setSnackbarOpen(false);
         return (
           <div key={entry._id} className="mb-6 bg-[#1d1d1d] shadow rounded-xl p-4">
             <div className="flex justify-between items-center mb-2">
-              <h2 className="font-semibold text-lg text-white">{entry.date}</h2>
+              {/* <h2 className="font-semibold text-lg text-white">{entry.date}</h2> */}
+
+<button onClick={() => handleEditSalaryName(entry._id)} >
+  {/* {entry.date} */}
+  <h2 className="font-semibold text-lg text-white">{entry.date}</h2> 
+</button>
+
               <div className="flex gap-4 items-center">
                 {!isEditingAll && expenses.length > 0 && (
                   <button
@@ -448,7 +484,7 @@ const handleCloseSnackbar = () => setSnackbarOpen(false);
                 </button>
                 <button
                   onClick={() => openDeleteSalaryModal(entry._id)}
-                  className="text-gray-500 text-sm"
+                  className="text-red-500 text-sm"
                 >
                   Delete
                 </button>
@@ -466,62 +502,61 @@ const handleCloseSnackbar = () => setSnackbarOpen(false);
             <ul className="border border-gray-800 rounded divide-y divide-mist-900 text-xs">
               {expenses.map((expense, idx) => (
                 <li key={idx} className="flex justify-between items-center gap-2 m-2">
-                  {isEditingAll ? (
-                    <input
-                      type="text"
-                      value={editedExpenses[idx]?.name || ""}
-                      onChange={(e) => {
-                        const newExpenses = [...editedExpenses];
-                        if (newExpenses[idx]) {
-                          newExpenses[idx].name = e.target.value;
-                          setEditedExpenses(newExpenses);
-                        }
-                      }}
-                      className="flex-1 border border-mist-900 px-2 py-1 rounded text-white"
-                    />
-                  ) : (
-                    <span
-                      onClick={() => handleTogglePaid(entry._id, idx)}
-                      className={`flex-1 break-words cursor-pointer ${
-                        expense.paid ? "line-through text-gray-500" : "text-white"
-                      }`}
-                    >
-                      {expense.name}
-                    </span>
-                  )}
+  {isEditingAll ? (
+    <input
+      type="text"
+      value={editedExpenses[idx]?.name || ""}
+      onChange={(e) => {
+        const newExpenses = [...editedExpenses];
+        if (newExpenses[idx]) {
+          newExpenses[idx].name = e.target.value;
+          setEditedExpenses(newExpenses);
+        }
+      }}
+      className="flex-1 border border-mist-900 px-2 py-1 rounded text-white"
+    />
+  ) : (
+    <span
+      onClick={() => handleTogglePaid(entry._id, idx)}
+      className={`flex-1 break-words cursor-pointer ${
+        expense.paid ? "line-through text-gray-500" : "text-white"
+      }`}
+    >
+      {expense.name}
+    </span>
+  )}
 
-                  {isEditingAll ? (
-                    <input
-                      type="number"
-                      value={editedExpenses[idx]?.amount || 0}
-                      onChange={(e) => {
-                        const newExpenses = [...editedExpenses];
-                        if (newExpenses[idx]) {
-                          newExpenses[idx].amount = Number(e.target.value);
-                          setEditedExpenses(newExpenses);
-                        }
-                      }}
-                      className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-white"
-                    />
-                  ) : (
-                    <span
-                      className={`w-24 text-right font-medium ${
-                        expense.paid ? "line-through text-gray-500" : "text-white"
-                      }`}
-                    >
-                      {format(expense.amount)}
-                    </span>
-                  )}
+  {isEditingAll ? (
+    <input
+      type="number"
+      value={editedExpenses[idx]?.amount || 0}
+      onChange={(e) => {
+        const newExpenses = [...editedExpenses];
+        if (newExpenses[idx]) {
+          newExpenses[idx].amount = Number(e.target.value);
+          setEditedExpenses(newExpenses);
+        }
+      }}
+      className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-white"
+    />
+  ) : (
+    <span
+      className={`w-24 text-right font-medium ${
+        expense.paid ? "line-through text-gray-500" : "text-white"
+      }`}
+    >
+      {format(expense.amount)}
+    </span>
+  )}
 
-                  {isEditingAll && (
-                    <button
-                      onClick={() => handleDeleteExpense(entry._id, idx)}
-                      className="px-2 py-1 text-white text-sm border border-mist-900 rounded"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </li>
+  {/* ✅ Always show Delete button */}
+  <button
+    onClick={() => handleDeleteExpense(entry._id, idx)}
+    className="px-2 py-1 text-white text-sm border border-mist-900 rounded"
+  >
+     <TrashIcon className="w-4 h-4 text-gray-500" />
+  </button>
+</li>
               ))}
             </ul>
 
