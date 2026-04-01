@@ -14,10 +14,10 @@ export default function BottomNavBar() {
     { name: "Home", path: "/", icon: HomeIcon },
     { name: "Loans", path: "/loans", icon: BanknotesIcon },
     { name: "Savings", path: "/savings", icon: BuildingLibraryIcon },
-    { name: "Notes", path: "/notes", icon: DocumentTextIcon },
     { name: "Salary", path: "/salary", icon: CurrencyDollarIcon },
     { name: "Expenses", path: "/expenses", icon: ReceiptPercentIcon },
     { name: "Bills", path: "/bills", icon: ReceiptPercentIcon },
+        { name: "Notes", path: "/notes", icon: DocumentTextIcon },
      { name: "Calc", path: "/calculator", icon: CalculatorIcon },
 
   ];

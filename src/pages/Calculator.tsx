@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const CalculatorPage: React.FC = () => {
-  const [display, setDisplay] = useState("0");
+  const [display, setDisplay] = useState(() => {
+    return localStorage.getItem("calculatorDisplay") || "0";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("calculatorDisplay", display);
+  }, [display]);
 
   const handleClick = (value: string) => {
     if (display === "0" && value !== ".") {
@@ -27,13 +33,12 @@ const CalculatorPage: React.FC = () => {
     }
   };
 
-  // ✅ UPDATED BUTTONS (with C + DEL)
   const buttons = [
     "C", "DEL", "/", "*",
     "7", "8", "9", "-",
     "4", "5", "6", "+",
     "1", "2", "3", "=",
-    "0", ".", 
+    "0", ".",
   ];
 
   const handleAction = (btn: string) => {
@@ -45,20 +50,18 @@ const CalculatorPage: React.FC = () => {
 
   return (
     <div className="h-screen max-w-md mx-auto bg-[#111111] flex flex-col px-4 pt-6 pb-24">
-      
-      {/* DISPLAY */}
-      <div className="mb-4">
-        <h1 className="text-lg font-semibold text-white mb-3">Calculator</h1>
 
+      {/* PUSH KEYPAD DOWN */}
+      <div className="flex-1" />
+
+      {/* BIG DISPLAY ABOVE KEYPAD */}
+      <div className="mb-4">
         <div className="bg-[#1d1d1d] p-4 rounded-xl text-right">
           <p className="text-6xl text-[#01E777] font-bold break-all">
             {display}
           </p>
         </div>
       </div>
-
-      {/* PUSH KEYPAD DOWN */}
-      <div className="flex-1" />
 
       {/* KEYPAD */}
       <div className="grid grid-cols-4 gap-2">
