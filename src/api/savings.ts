@@ -33,3 +33,8 @@ export const addSavingsTransaction = async (
   const res = await api.post(`/${savingsId}/transactions`, transaction);
   return res.data;
 };
+
+// ✅ Delete savings
+export const deleteSavings = async (savingsId: string): Promise<void> => {
+  await api.delete(`/${savingsId}`);
+};

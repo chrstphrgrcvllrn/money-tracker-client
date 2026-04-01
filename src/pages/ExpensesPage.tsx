@@ -23,7 +23,11 @@ const ExpensesPage: React.FC = () => {
   const [amount, setAmount] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"pending" | "done">("pending");
+
+  // ✅ added monthly
+  const [activeTab, setActiveTab] = useState<
+    "pending" | "done" | "monthly"
+  >("pending");
 
   const loadExpenses = async () => {
     const data = await fetchExpenses();
@@ -93,9 +97,6 @@ const ExpensesPage: React.FC = () => {
   const isToday = (dateStr: string) =>
     new Date(dateStr).toDateString() === today.toDateString();
 
-  // const isYesterday = (dateStr: string) =>
-  //   new Date(dateStr).toDateString() === yesterday.toDateString();
-
   const isThisWeek = (dateStr: string) => {
     const d = new Date(dateStr);
     const startOfWeek = new Date(today);
@@ -129,16 +130,24 @@ const ExpensesPage: React.FC = () => {
     .reduce((sum, e) => sum + e.amount, 0);
 
   // =========================
-  // FILTERED & SORTED LIST
+  // FILTERED LIST (pending/done)
   // =========================
   const filteredExpenses = expenses
-    .filter((exp) => (activeTab === "done" ? exp.done : !exp.done))
+    .filter((exp) =>
+      activeTab === "done"
+        ? exp.done
+        : activeTab === "pending"
+        ? !exp.done
+        : true
+    )
     .sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) =>
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime()
     );
 
   // =========================
-  // GROUP EXPENSES BY DATE
+  // GROUP BY DATE
   // =========================
   const groupedExpenses: Record<string, Expense[]> = {};
   filteredExpenses.forEach((exp) => {
@@ -148,6 +157,23 @@ const ExpensesPage: React.FC = () => {
   });
 
   const sortedDates = Object.keys(groupedExpenses).sort(
+    (a, b) => new Date(b).getTime() - new Date(a).getTime()
+  );
+
+  // =========================
+  // GROUP BY MONTH (for totals only)
+  // =========================
+  const monthlyExpenses: Record<string, Expense[]> = {};
+
+  expenses.forEach((exp) => {
+    const d = new Date(exp.createdAt);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+
+    if (!monthlyExpenses[key]) monthlyExpenses[key] = [];
+    monthlyExpenses[key].push(exp);
+  });
+
+  const sortedMonths = Object.keys(monthlyExpenses).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
 
@@ -191,7 +217,7 @@ const ExpensesPage: React.FC = () => {
 
       {/* TABS */}
       <div className="flex gap-2 mb-4">
-        {["pending", "done"].map((tab) => (
+        {["pending", "done", "monthly"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
@@ -206,82 +232,107 @@ const ExpensesPage: React.FC = () => {
         ))}
       </div>
 
-      {/* LIST WITH DATE BARRIERS */}
+      {/* LIST */}
       <ul className="space-y-2 text-sm">
-        {sortedDates.map((date) => (
-          <li key={date}>
-            {/* Date Barrier */}
-            <div className="text-gray-400 text-[10px] mb-1 font-semibold">
-              {date === today.toDateString()
-                ? "Today"
-                : date === yesterday.toDateString()
-                ? "Yesterday"
-                : new Date(date).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                  })}
-            </div>
+        {activeTab === "monthly"
+          ? sortedMonths.map((monthKey) => {
+              const monthList = monthlyExpenses[monthKey];
 
-            {/* Expenses for this date */}
-            {groupedExpenses[date].map((exp) => (
-              <div
-                key={exp._id}
-                className={`flex justify-between items-center p-2 bg-[#1d1d1d] rounded-xl ${
-                  exp.done ? "text-gray-700 line-through" : ""
-                }`}
-              >
-                <div className="flex flex-col">
-                  <span
-                    className={`font-medium ${
-                      exp.done ? "text-gray-700" : "text-white"
+              const total = monthList.reduce(
+                (sum, e) => sum + e.amount,
+                0
+              );
+
+              const date = new Date(monthList[0].createdAt);
+              const label = date.toLocaleDateString(undefined, {
+                month: "long",
+                year: "numeric",
+              });
+
+              return (
+                <li key={monthKey}>
+                  <div className="flex justify-between items-center p-3 bg-[#1d1d1d] rounded-xl">
+                    <span className="text-white font-medium">
+                      {label}
+                    </span>
+                    <span className="text-[#01E777] font-bold">
+                      ₱{total.toLocaleString()}
+                    </span>
+                  </div>
+                </li>
+              );
+            })
+          : sortedDates.map((date) => (
+              <li key={date}>
+                <div className="text-gray-400 text-[10px] mb-1 font-semibold">
+                  {date === today.toDateString()
+                    ? "Today"
+                    : date === yesterday.toDateString()
+                    ? "Yesterday"
+                    : new Date(date).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                </div>
+
+                {groupedExpenses[date].map((exp) => (
+                  <div
+                    key={exp._id}
+                    className={`flex justify-between items-center p-2 bg-[#1d1d1d] rounded-xl ${
+                      exp.done ? "text-gray-700 line-through" : ""
                     }`}
                   >
-                    {exp.text}
-                  </span>
-                  <span className="text-[#01E777] text-xs">
-                    ₱{exp.amount.toLocaleString()}
-                  </span>
-                  <span className="text-gray-600 text-[10px]">
-                    {new Date(exp.createdAt).toLocaleTimeString(undefined, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
+                    <div className="flex flex-col">
+                      <span
+                        className={
+                          exp.done ? "text-gray-700" : "text-white"
+                        }
+                      >
+                        {exp.text}
+                      </span>
+                      <span className="text-[#01E777] text-xs">
+                        ₱{exp.amount.toLocaleString()}
+                      </span>
+                      <span className="text-gray-600 text-[10px]">
+                        {new Date(exp.createdAt).toLocaleTimeString(
+                          undefined,
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </span>
+                    </div>
 
-                <div className="flex items-center gap-2">
-                  {/* EDIT */}
-                  <button
-                    onClick={() => handleEdit(exp)}
-                    className="text-gray-400 hover:text-blue-400"
-                  >
-                    <PencilIcon className="w-4 h-4" />
-                  </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEdit(exp)}
+                        className="text-gray-400 hover:text-blue-400"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                      </button>
 
-                  {/* DELETE */}
-                  <button
-                    onClick={() => handleDelete(exp._id)}
-                    className="text-gray-400 hover:text-red-500"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
+                      <button
+                        onClick={() => handleDelete(exp._id)}
+                        className="text-gray-400 hover:text-red-500"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
 
-                  {/* TOGGLE */}
-                  <button
-                    onClick={() => handleToggle(exp._id)}
-                    className="flex items-center justify-center"
-                  >
-                    <CheckIcon
-                      className={`w-5 h-5 ${
-                        exp.done ? "text-[#01E777]" : "text-gray-500"
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
+                      <button onClick={() => handleToggle(exp._id)}>
+                        <CheckIcon
+                          className={`w-5 h-5 ${
+                            exp.done
+                              ? "text-[#01E777]"
+                              : "text-gray-500"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </li>
             ))}
-          </li>
-        ))}
       </ul>
 
       {/* MODAL */}

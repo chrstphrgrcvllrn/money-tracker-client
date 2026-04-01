@@ -4,6 +4,7 @@ import {
   getSavings,
   createSavings,
   addSavingsTransaction,
+  deleteSavings
 } from "../api/savings";
 
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
@@ -113,6 +114,19 @@ export default function SavingsPage() {
       console.error(err);
     }
   };
+
+// inside SavingsPage component
+const handleDeleteSavings = async (id: string) => {
+  if (!confirm("Are you sure you want to delete this savings?")) return;
+
+  try {
+    await deleteSavings(id);
+    setSavings((prev) => prev.filter((s) => s._id !== id));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   const totalInitial = savings.reduce(
     (sum, item) => sum + (item.initialAmount || 0),
@@ -335,7 +349,17 @@ export default function SavingsPage() {
                       Add Transaction
                     </button>
                   </div>
+                  <div className="mt-2 flex justify-end gap-2">
+  <button
+    onClick={() => handleDeleteSavings(item._id)}
+    className="px-3 py-1 bg-red-500 text-white font-semibold rounded-lg text-sm"
+  >
+    Delete
+  </button>
+</div>
                 </div>
+
+                
               )}
             </div>
           );

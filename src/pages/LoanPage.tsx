@@ -199,11 +199,28 @@ export default function LoanPage() {
       </div>
 
       {/* LIST */}
-      <div className="space-y-3">
-        {loans.map((loan, index) => {
+     <div className="space-y-3">
+      {/*    {loans.map((loan, index) => {
           const loanTransactions = loan.transactions || [];
           const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
-          const remaining = Number(loan.initialAmount) + loanSum;
+          const remaining = Number(loan.initialAmount) + loanSum; */}
+
+  {loans
+    .slice() // make a copy so we don’t mutate state
+    .sort((a, b) => {
+      const aRemaining =
+        Number(a.initialAmount) +
+        (a.transactions || []).reduce((s, t) => s + Number(t.amount), 0);
+      const bRemaining =
+        Number(b.initialAmount) +
+        (b.transactions || []).reduce((s, t) => s + Number(t.amount), 0);
+      return bRemaining - aRemaining; // highest first
+    })
+    .map((loan, index) => {
+      const loanTransactions = loan.transactions || [];
+      const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
+      const remaining = Number(loan.initialAmount) + loanSum;
+
 
           return (
             <div
