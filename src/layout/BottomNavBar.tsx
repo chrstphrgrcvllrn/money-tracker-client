@@ -1,23 +1,25 @@
 import { NavLink } from "react-router-dom";
 import {
-  HomeIcon,
+  // HomeIcon,
   BanknotesIcon,
    BuildingLibraryIcon,
   CurrencyDollarIcon,
   ReceiptPercentIcon,
   DocumentTextIcon,
     CalculatorIcon,
+      CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 
 export default function BottomNavBar() {
   const navItems = [
-    { name: "Home", path: "/", icon: HomeIcon },
+    // { name: "Home", path: "/", icon: HomeIcon },
     { name: "Loans", path: "/loans", icon: BanknotesIcon },
     { name: "Savings", path: "/savings", icon: BuildingLibraryIcon },
     { name: "Salary", path: "/salary", icon: CurrencyDollarIcon },
     { name: "Expenses", path: "/expenses", icon: ReceiptPercentIcon },
     { name: "Bills", path: "/bills", icon: ReceiptPercentIcon },
-        { name: "Notes", path: "/notes", icon: DocumentTextIcon },
+    { name: "Notes", path: "/notes", icon: DocumentTextIcon },
+      { name: "Exercise", path: "/calendar", icon: CalendarDaysIcon }, 
      { name: "Calc", path: "/calculator", icon: CalculatorIcon },
 
   ];
@@ -33,7 +35,7 @@ export default function BottomNavBar() {
             to={item.path}
             className={({ isActive }) =>
               `flex flex-col items-center text-xs ${
-                isActive ? "text-[#01E777]" : "text-gray-400"
+                isActive ? "text-[#BCFF5E]" : "text-gray-400"
               }`
             }
           >
