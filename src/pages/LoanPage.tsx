@@ -191,7 +191,7 @@ export default function LoanPage() {
       )}
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-[#1d1d1d] rounded-xl text-center border border-[rgba(255,255,255,0.12)]">
+      <div className="mb-6 p-4 bg-[#1d1d1d] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Remaining</p>
         <p className="text-[2.5rem] font-bold text-[#01E777]">
           {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
@@ -225,7 +225,7 @@ export default function LoanPage() {
           return (
             <div
               key={loan._id || index} 
-              className="bg-[#1d1d1d] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.12)]"
+              className="bg-[#1d1d1d] rounded-xl overflow-hidden "
             >
               <button
                 className="w-full flex justify-between items-center px-4 py-3"

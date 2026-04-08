@@ -4,7 +4,7 @@ import {
   getSavings,
   createSavings,
   addSavingsTransaction,
-  deleteSavings
+  deleteSavings,
 } from "../api/savings";
 
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
@@ -18,14 +18,23 @@ export default function SavingsPage() {
   const [newSavingsName, setNewSavingsName] = useState("");
   const [newSavingsAmount, setNewSavingsAmount] = useState("");
 
-  const [amountInputs, setAmountInputs] = useState<Record<number, string>>(
-    {}
-  );
+  const [amountInputs, setAmountInputs] = useState<Record<number, string>>({});
   const [dateInputs, setDateInputs] = useState<Record<number, string>>({});
   const [transactionType, setTransactionType] = useState<Record<number, "+" | "-">>({});
 
-  // ✅ toggle visibility
   const [showAmounts, setShowAmounts] = useState(true);
+
+  // ✅ icon paths
+  const getIconPaths = (name: string) => {
+    if (!name) return [];
+    const formatted = name.toLowerCase().replace(/\s+/g, "");
+    return [
+      `/${formatted}.png`,
+      `/${formatted}.jpg`,
+      `/${formatted}.jpeg`,
+      `/${formatted}.webp`,
+    ];
+  };
 
   useEffect(() => {
     const fetchSavings = async () => {
@@ -115,18 +124,16 @@ export default function SavingsPage() {
     }
   };
 
-// inside SavingsPage component
-const handleDeleteSavings = async (id: string) => {
-  if (!confirm("Are you sure you want to delete this savings?")) return;
+  const handleDeleteSavings = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this savings?")) return;
 
-  try {
-    await deleteSavings(id);
-    setSavings((prev) => prev.filter((s) => s._id !== id));
-  } catch (err) {
-    console.error(err);
-  }
-};
-
+    try {
+      await deleteSavings(id);
+      setSavings((prev) => prev.filter((s) => s._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const totalInitial = savings.reduce(
     (sum, item) => sum + (item.initialAmount || 0),
@@ -182,7 +189,7 @@ const handleDeleteSavings = async (id: string) => {
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* ✅ MODAL (restored) */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
           <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
@@ -245,19 +252,39 @@ const handleDeleteSavings = async (id: string) => {
           );
 
           const balance = item.initialAmount + deposits - withdrawals;
+          const paths = getIconPaths(item.name);
 
           return (
-            <div
-              key={item._id}
-              className="bg-[#1d1d1d] rounded-xl overflow-hidden"
-            >
+            <div key={item._id} className="bg-[#1d1d1d] rounded-xl overflow-hidden">
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
                 onClick={() => toggleExpand(index)}
               >
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center">
-                    <span className="text-white font-semibold">
+                  {/* ✅ ICON */}
+                  <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={paths[0]}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        const currentIndex = paths.indexOf(
+                          img.src.replace(window.location.origin, "")
+                        );
+                        const nextPath = paths[currentIndex + 1];
+
+                        if (nextPath) {
+                          img.src = nextPath;
+                        } else {
+                          img.style.display = "none";
+                          if (img.nextSibling) {
+                            (img.nextSibling as HTMLElement).style.display = "block";
+                          }
+                        }
+                      }}
+                    />
+                    <span className="text-white font-semibold hidden">
                       {item.name?.charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -267,9 +294,9 @@ const handleDeleteSavings = async (id: string) => {
                       {item.name}
                     </p>
 
-                    <p className="text-xs text-[#01E777]">
+                    <p className="text-xs text-gray-500">
                       Deposits:{" "}
-                      <span className="text-white font-medium">
+                      <span className="text-gray-500 font-medium">
                         {showAmounts ? deposits.toLocaleString() : mask(deposits)}
                       </span>
                     </p>
@@ -283,26 +310,25 @@ const handleDeleteSavings = async (id: string) => {
 
               {expanded === index && (
                 <div className="border-t px-4 py-3">
-                 <ul className="text-xs text-white space-y-1">
-                  {(item.transactions ?? []).map((t, i) => (
-                    <li key={i} className="flex justify-between">
-                      <span>{t.date}</span>
-
-                      <span
-                        className={`${
-                          t.amount < 0
-                            ? "text-red-400"
-                            : t.amount > 0
-                            ? "text-green-400"
-                            : "text-white"
-                        }`}
-                      >
-                        {t.amount > 0 ? "+" : "-"}
-                        {Math.abs(t.amount).toLocaleString()}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                  <ul className="text-xs text-white space-y-1">
+                    {(item.transactions ?? []).map((t, i) => (
+                      <li key={i} className="flex justify-between">
+                        <span>{t.date}</span>
+                        <span
+                          className={`${
+                            t.amount < 0
+                              ? "text-red-400"
+                              : t.amount > 0
+                              ? "text-green-400"
+                              : "text-white"
+                          }`}
+                        >
+                          {t.amount > 0 ? "+" : "-"}
+                          {Math.abs(t.amount).toLocaleString()}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
 
                   <div className="mt-3 space-y-2">
                     <input
@@ -311,7 +337,7 @@ const handleDeleteSavings = async (id: string) => {
                       onChange={(e) =>
                         setDateInputs((prev) => ({ ...prev, [index]: e.target.value }))
                       }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600"
                     />
 
                     <div className="flex gap-2">
@@ -323,7 +349,7 @@ const handleDeleteSavings = async (id: string) => {
                             [index]: e.target.value as "+" | "-",
                           }))
                         }
-                        className="w-20 px-2 py-2 rounded-lg text-sm text-white bg-[#1d1d1d] border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+                        className="w-20 px-2 py-2 rounded-lg text-sm text-white bg-[#1d1d1d] border border-gray-600"
                       >
                         <option value="+">+</option>
                         <option value="-">-</option>
@@ -336,7 +362,7 @@ const handleDeleteSavings = async (id: string) => {
                         onChange={(e) =>
                           setAmountInputs((prev) => ({ ...prev, [index]: e.target.value }))
                         }
-                        className="flex-1 px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+                        className="flex-1 px-3 py-2 rounded-lg text-sm text-white border border-gray-600"
                       />
                     </div>
 
@@ -349,17 +375,16 @@ const handleDeleteSavings = async (id: string) => {
                       Add Transaction
                     </button>
                   </div>
-                  <div className="mt-2 flex justify-end gap-2">
-  <button
-    onClick={() => handleDeleteSavings(item._id)}
-    className="px-3 py-1 bg-red-500 text-white font-semibold rounded-lg text-sm"
-  >
-    Delete
-  </button>
-</div>
-                </div>
 
-                
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      onClick={() => handleDeleteSavings(item._id)}
+                      className="px-3 py-1 bg-red-500 text-white font-semibold rounded-lg text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           );
