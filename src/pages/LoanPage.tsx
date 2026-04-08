@@ -191,7 +191,7 @@ export default function LoanPage() {
       )}
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-[#1d1d1d] rounded-xl text-center">
+      <div className="mb-6 p-4 bg-[#1d1d1d] rounded-xl text-center border border-[rgba(255,255,255,0.12)]">
         <p className="text-gray-400 text-sm">Total Remaining</p>
         <p className="text-[2.5rem] font-bold text-[#01E777]">
           {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
@@ -225,7 +225,7 @@ export default function LoanPage() {
           return (
             <div
               key={loan._id || index} 
-              className="bg-[#1d1d1d] rounded-xl overflow-hidden"
+              className="bg-[#1d1d1d] rounded-xl overflow-hidden border border-[rgba(255,255,255,0.12)]"
             >
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
@@ -239,20 +239,20 @@ export default function LoanPage() {
                   <div>
                     <p className="font-medium text-[1.2rem] text-white">{loan.name}</p>
                    <p className="text-xs text-[#01E777]">
-  Paid:{" "}
-  <span className="text-white font-medium">
-    {showAmounts
-      ? loanTransactions
-          .filter((t) => t.amount < 0)
-          .reduce((s, t) => s + Math.abs(Number(t.amount)), 0)
-          .toLocaleString()
-      : mask(
-          loanTransactions
-            .filter((t) => t.amount < 0)
-            .reduce((s, t) => s + Math.abs(Number(t.amount)), 0)
-        )}
-  </span>
-</p>
+                  Paid:{" "}
+                  <span className="text-white font-medium">
+                    {showAmounts
+                      ? loanTransactions
+                          .filter((t) => t.amount < 0)
+                          .reduce((s, t) => s + Math.abs(Number(t.amount)), 0)
+                          .toLocaleString()
+                      : mask(
+                          loanTransactions
+                            .filter((t) => t.amount < 0)
+                            .reduce((s, t) => s + Math.abs(Number(t.amount)), 0)
+                        )}
+                  </span>
+                </p>
                   </div>
                 </div>
 

@@ -60,18 +60,66 @@ const filteredNotes = notes.filter((note) => {
   });
 
 // Highlight [bracketed] text only if note is not done
-const highlightBrackets = (text: string, done: boolean) => {
-  const parts = text.split(/(\[.*?\])/g);
-  return parts.map((part, idx) =>
-    part.startsWith("[") && part.endsWith("]") && !done ? (
-      <span key={idx} className="text-[#01E777]">
-        {part}
-      </span>
-    ) : (
-      part
-    )
-  );
+// const highlightBrackets = (text: string, done: boolean) => {
+//   const parts = text.split(/(\[.*?\])/g);
+//   return parts.map((part, idx) =>
+//     part.startsWith("[") && part.endsWith("]") && !done ? (
+//       <span key={idx} className="text-[#01E777]">
+//         {part}
+//       </span>
+//     ) : (
+//       part
+//     )
+//   );
+// };
+
+const highlightText = (text: string, done: boolean) => {
+  if (done) return text;
+
+  const regex = /(Watch:|Upcoming Holiday:|Upcoming Leave:)/g;
+
+  const parts = text.split(regex);
+
+  return parts.map((part, idx) => {
+    if (part === "Watch:") {
+      return (
+        <span key={idx} className="text-[#01E777] font-medium">
+          {part}
+        </span>
+      );
+    }
+
+    if (part === "Upcoming Holiday:") {
+      return (
+        <span key={idx} className="text-[#01E4E7] font-medium">
+          {part}
+        </span>
+      );
+    }
+
+    if (part === "Upcoming Leave:") {
+      return (
+        <span key={idx} className="text-[#e70171] font-medium">
+          {part}
+        </span>
+      );
+    }
+
+    // keep bracket highlight
+    const bracketParts = part.split(/(\[.*?\])/g);
+    return bracketParts.map((bp, i) =>
+      bp.startsWith("[") && bp.endsWith("]") ? (
+        <span key={`${idx}-${i}`} className="text-[#01E777]">
+          {bp}
+        </span>
+      ) : (
+        <span key={`${idx}-${i}`}>{bp}</span>
+      )
+    );
+  });
 };
+
+
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#111111]">
       {/* HEADER */}
@@ -143,7 +191,7 @@ const highlightBrackets = (text: string, done: boolean) => {
                   note.done ? "text-gray-700 line-through" : "text-white"
                 }`}
               >
-                  {highlightBrackets(note.text, note.done)}
+                  {highlightText(note.text, note.done)}
               </span>
             </div>
 
