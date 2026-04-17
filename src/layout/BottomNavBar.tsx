@@ -8,6 +8,7 @@ import {
   DocumentTextIcon,
     CalculatorIcon,
       CalendarDaysIcon,
+      TvIcon
 } from "@heroicons/react/24/outline";
 
 export default function BottomNavBar() {
@@ -19,8 +20,11 @@ export default function BottomNavBar() {
     { name: "Expenses", path: "/expenses", icon: ReceiptPercentIcon },
     { name: "Bills", path: "/bills", icon: ReceiptPercentIcon },
     { name: "Notes", path: "/notes", icon: DocumentTextIcon },
-      { name: "Exercise", path: "/calendar", icon: CalendarDaysIcon }, 
+      { name: "Thoughts", path: "/thoughts", icon: DocumentTextIcon },
+  { name: "Watchlist", path: "/watchlist", icon: TvIcon },  
+    { name: "Exercise", path: "/calendar", icon: CalendarDaysIcon }, 
      { name: "Calc", path: "/calculator", icon: CalculatorIcon },
+
 
   ];
 
