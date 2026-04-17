@@ -13,11 +13,10 @@ const WatchlistPage: React.FC = () => {
   const [title, setTitle] = useState("");
   const [current, setCurrent] = useState("");
   const [nextRelease, setNextRelease] = useState("");
-  const [status, setStatus] = useState<WatchItem["status"]>("ongoing");
 
   const [tab, setTab] = useState<"ongoing" | "completed">("ongoing");
 
-  // 👇 EDIT STATE
+  // EDIT STATE
   const [editId, setEditId] = useState<string | null>(null);
   const [editData, setEditData] = useState({
     title: "",
@@ -27,14 +26,14 @@ const WatchlistPage: React.FC = () => {
 
   const fetchWatchlist = async () => {
     const data = await getWatchlist();
-    setWatchlist([...data]);
+    setWatchlist(data);
   };
 
   useEffect(() => {
     fetchWatchlist();
   }, []);
 
-  // CREATE
+  // CREATE (status handled by backend default = ongoing)
   const addItem = async () => {
     if (!title.trim()) return;
 
@@ -42,7 +41,6 @@ const WatchlistPage: React.FC = () => {
       title,
       current,
       nextRelease,
-      status,
     });
 
     setTitle("");
@@ -51,7 +49,7 @@ const WatchlistPage: React.FC = () => {
     fetchWatchlist();
   };
 
-  // START EDIT
+  // EDIT START
   const startEdit = (item: WatchItem) => {
     setEditId(item._id);
     setEditData({
@@ -61,13 +59,13 @@ const WatchlistPage: React.FC = () => {
     });
   };
 
-  // CANCEL EDIT
+  // CANCEL
   const cancelEdit = () => {
     setEditId(null);
     setEditData({ title: "", current: "", nextRelease: "" });
   };
 
-  // SAVE EDIT
+  // SAVE
   const saveEdit = async (id: string) => {
     await updateWatchItem(id, editData);
     cancelEdit();
@@ -136,11 +134,7 @@ const WatchlistPage: React.FC = () => {
           const isEditing = editId === item._id;
 
           return (
-            <li
-              key={item._id}
-              className="p-2 bg-[#1d1d1d] rounded text-white"
-            >
-              {/* VIEW MODE */}
+            <li key={item._id} className="p-2 bg-[#1d1d1d] rounded text-white">
               {!isEditing ? (
                 <div className="flex justify-between items-center">
                   <div>
@@ -171,15 +165,11 @@ const WatchlistPage: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                // EDIT MODE
                 <div className="space-y-2">
                   <input
                     value={editData.title}
                     onChange={(e) =>
-                      setEditData({
-                        ...editData,
-                        title: e.target.value,
-                      })
+                      setEditData({ ...editData, title: e.target.value })
                     }
                     className="w-full bg-black px-2 py-1 rounded"
                   />
@@ -188,10 +178,7 @@ const WatchlistPage: React.FC = () => {
                     <input
                       value={editData.current}
                       onChange={(e) =>
-                        setEditData({
-                          ...editData,
-                          current: e.target.value,
-                        })
+                        setEditData({ ...editData, current: e.target.value })
                       }
                       className="flex-1 bg-black px-2 py-1 rounded"
                     />
