@@ -5,30 +5,22 @@ type ExerciseData = {
   [key: string]: number; // "YYYY-MM-DD": minutes
 };
 
-type RunEntry = { date: string; minutes: number };
-
 const CalendarPage: React.FC = () => {
   const today = new Date();
 
   const [currentDate, setCurrentDate] = useState(today);
   const [exerciseData, setExerciseData] = useState<ExerciseData>({});
-  const [recentRuns, setRecentRuns] = useState<RunEntry[]>([]);
 
   // Load exercise data
   useEffect(() => {
     getExercise().then((data) => {
       const mapped: ExerciseData = {};
-      const runs: RunEntry[] = [];
 
       data.forEach((item: any) => {
         mapped[item.date] = item.minutes;
-        if (item.minutes > 0) runs.push({ date: item.date, minutes: item.minutes });
       });
 
-      runs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
       setExerciseData(mapped);
-      setRecentRuns(runs);
     });
   }, []);
 
@@ -44,6 +36,7 @@ const CalendarPage: React.FC = () => {
   const prevMonth = month - 1 < 0 ? 11 : month - 1;
   const prevYear = month - 1 < 0 ? year - 1 : year;
   const prevMonthLastDate = new Date(year, month, 0).getDate();
+
   for (let i = firstDayOfMonth - 1; i >= 0; i--) {
     days.push({
       day: prevMonthLastDate - i,
@@ -61,6 +54,7 @@ const CalendarPage: React.FC = () => {
   // Next month
   const nextMonth = month + 1 > 11 ? 0 : month + 1;
   const nextYear = month + 1 > 11 ? year + 1 : year;
+
   let nextDayCounter = 1;
   while (days.length % 7 !== 0) {
     days.push({
@@ -89,13 +83,10 @@ const CalendarPage: React.FC = () => {
     if (isNaN(minutes)) return;
 
     const updated = await addExercise(key, minutes);
-    const updatedData = { ...exerciseData, [key]: updated.minutes };
-    setExerciseData(updatedData);
-
-    // Update recent runs
-    const newRuns = recentRuns.filter((r) => r.date !== key);
-    newRuns.unshift({ date: key, minutes: updated.minutes });
-    setRecentRuns(newRuns);
+    setExerciseData((prev) => ({
+      ...prev,
+      [key]: updated.minutes,
+    }));
   };
 
   const changeMonth = (offset: number) => {
@@ -109,8 +100,20 @@ const CalendarPage: React.FC = () => {
 
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+  // ✅ Total run days
+  const totalRunDays = Object.values(exerciseData).filter((m) => m > 0).length;
+
+  // ✅ Today minutes
+  const todayKey = formatKey(
+    today.getDate(),
+    today.getMonth(),
+    today.getFullYear()
+  );
+  const todayMinutes = exerciseData[todayKey] || 0;
+
   return (
     <div className="h-screen max-w-md mx-auto bg-[#111111] flex flex-col px-4 pt-4 pb-4 text-white">
+
       {/* HEADER */}
       <div className="flex items-center justify-between mb-3">
         <button
@@ -166,7 +169,9 @@ const CalendarPage: React.FC = () => {
           return (
             <div
               key={index}
-              onClick={() => currentMonth && handleAddMinutes(day, month, year)}
+              onClick={() =>
+                currentMonth && handleAddMinutes(day, month, year)
+              }
               className={`aspect-square p-0.5 flex flex-col justify-between items-center rounded-md text-[10px] font-semibold cursor-pointer ${bgClass}`}
             >
               <span className="text-sm">{day}</span>
@@ -178,33 +183,31 @@ const CalendarPage: React.FC = () => {
         })}
       </div>
 
-{/* RECENT RUNS */}
-{recentRuns.length > 0 && (
-  <div className="mt-2 p-2 rounded-xl text-sm flex-1 flex flex-col overflow-y-auto">
-    <h2 className="font-bold mb-1">Recent Runs:</h2>
-    <ul className="space-y-1 flex-1 overflow-y-auto">
-      {recentRuns.map((run) => {
-        // Convert date string to formatted version
-        const [year, month, day] = run.date.split("-").map(Number);
-        const dateObj = new Date(year, month - 1, day);
-        const formattedDate = `${dateObj.toLocaleString("en-US", { month: "short" })} ${dateObj.getDate()} ${year}`;
+      {/* RUN PROGRESS */}
+      {totalRunDays > 0 && (
+        <div className="mt-3 p-3 rounded-xl bg-[#1d1d1d] text-center">
 
-        return (
-          <li key={run.date} className="flex justify-between items-center px-2 py-2 bg-[#1d1d1d] rounded-lg">
-            <span className="flex items-center gap-2">
-              {/* Circle icon like logo */}
-              <span className="w-8 h-8 rounded-full border border-[#BCFF5E] flex items-center justify-center text-black">
-                🏃
-              </span>
-              <span>{formattedDate}</span>
-            </span>
-            <span className="font-bold  text-[#BCFF5E]">{run.minutes} min</span>
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-)}
+          <h2 className="text-3xl font-bold text-[#BCFF5E]">
+            Day {totalRunDays} Complete 🏃
+          </h2>
+
+          <p className="text-xs text-gray-400 mt-1">
+            Keep the streak going
+          </p>
+
+          {todayMinutes > 0 && (
+            <p className="text-sm mt-2 text-white">
+              You&apos;ve finished{" "}
+              <span className="text-[#BCFF5E] font-bold">
+                {todayMinutes}
+              </span>{" "}
+              minutes today! Good job!
+            </p>
+          )}
+
+        </div>
+      )}
+
     </div>
   );
 };

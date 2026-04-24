@@ -24,6 +24,15 @@ const WatchlistPage: React.FC = () => {
     nextRelease: "",
   });
 
+  // POSTERS CACHE
+  const [posters, setPosters] = useState<Record<string, string>>({});
+
+  // SUGGESTIONS
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const API_KEY = import.meta.env.VITE_OMDB_API_KEY;
+
   const fetchWatchlist = async () => {
     const data = await getWatchlist();
     setWatchlist(data);
@@ -33,7 +42,73 @@ const WatchlistPage: React.FC = () => {
     fetchWatchlist();
   }, []);
 
-  // CREATE (status handled by backend default = ongoing)
+  // FETCH POSTER
+  const fetchPoster = async (title: string) => {
+    if (!title || posters[title]) return;
+
+    try {
+      const res = await fetch(
+        `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${API_KEY}`
+      );
+      const data = await res.json();
+
+      if (data?.Poster && data.Poster !== "N/A") {
+        setPosters((prev) => ({ ...prev, [title]: data.Poster }));
+      }
+    } catch (err) {
+      console.error("Poster fetch failed:", err);
+    }
+  };
+
+  // FETCH POSTERS WHEN LIST CHANGES
+  useEffect(() => {
+    watchlist.forEach((item) => {
+      fetchPoster(item.title);
+    });
+  }, [watchlist]);
+
+  // SUGGESTION SEARCH (debounced)
+  useEffect(() => {
+    if (!title.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://www.omdbapi.com/?s=${encodeURIComponent(title)}&apikey=${API_KEY}`
+        );
+        const data = await res.json();
+
+        if (data?.Search) {
+          setSuggestions(data.Search.slice(0, 5));
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+        }
+      } catch (err) {
+        console.error("Search failed:", err);
+      }
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [title]);
+
+  // SELECT SUGGESTION
+  const selectSuggestion = (item: any) => {
+    setTitle(item.Title);
+    setShowSuggestions(false);
+
+    if (item.Poster && item.Poster !== "N/A") {
+      setPosters((prev) => ({
+        ...prev,
+        [item.Title]: item.Poster,
+      }));
+    }
+  };
+
+  // CREATE
   const addItem = async () => {
     if (!title.trim()) return;
 
@@ -46,6 +121,9 @@ const WatchlistPage: React.FC = () => {
     setTitle("");
     setCurrent("");
     setNextRelease("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+
     fetchWatchlist();
   };
 
@@ -80,12 +158,40 @@ const WatchlistPage: React.FC = () => {
 
       {/* INPUT */}
       <div className="space-y-2 mb-4">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-          className="w-full bg-[#1d1d1d] px-2 py-1 rounded text-white"
-        />
+        <div className="relative">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onFocus={() => title && setShowSuggestions(true)}
+            placeholder="Title"
+            className="w-full bg-[#1d1d1d] px-2 py-1 rounded text-white"
+          />
+
+          {/* SUGGESTIONS */}
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute z-10 w-full bg-[#1d1d1d] mt-1 rounded shadow-lg max-h-48 overflow-auto">
+              {suggestions.map((s) => (
+                <li
+                  key={s.imdbID}
+                  onClick={() => selectSuggestion(s)}
+                  className="flex items-center gap-2 px-2 py-1 hover:bg-[#2a2a2a] cursor-pointer"
+                >
+                  <img
+                    src={
+                      s.Poster !== "N/A"
+                        ? s.Poster
+                        : "https://via.placeholder.com/30x45"
+                    }
+                    className="w-6 h-8 object-cover rounded"
+                  />
+                  <span className="text-white text-xs">
+                    {s.Title} ({s.Year})
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         <div className="flex gap-2">
           <input
@@ -134,10 +240,22 @@ const WatchlistPage: React.FC = () => {
           const isEditing = editId === item._id;
 
           return (
-            <li key={item._id} className="p-2 bg-[#1d1d1d] rounded text-white">
+            <li
+              key={item._id}
+              className="p-2 bg-[#1d1d1d] rounded text-white"
+            >
               {!isEditing ? (
-                <div className="flex justify-between items-center">
-                  <div>
+                <div className="flex gap-3 items-center">
+                  <img
+                    src={
+                      posters[item.title] ||
+                      "https://via.placeholder.com/50x75?text=No+Image"
+                    }
+                    alt={item.title}
+                    className="w-12 h-16 object-cover rounded"
+                  />
+
+                  <div className="flex-1">
                     <div className="font-medium">{item.title}</div>
                     <div className="text-gray-400 text-xs">
                       {item.current} • Next: {item.nextRelease}
