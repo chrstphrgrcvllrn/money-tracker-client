@@ -279,13 +279,13 @@ const ExpensesPage: React.FC = () => {
                   <div
                     key={exp._id}
                     className={`flex justify-between items-center p-2 bg-[#1d1d1d] rounded-xl ${
-                      exp.done ? "text-gray-700 line-through" : ""
+                      exp.done ? "text-white" : ""
                     }`}
                   >
                     <div className="flex flex-col">
                       <span
                         className={
-                          exp.done ? "text-gray-700" : "text-white"
+                          exp.done ? "text-white" : "text-white"
                         }
                       >
                         {exp.text}

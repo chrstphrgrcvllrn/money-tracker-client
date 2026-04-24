@@ -164,7 +164,7 @@ const WatchlistPage: React.FC = () => {
             onChange={(e) => setTitle(e.target.value)}
             onFocus={() => title && setShowSuggestions(true)}
             placeholder="Title"
-            className="w-full bg-[#1d1d1d] px-2 py-1 rounded text-white"
+            className="w-full bg-[#1d1d1d] px-2 py-4 rounded text-white"
           />
 
           {/* SUGGESTIONS */}
@@ -174,7 +174,7 @@ const WatchlistPage: React.FC = () => {
                 <li
                   key={s.imdbID}
                   onClick={() => selectSuggestion(s)}
-                  className="flex items-center gap-2 px-2 py-1 hover:bg-[#2a2a2a] cursor-pointer"
+                  className="flex items-center gap-2 px-2 py-3 hover:bg-[#2a2a2a] cursor-pointer"
                 >
                   <img
                     src={
@@ -198,14 +198,14 @@ const WatchlistPage: React.FC = () => {
             value={current}
             onChange={(e) => setCurrent(e.target.value)}
             placeholder="S01E02"
-            className="flex-1 bg-[#1d1d1d] px-2 py-1 rounded text-white"
+            className="flex-1 bg-[#1d1d1d] px-2 py-2 rounded text-white"
           />
 
           <input
             value={nextRelease}
             onChange={(e) => setNextRelease(e.target.value)}
             placeholder="Next release"
-            className="flex-1 bg-[#1d1d1d] px-2 py-1 rounded text-white"
+            className="flex-1 bg-[#1d1d1d] px-2 py-2 rounded text-white"
           />
         </div>
 
@@ -252,14 +252,16 @@ const WatchlistPage: React.FC = () => {
                       "https://via.placeholder.com/50x75?text=No+Image"
                     }
                     alt={item.title}
-                    className="w-12 h-16 object-cover rounded"
+                    className="w-12 h-16 object-cover rounded "
                   />
 
                   <div className="flex-1">
-                    <div className="font-medium">{item.title}</div>
-                    <div className="text-gray-400 text-xs">
-                      {item.current} • Next: {item.nextRelease}
-                    </div>
+                    <div className="font-medium text-lg">{item.title}</div>
+                <div className="text-gray-400 text-xs">
+              {item.nextRelease
+                ? `${item.current || ""}${item.current ? " • " : ""}${item.nextRelease}`
+                : ""}
+            </div>
                   </div>
 
                   <div className="flex gap-2">
