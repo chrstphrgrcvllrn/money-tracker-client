@@ -314,7 +314,7 @@ const handleEditSalaryName = async (id: string) => {
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-start">
-        <h1 className="text-lg font-semibold text-[#170B3F]">Salary</h1>
+        {/* <h1 className="text-lg font-semibold text-[#170B3F]">Salary</h1> */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowForm(true)}

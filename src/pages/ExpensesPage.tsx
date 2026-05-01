@@ -184,7 +184,7 @@ const ExpensesPage: React.FC = () => {
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-[#170B3F]">Expenses</h1>
+        {/* <h1 className="text-lg font-semibold text-[#170B3F]">Expenses</h1> */}
         <button
           onClick={() => setShowModal(true)}
           className="bg-[#6762FD] text-white font-bold px-3 py-1 rounded-full"

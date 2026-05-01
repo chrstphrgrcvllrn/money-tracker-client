@@ -159,9 +159,9 @@ const CalendarPage: React.FC = () => {
           const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
           const bgClass = minutes > 0
-            ? "bg-[#EDEAF5] text-[#170B3F]"
+            ? "bg-[#6762FD] text-white"
             : isCurrent
-            ? "bg-[#EDEAF5] border-2 border-[#BCFF5E]"
+            ? "bg-[#EDEAF5] border-2 border-[#F302B9]"
             : !currentMonth
             ? "bg-[#EDEAF5] text-gray-500"
             : "bg-[#EDEAF5] " + (isWeekend ? "text-gray-500" : "text-[#170B3F]");
@@ -187,7 +187,7 @@ const CalendarPage: React.FC = () => {
       {totalRunDays > 0 && (
         <div className="mt-3 p-3 rounded-xl bg-[#EDEAF5] text-center">
 
-          <h2 className="text-3xl font-bold text-[#BCFF5E]">
+          <h2 className="text-3xl font-bold text-[#F302B9]">
             Day {totalRunDays} Complete 🏃
           </h2>
 
@@ -198,7 +198,7 @@ const CalendarPage: React.FC = () => {
           {todayMinutes > 0 && (
             <p className="text-sm mt-2 text-[#170B3F]">
               You&apos;ve finished{" "}
-              <span className="text-[#BCFF5E] font-bold">
+              <span className="text-[#F302B9] font-bold">
                 {todayMinutes}
               </span>{" "}
               minutes today! Good job!

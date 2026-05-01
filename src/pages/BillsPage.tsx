@@ -210,9 +210,9 @@ export default function BillsPage() {
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-start">
-        <h1 className="text-lg font-semibold text-[#170B3F]">
+        {/* <h1 className="text-lg font-semibold text-[#170B3F]">
           Bills
-        </h1>
+        </h1> */}
 
         <button
           onClick={() => setShowForm(true)}

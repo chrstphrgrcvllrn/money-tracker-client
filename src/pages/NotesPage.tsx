@@ -124,7 +124,7 @@ const highlightText = (text: string, done: boolean) => {
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-[#170B3F]">Notes</h1>
+        {/* <h1 className="text-lg font-semibold text-[#170B3F]">Notes</h1> */}
         <div className="flex items-center gap-3"></div>
       </div>
 

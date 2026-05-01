@@ -25,7 +25,7 @@ const ThoughtsPage: React.FC = () => {
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
-      <h1 className="text-lg font-semibold text-[#170B3F] mb-4">Thoughts</h1>
+      {/* <h1 className="text-lg font-semibold text-[#170B3F] mb-4">Thoughts</h1> */}
 
       {/* INPUT */}
       <div className="flex gap-2 mb-4">

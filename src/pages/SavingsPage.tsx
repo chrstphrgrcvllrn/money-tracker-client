@@ -166,7 +166,7 @@ export default function SavingsPage() {
     <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans text-gray-800 bg-[#ffffff]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-start">
-        <h1 className="text-lg font-semibold text-[#170B3F]">Savings</h1>
+        {/* <h1 className="text-lg font-semibold text-[#170B3F]">Savings</h1> */}
 
         <div className="flex items-center gap-3">
           <button

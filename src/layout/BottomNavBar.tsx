@@ -29,25 +29,25 @@ export default function BottomNavBar() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-[#EDEAF5] border-t border-[#1d1d1d] flex justify-around py-3 z-50 px-4">
-      {navItems.map((item) => {
-        const Icon = item.icon;
+<nav className="fixed bottom-0 left-0 w-full bg-[#EDEAF5]  grid grid-cols-5 py-3 z-50 px-4">
+  {navItems.map((item) => {
+    const Icon = item.icon;
 
-        return (
-          <NavLink
-            key={item.name}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex flex-col items-center text-xs ${
-                isActive ? "text-[#6762FD]" : "text-gray-400"
-              }`
-            }
-          >
-            <Icon className="w-6 h-6 mb-1" />
-            <span className="font-semibold">{item.name}</span>
-          </NavLink>
-        );
-      })}
-    </nav>
+    return (
+      <NavLink
+        key={item.name}
+        to={item.path}
+        className={({ isActive }) =>
+          `flex flex-col items-center justify-center text-xs ${
+            isActive ? "text-[#6762FD]" : "text-gray-400"
+          }`
+        }
+      >
+        <Icon className="w-6 h-6 mb-1" />
+        <span className="font-semibold">{item.name}</span>
+      </NavLink>
+    );
+  })}
+</nav>
   );
 }
