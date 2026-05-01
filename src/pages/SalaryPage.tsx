@@ -311,15 +311,15 @@ const handleEditSalaryName = async (id: string) => {
 
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#111111]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-start">
-        <h1 className="text-lg font-semibold text-white">Salary</h1>
+        <h1 className="text-lg font-semibold text-[#170B3F]">Salary</h1>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowForm(true)}
             title="Add Salary"
-            className="mb-0 px-[0.7rem] py-[0.3rem] bg-[#01E777] text-black font-bold rounded-4xl text-sm"
+            className="mb-0 px-[0.7rem] py-[0.3rem] bg-[#6762FD] text-white font-bold rounded-4xl text-sm"
           >
             +
           </button>
@@ -330,7 +330,7 @@ const handleEditSalaryName = async (id: string) => {
       <div className="flex mb-4 gap-2">
         <button
           className={`px-3 py-1 rounded ${
-            activeTab === "active" ? "bg-[#01E777] text-black font-bold" : "bg-[#1d1d1d] text-white "
+            activeTab === "active" ? "bg-[#6762FD] text-white font-bold" : "bg-[#EDEAF5] text-[#170B3F] "
           }`}
           onClick={() => setActiveTab("active")}
         >
@@ -338,7 +338,7 @@ const handleEditSalaryName = async (id: string) => {
         </button>
         <button
           className={`px-3 py-1 rounded ${
-            activeTab === "completed" ? "bg-[#01E777] text-black font-bold" : "bg-[#1d1d1d] text-white "
+            activeTab === "completed" ? "bg-[#6762FD] text-white font-bold" : "bg-[#EDEAF5] text-[#170B3F] "
           }`}
           onClick={() => setActiveTab("completed")}
         >
@@ -348,22 +348,22 @@ const handleEditSalaryName = async (id: string) => {
 
       {/* ADD SALARY MODAL */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
-          <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-white text-lg font-semibold">Add Salary</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#ffffff]/70">
+          <div className="w-full max-w-sm p-5 bg-[#EDEAF5] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-[#170B3F] text-lg font-semibold">Add Salary</h2>
             <input
               type="text"
               placeholder="Date (e.g., May 2026)"
               value={newSalaryDate}
               onChange={(e) => setNewSalaryDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
             />
             <input
               type="number"
               placeholder="Salary amount"
               value={newSalaryAmount}
               onChange={(e) => setNewSalaryAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
             />
             <div className="flex justify-end space-x-2 pt-2">
               <button
@@ -374,7 +374,7 @@ const handleEditSalaryName = async (id: string) => {
               </button>
               <button
                 onClick={handleAddSalary}
-                className="px-3 py-1 bg-[#01E777] text-black font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#6762FD] text-white font-semibold rounded-lg text-sm"
               >
                 Save
               </button>
@@ -385,22 +385,22 @@ const handleEditSalaryName = async (id: string) => {
 
       {/* ADD EXPENSE MODAL */}
       {showExpenseForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
-          <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-white text-lg font-semibold">Add Expense</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#ffffff]/70">
+          <div className="w-full max-w-sm p-5 bg-[#EDEAF5] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-[#170B3F] text-lg font-semibold">Add Expense</h2>
             <input
               type="text"
               placeholder="Expense name"
               value={expenseName}
               onChange={(e) => setExpenseName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
             />
             <input
               type="number"
               placeholder="Expense amount"
               value={expenseAmount}
               onChange={(e) => setExpenseAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
             />
             <div className="flex justify-end space-x-2 pt-2">
               <button
@@ -411,7 +411,7 @@ const handleEditSalaryName = async (id: string) => {
               </button>
               <button
                 onClick={handleSaveExpense}
-                className="px-3 py-1 bg-[#01E777] text-black font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#6762FD] text-white font-semibold rounded-lg text-sm"
               >
                 Save
               </button>
@@ -422,9 +422,9 @@ const handleEditSalaryName = async (id: string) => {
 
       {/* DELETE SALARY MODAL */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/70">
-          <div className="w-full max-w-sm p-5 bg-[#1d1d1d] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-white text-lg font-semibold">Confirm Delete</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#ffffff]/70">
+          <div className="w-full max-w-sm p-5 bg-[#EDEAF5] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-[#170B3F] text-lg font-semibold">Confirm Delete</h2>
             <p className="text-gray-400">Are you sure you want to delete this salary?</p>
             <div className="flex justify-end space-x-2 pt-2">
               <button
@@ -435,7 +435,7 @@ const handleEditSalaryName = async (id: string) => {
               </button>
               <button
                 onClick={handleConfirmDeleteSalary}
-                className="px-3 py-1 bg-red-500 text-white font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-red-500 text-[#170B3F] font-semibold rounded-lg text-sm"
               >
                 Delete
               </button>
@@ -452,13 +452,13 @@ const handleEditSalaryName = async (id: string) => {
         const isEditingAll = editingAllEntryId === entry._id;
 
         return (
-          <div key={entry._id} className="mb-6 bg-[#1d1d1d] shadow rounded-xl p-4">
+          <div key={entry._id} className="mb-6 bg-[#EDEAF5] shadow rounded-xl p-4">
             <div className="flex justify-between items-center mb-2">
-              {/* <h2 className="font-semibold text-lg text-white">{entry.date}</h2> */}
+              {/* <h2 className="font-semibold text-lg text-[#170B3F]">{entry.date}</h2> */}
 
 <button onClick={() => handleEditSalaryName(entry._id)} >
   {/* {entry.date} */}
-  <h2 className="font-semibold text-lg text-white">{entry.date}</h2> 
+  <h2 className="font-semibold text-lg text-[#170B3F]">{entry.date}</h2> 
 </button>
 
               <div className="flex gap-4 items-center">
@@ -495,7 +495,7 @@ const handleEditSalaryName = async (id: string) => {
             <div className="flex justify-between text-gray-500 mb-2">
               <span>Salary</span>
               <button onClick={() => handleEditSalary(entry._id)}>
-                <span className="font-semibold text-[#01E777]">{format(entry.salary)}</span>
+                <span className="font-semibold text-[#6762FD]">{format(entry.salary)}</span>
               </button>
             </div>
 
@@ -513,13 +513,13 @@ const handleEditSalaryName = async (id: string) => {
           setEditedExpenses(newExpenses);
         }
       }}
-      className="flex-1 border border-mist-900 px-2 py-1 rounded text-white"
+      className="flex-1 border border-mist-900 px-2 py-1 rounded text-[#170B3F]"
     />
   ) : (
     <span
       onClick={() => handleTogglePaid(entry._id, idx)}
       className={`flex-1 break-words cursor-pointer ${
-        expense.paid ? "line-through text-gray-500" : "text-white"
+        expense.paid ? "line-through text-gray-500" : "text-[#170B3F]"
       }`}
     >
       {expense.name}
@@ -537,12 +537,12 @@ const handleEditSalaryName = async (id: string) => {
           setEditedExpenses(newExpenses);
         }
       }}
-      className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-white"
+      className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-[#170B3F]"
     />
   ) : (
     <span
       className={`w-24 text-right font-medium ${
-        expense.paid ? "line-through text-gray-500" : "text-white"
+        expense.paid ? "line-through text-gray-500" : "text-[#170B3F]"
       }`}
     >
       {format(expense.amount)}
@@ -552,7 +552,7 @@ const handleEditSalaryName = async (id: string) => {
   {/* ✅ Always show Delete button */}
   <button
     onClick={() => handleDeleteExpense(entry._id, idx)}
-    className="px-2 py-1 text-white text-sm border border-mist-900 rounded"
+    className="px-2 py-1 text-[#170B3F] text-sm border border-mist-900 rounded"
   >
      <TrashIcon className="w-4 h-4 text-gray-500" />
   </button>
@@ -564,13 +564,13 @@ const handleEditSalaryName = async (id: string) => {
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleSaveAllExpenses(entry._id)}
-                  className="px-3 py-1 bg-[#01E777] font-bold rounded text-sm"
+                  className="px-3 py-1 bg-[#6762FD] font-bold rounded text-sm"
                 >
                   Save All
                 </button>
                 <button
                   onClick={handleCancelEditAll}
-                  className="px-3 py-1 bg-[#01E777] font-bold rounded text-sm"
+                  className="px-3 py-1 bg-[#6762FD] font-bold rounded text-sm"
                 >
                   Cancel
                 </button>
@@ -580,12 +580,12 @@ const handleEditSalaryName = async (id: string) => {
             {/* Totals */}
             <div className="flex justify-between font-semibold pt-2 mb-2">
               <span className="text-gray-500">Total</span>
-              <span className="text-white">{format(totalExpenses)}</span>
+              <span className="text-[#170B3F]">{format(totalExpenses)}</span>
             </div>
 
             <div className="flex justify-between font-semibold">
               <span></span>
-              <span className={`${remaining < 0 ? "text-red-500" : "text-white"}`}>
+              <span className={`${remaining < 0 ? "text-red-500" : "text-[#170B3F]"}`}>
                 {format(remaining)}
               </span>
             </div>

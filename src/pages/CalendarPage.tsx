@@ -112,13 +112,13 @@ const CalendarPage: React.FC = () => {
   const todayMinutes = exerciseData[todayKey] || 0;
 
   return (
-    <div className="h-screen max-w-md mx-auto bg-[#111111] flex flex-col px-4 pt-4 pb-4 text-white">
+    <div className="h-screen max-w-md mx-auto bg-[#ffffff] flex flex-col px-4 pt-4 pb-4 text-[#170B3F]">
 
       {/* HEADER */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={() => changeMonth(-1)}
-          className="bg-[#1d1d1d] px-3 py-1 rounded-xl text-sm"
+          className="bg-[#EDEAF5] px-3 py-1 rounded-xl text-sm"
         >
           ◀
         </button>
@@ -129,7 +129,7 @@ const CalendarPage: React.FC = () => {
 
         <button
           onClick={() => changeMonth(1)}
-          className="bg-[#1d1d1d] px-3 py-1 rounded-xl text-sm"
+          className="bg-[#EDEAF5] px-3 py-1 rounded-xl text-sm"
         >
           ▶
         </button>
@@ -159,12 +159,12 @@ const CalendarPage: React.FC = () => {
           const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
           const bgClass = minutes > 0
-            ? "bg-[#BCFF5E] text-black"
+            ? "bg-[#EDEAF5] text-[#170B3F]"
             : isCurrent
-            ? "bg-[#1d1d1d] border-2 border-[#BCFF5E]"
+            ? "bg-[#EDEAF5] border-2 border-[#BCFF5E]"
             : !currentMonth
-            ? "bg-[#1d1d1d] text-gray-500"
-            : "bg-[#1d1d1d] " + (isWeekend ? "text-gray-500" : "text-white");
+            ? "bg-[#EDEAF5] text-gray-500"
+            : "bg-[#EDEAF5] " + (isWeekend ? "text-gray-500" : "text-[#170B3F]");
 
           return (
             <div
@@ -185,7 +185,7 @@ const CalendarPage: React.FC = () => {
 
       {/* RUN PROGRESS */}
       {totalRunDays > 0 && (
-        <div className="mt-3 p-3 rounded-xl bg-[#1d1d1d] text-center">
+        <div className="mt-3 p-3 rounded-xl bg-[#EDEAF5] text-center">
 
           <h2 className="text-3xl font-bold text-[#BCFF5E]">
             Day {totalRunDays} Complete 🏃
@@ -196,7 +196,7 @@ const CalendarPage: React.FC = () => {
           </p>
 
           {todayMinutes > 0 && (
-            <p className="text-sm mt-2 text-white">
+            <p className="text-sm mt-2 text-[#170B3F]">
               You&apos;ve finished{" "}
               <span className="text-[#BCFF5E] font-bold">
                 {todayMinutes}

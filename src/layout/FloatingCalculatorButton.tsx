@@ -12,8 +12,8 @@
 //         bottom-20 
 //         left-1/2 
 //         -translate-x-1/2 
-//         bg-[#01E777] 
-//         text-black 
+//         bg-[#6762FD] 
+//         text-[#170B3F] 
 //         p-5 
 //         rounded-full 
 //         shadow-lg 

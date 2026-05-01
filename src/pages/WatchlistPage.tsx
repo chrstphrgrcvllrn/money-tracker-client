@@ -153,8 +153,8 @@ const WatchlistPage: React.FC = () => {
   const filtered = watchlist.filter((w) => w.status === tab);
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#111111]">
-      <h1 className="text-lg font-semibold text-white mb-4">Watchlist</h1>
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
+      <h1 className="text-lg font-semibold text-[#170B3F] mb-4">Watchlist</h1>
 
       {/* INPUT */}
       <div className="space-y-2 mb-4">
@@ -164,12 +164,12 @@ const WatchlistPage: React.FC = () => {
             onChange={(e) => setTitle(e.target.value)}
             onFocus={() => title && setShowSuggestions(true)}
             placeholder="Title"
-            className="w-full bg-[#1d1d1d] px-2 py-4 rounded text-white"
+            className="w-full bg-[#EDEAF5] px-2 py-4 rounded text-[#170B3F]"
           />
 
           {/* SUGGESTIONS */}
           {showSuggestions && suggestions.length > 0 && (
-            <ul className="absolute z-10 w-full bg-[#1d1d1d] mt-1 rounded shadow-lg max-h-48 overflow-auto">
+            <ul className="absolute z-10 w-full bg-[#EDEAF5] mt-1 rounded shadow-lg max-h-48 overflow-auto">
               {suggestions.map((s) => (
                 <li
                   key={s.imdbID}
@@ -184,7 +184,7 @@ const WatchlistPage: React.FC = () => {
                     }
                     className="w-6 h-8 object-cover rounded"
                   />
-                  <span className="text-white text-xs">
+                  <span className="text-[#170B3F] text-xs">
                     {s.Title} ({s.Year})
                   </span>
                 </li>
@@ -198,20 +198,20 @@ const WatchlistPage: React.FC = () => {
             value={current}
             onChange={(e) => setCurrent(e.target.value)}
             placeholder="S01E02"
-            className="flex-1 bg-[#1d1d1d] px-2 py-2 rounded text-white"
+            className="flex-1 bg-[#EDEAF5] px-2 py-2 rounded text-[#170B3F]"
           />
 
           <input
             value={nextRelease}
             onChange={(e) => setNextRelease(e.target.value)}
             placeholder="Next release"
-            className="flex-1 bg-[#1d1d1d] px-2 py-2 rounded text-white"
+            className="flex-1 bg-[#EDEAF5] px-2 py-2 rounded text-[#170B3F]"
           />
         </div>
 
         <button
           onClick={addItem}
-          className="bg-[#01E777] text-black font-bold px-2 py-1 rounded"
+          className="bg-[#6762FD] text-white font-bold px-2 py-1 rounded"
         >
           Add
         </button>
@@ -225,8 +225,8 @@ const WatchlistPage: React.FC = () => {
             onClick={() => setTab(t as any)}
             className={`px-2 py-1 rounded-xl capitalize ${
               tab === t
-                ? "bg-[#01E777] text-black font-bold"
-                : "bg-[#1d1d1d] text-gray-400"
+                ? "bg-[#6762FD] text-white font-bold"
+                : "bg-[#EDEAF5] text-gray-400"
             }`}
           >
             {t}
@@ -242,7 +242,7 @@ const WatchlistPage: React.FC = () => {
           return (
             <li
               key={item._id}
-              className="p-2 bg-[#1d1d1d] rounded text-white"
+              className="p-2 bg-[#EDEAF5] rounded text-[#170B3F]"
             >
               {!isEditing ? (
                 <div className="flex gap-3 items-center">
@@ -280,7 +280,7 @@ const WatchlistPage: React.FC = () => {
                         fetchWatchlist();
                       }}
                     >
-                      <CheckIcon className="w-5 h-5 text-[#01E777]" />
+                      <CheckIcon className="w-5 h-5 text-[#6762FD]" />
                     </button>
                   </div>
                 </div>
@@ -318,7 +318,7 @@ const WatchlistPage: React.FC = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => saveEdit(item._id)}
-                      className="bg-[#01E777] text-black px-2 py-1 rounded"
+                      className="bg-[#6762FD] text-white px-2 py-1 rounded"
                     >
                       Save
                     </button>

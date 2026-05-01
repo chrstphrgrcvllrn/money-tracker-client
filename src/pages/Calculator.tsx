@@ -49,15 +49,15 @@ const CalculatorPage: React.FC = () => {
   };
 
   return (
-    <div className="h-screen max-w-md mx-auto bg-[#111111] flex flex-col px-4 pt-6 pb-24">
+    <div className="h-screen max-w-md mx-auto bg-[#ffffff] flex flex-col px-4 pt-6 pb-24">
 
       {/* PUSH KEYPAD DOWN */}
       <div className="flex-1" />
 
       {/* BIG DISPLAY ABOVE KEYPAD */}
       <div className="mb-4">
-        <div className="bg-[#1d1d1d] p-4 rounded-xl text-right">
-          <p className="text-6xl text-[#01E777] font-bold break-all">
+        <div className="bg-[#EDEAF5] p-4 rounded-xl text-right">
+          <p className="text-6xl text-[#6762FD] font-bold break-all">
             {display}
           </p>
         </div>
@@ -75,10 +75,10 @@ const CalculatorPage: React.FC = () => {
               onClick={() => handleAction(btn)}
               className={`py-4 rounded-xl font-bold text-xl ${
                 isEqual
-                  ? "bg-[#01E777] text-black"
+                  ? "bg-[#6762FD] text-white"
                   : isAction
-                  ? "bg-[#2a2a2a] text-white"
-                  : "bg-[#1d1d1d] text-white"
+                  ? "bg-[#2a2a2a] text-[#170B3F]"
+                  : "bg-[#EDEAF5] text-[#170B3F]"
               }`}
             >
               {btn}
