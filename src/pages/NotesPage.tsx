@@ -64,7 +64,7 @@ const filteredNotes = notes.filter((note) => {
 //   const parts = text.split(/(\[.*?\])/g);
 //   return parts.map((part, idx) =>
 //     part.startsWith("[") && part.endsWith("]") && !done ? (
-//       <span key={idx} className="text-[#6762FD]">
+//       <span key={idx} className="text-white">
 //         {part}
 //       </span>
 //     ) : (
@@ -83,7 +83,7 @@ const highlightText = (text: string, done: boolean) => {
   return parts.map((part, idx) => {
     if (part === "Watch:") {
       return (
-        <span key={idx} className="text-[#6762FD] font-medium">
+        <span key={idx} className="text-white font-medium">
           {part}
         </span>
       );
@@ -109,7 +109,7 @@ const highlightText = (text: string, done: boolean) => {
     const bracketParts = part.split(/(\[.*?\])/g);
     return bracketParts.map((bp, i) =>
       bp.startsWith("[") && bp.endsWith("]") ? (
-        <span key={`${idx}-${i}`} className="text-[#6762FD]">
+        <span key={`${idx}-${i}`} className="text-white">
           {bp}
         </span>
       ) : (
@@ -121,10 +121,10 @@ const highlightText = (text: string, done: boolean) => {
 
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        {/* <h1 className="text-lg font-semibold text-[#170B3F]">Notes</h1> */}
+        {/* <h1 className="text-lg font-semibold text-white">Notes</h1> */}
         <div className="flex items-center gap-3"></div>
       </div>
 
@@ -135,7 +135,7 @@ const highlightText = (text: string, done: boolean) => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter note"
-          className="flex-1 bg-[#EDEAF5] px-2 py-1 rounded text-[#170B3F]"
+          className="flex-1 bg-[#1C1C1E] px-2 py-1 rounded text-white"
         />
 
         <select
@@ -143,7 +143,7 @@ const highlightText = (text: string, done: boolean) => {
           onChange={(e) =>
             setCategory(e.target.value as Note["category"])
           }
-          className="bg-[#EDEAF5] px-2 py-1 rounded text-[#fff]"
+          className="bg-[#1C1C1E] px-2 py-1 rounded text-[#fff]"
         >
           <option value="work">Work</option>
           <option value="personal">Personal</option>
@@ -153,7 +153,7 @@ const highlightText = (text: string, done: boolean) => {
 
         <button
           onClick={addNote}
-          className="bg-[#6762FD] text-white font-bold px-2 py-1 rounded"
+          className="bg-[#EB5647] text-white font-bold px-2 py-1 rounded"
         >
           Add
         </button>
@@ -167,8 +167,8 @@ const highlightText = (text: string, done: boolean) => {
             onClick={() => setActiveTab(tab as any)}
             className={`px-2 py-1 rounded-xl text-xs capitalize ${
               activeTab === tab
-                ? "bg-[#6762FD] text-white font-bold"
-                : "bg-[#EDEAF5] text-gray-400"
+                ? "bg-[#EB5647] text-white font-bold"
+                : "bg-[#1C1C1E] text-gray-400"
             }`}
           >
             {tab}
@@ -181,14 +181,14 @@ const highlightText = (text: string, done: boolean) => {
         {sortedNotes.map((note) => (
           <li
             key={note._id}
-            className={`flex justify-between items-center p-2 bg-[#EDEAF5] rounded-xl ${
+            className={`flex justify-between items-center p-2 bg-[#1C1C1E] rounded-xl ${
               note.done ? "text-gray-700 line-through" : ""
             }`}
           >
             <div>
               <span
                 className={`font-medium ${
-                  note.done ? "text-gray-700 line-through" : "text-[#170B3F]"
+                  note.done ? "text-gray-700 line-through" : "text-white"
                 }`}
               >
                   {highlightText(note.text, note.done)}
@@ -198,11 +198,11 @@ const highlightText = (text: string, done: boolean) => {
             <div className="flex gap-2">
               <button
                 onClick={() => handleToggle(note._id)}
-                className="flex items-center justify-center px-2 py-1 rounded text-mist-500 hover:text-[#6762FD]"
+                className="flex items-center justify-center px-2 py-1 rounded text-mist-500 hover:text-white"
               >
                 <CheckIcon
                   className={`w-5 h-5 ${
-                    note.done ? "text-[#6762FD]" : "text-gray-500"
+                    note.done ? "text-white" : "text-[#9C9BA1]"
                   }`}
                 />
               </button>

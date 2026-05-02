@@ -24,8 +24,8 @@ const ThoughtsPage: React.FC = () => {
   };
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
-      {/* <h1 className="text-lg font-semibold text-[#170B3F] mb-4">Thoughts</h1> */}
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
+      {/* <h1 className="text-lg font-semibold text-white mb-4">Thoughts</h1> */}
 
       {/* INPUT */}
       <div className="flex gap-2 mb-4">
@@ -33,12 +33,12 @@ const ThoughtsPage: React.FC = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Write a thought..."
-          className="flex-1 bg-[#EDEAF5] px-2 py-1 rounded text-[#170B3F]"
+          className="flex-1 bg-[#1C1C1E] px-2 py-1 rounded text-white"
         />
 
         <button
           onClick={addThought}
-          className="bg-[#6762FD] text-white font-bold px-2 py-1 rounded"
+          className="bg-[#EB5647] text-white font-bold px-2 py-1 rounded"
         >
           Add
         </button>
@@ -49,7 +49,7 @@ const ThoughtsPage: React.FC = () => {
         {thoughts.map((t) => (
           <li
             key={t._id}
-            className="p-2 bg-[#EDEAF5] rounded text-[#170B3F]"
+            className="p-2 bg-[#1C1C1E] rounded text-white"
           >
             {t.text}
           </li>

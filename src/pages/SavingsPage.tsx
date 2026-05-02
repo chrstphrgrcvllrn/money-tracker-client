@@ -163,10 +163,10 @@ export default function SavingsPage() {
   }
 
   return (
-    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans text-gray-800 bg-[#ffffff]">
+    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans text-gray-800 bg-[#000000]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-start">
-        {/* <h1 className="text-lg font-semibold text-[#170B3F]">Savings</h1> */}
+        {/* <h1 className="text-lg font-semibold text-white">Savings</h1> */}
 
         <div className="flex items-center gap-3">
           <button
@@ -182,7 +182,7 @@ export default function SavingsPage() {
 
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-[0.7rem] py-[0.3rem] bg-[#6762FD] font-bold text-[#170B3F] rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem] bg-[#EB5647] font-bold text-white rounded-4xl text-sm"
           >
             +
           </button>
@@ -191,16 +191,16 @@ export default function SavingsPage() {
 
       {/* ✅ MODAL (restored) */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#ffffff]/70">
-          <div className="w-full max-w-sm p-5 bg-[#EDEAF5] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-[#170B3F] text-lg font-semibold">Add Savings</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/70">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-white text-lg font-semibold">Add Savings</h2>
 
             <input
               type="text"
               placeholder="Savings name"
               value={newSavingsName}
               onChange={(e) => setNewSavingsName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
             />
 
             <input
@@ -208,7 +208,7 @@ export default function SavingsPage() {
               placeholder="Initial amount"
               value={newSavingsAmount}
               onChange={(e) => setNewSavingsAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
             />
 
             <div className="flex justify-end space-x-2 pt-2">
@@ -221,7 +221,7 @@ export default function SavingsPage() {
 
               <button
                 onClick={handleAddSavings}
-                className="px-3 py-1 bg-[#6762FD] text-white font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#EB5647] text-white font-semibold rounded-lg text-sm"
               >
                 Save
               </button>
@@ -231,9 +231,9 @@ export default function SavingsPage() {
       )}
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-[#EDEAF5] rounded-xl text-center">
+      <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Balance</p>
-        <p className="text-[2.5rem] font-bold text-[#6762FD]">
+        <p className="text-[2.5rem] font-bold text-white">
           {showAmounts ? totalBalance.toLocaleString() : mask(totalBalance)}
         </p>
       </div>
@@ -255,14 +255,14 @@ export default function SavingsPage() {
           const paths = getIconPaths(item.name);
 
           return (
-            <div key={item._id} className="bg-[#EDEAF5] rounded-xl overflow-hidden">
+            <div key={item._id} className="bg-[#1C1C1E] rounded-xl overflow-hidden">
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
                 onClick={() => toggleExpand(index)}
               >
                 <div className="flex items-center gap-3 text-left">
                   {/* ✅ ICON */}
-                  <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+                  <div className="w-10 h-10 rounded-lg bg-[#2C2C2E] flex items-center justify-center overflow-hidden">
                     <img
                       src={paths[0]}
                       alt={item.name}
@@ -284,33 +284,33 @@ export default function SavingsPage() {
                         }
                       }}
                     />
-                    <span className="text-[#170B3F] font-semibold hidden">
+                    <span className="text-white font-semibold hidden">
                       {item.name?.charAt(0).toUpperCase()}
                     </span>
                   </div>
 
                   <div>
-                    <p className="font-medium text-[1.2rem] text-[#170B3F]">
+                    <p className="font-medium text-[1.2rem] text-white">
                       {item.name}
                     </p>
 
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-[#9C9BA1]">
                       Deposits:{" "}
-                      <span className="text-gray-500 font-medium">
+                      <span className="text-[#9C9BA1] font-medium">
                         {showAmounts ? deposits.toLocaleString() : mask(deposits)}
                       </span>
                     </p>
                   </div>
                 </div>
 
-                <p className="font-bold text-[#6762FD]">
+                <p className="font-bold text-white">
                   {showAmounts ? balance.toLocaleString() : mask(balance)}
                 </p>
               </button>
 
               {expanded === index && (
                 <div className="border-t px-4 py-3">
-                  <ul className="text-xs text-[#170B3F] space-y-1">
+                  <ul className="text-xs text-white space-y-1">
                     {(item.transactions ?? []).map((t, i) => (
                       <li key={i} className="flex justify-between">
                         <span>{t.date}</span>
@@ -320,7 +320,7 @@ export default function SavingsPage() {
                               ? "text-red-400"
                               : t.amount > 0
                               ? "text-green-400"
-                              : "text-[#170B3F]"
+                              : "text-white"
                           }`}
                         >
                           {t.amount > 0 ? "+" : "-"}
@@ -337,7 +337,7 @@ export default function SavingsPage() {
                       onChange={(e) =>
                         setDateInputs((prev) => ({ ...prev, [index]: e.target.value }))
                       }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600"
+                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600"
                     />
 
                     <div className="flex gap-2">
@@ -349,7 +349,7 @@ export default function SavingsPage() {
                             [index]: e.target.value as "+" | "-",
                           }))
                         }
-                        className="w-20 px-2 py-2 rounded-lg text-sm text-[#170B3F] bg-[#EDEAF5] border border-gray-600"
+                        className="w-20 px-2 py-2 rounded-lg text-sm text-white bg-[#1C1C1E] border border-gray-600"
                       >
                         <option value="+">+</option>
                         <option value="-">-</option>
@@ -362,7 +362,7 @@ export default function SavingsPage() {
                         onChange={(e) =>
                           setAmountInputs((prev) => ({ ...prev, [index]: e.target.value }))
                         }
-                        className="flex-1 px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600"
+                        className="flex-1 px-3 py-2 rounded-lg text-sm text-white border border-gray-600"
                       />
                     </div>
 
@@ -370,7 +370,7 @@ export default function SavingsPage() {
                       onClick={() =>
                         handleAddTransaction(item._id, index, transactionType[index] || "+")
                       }
-                      className="w-full bg-[#6762FD] text-white font-bold py-2 rounded-lg text-sm"
+                      className="w-full bg-[#EB5647] text-white font-bold py-2 rounded-lg text-sm"
                     >
                       Add Transaction
                     </button>
@@ -379,7 +379,7 @@ export default function SavingsPage() {
                   <div className="mt-2 flex justify-end">
                     <button
                       onClick={() => handleDeleteSavings(item._id)}
-                      className="px-3 py-1 bg-red-500 text-[#170B3F] font-semibold rounded-lg text-sm"
+                      className="px-3 py-1 bg-red-500 text-white font-semibold rounded-lg text-sm"
                     >
                       Delete
                     </button>

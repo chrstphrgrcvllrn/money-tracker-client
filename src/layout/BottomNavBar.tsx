@@ -29,7 +29,7 @@ export default function BottomNavBar() {
   ];
 
   return (
-<nav className="fixed bottom-0 left-0 w-full bg-[#EDEAF5]  grid grid-cols-5 py-3 z-50 px-4">
+<nav className="fixed bottom-0 left-0 w-full bg-[#111312]  grid grid-cols-5 py-3 z-50 px-4">
   {navItems.map((item) => {
     const Icon = item.icon;
 
@@ -39,7 +39,7 @@ export default function BottomNavBar() {
         to={item.path}
         className={({ isActive }) =>
           `flex flex-col items-center justify-center text-xs ${
-            isActive ? "text-[#6762FD]" : "text-gray-400"
+            isActive ? "text-white" : "text-[#EB5647]"
           }`
         }
       >

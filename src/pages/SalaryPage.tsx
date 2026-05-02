@@ -14,6 +14,7 @@ export default function SalaryPage() {
   const [salaryData, setSalaryData] = useState<SalaryEntry[]>([]);
   const [editingAllEntryId, setEditingAllEntryId] = useState<string | null>(null);
   const [editedExpenses, setEditedExpenses] = useState<Expense[]>([]);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // ✅ MODAL STATE
   const [showForm, setShowForm] = useState(false);
@@ -33,9 +34,6 @@ export default function SalaryPage() {
   // ✅ TAB STATE
   const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
 
-
-  
-
   const format = (value: any) => Number(value || 0).toLocaleString();
 
   useEffect(() => {
@@ -54,7 +52,6 @@ export default function SalaryPage() {
     load();
   }, []);
 
-  // ✅ ADD SALARY (MODAL)
   const handleAddSalary = async () => {
     if (!newSalaryDate || !newSalaryAmount) return;
 
@@ -80,7 +77,6 @@ export default function SalaryPage() {
     setShowForm(false);
   };
 
-  // ✅ DUPLICATE SALARY
   const handleDuplicateSalary = async (entry: SalaryEntry) => {
     const duplicateEntry = await createSalary({
       date: entry.date + " (Copy)",
@@ -97,7 +93,6 @@ export default function SalaryPage() {
     ]);
   };
 
-  // ✅ EDIT SALARY
   const handleEditSalary = async (id: string) => {
     const entry = salaryData.find((s) => s._id === id);
     if (!entry) return;
@@ -116,31 +111,24 @@ export default function SalaryPage() {
     }
   };
 
-  // ✅ OPEN DELETE MODAL
   const openDeleteSalaryModal = (id: string) => {
     setSalaryToDelete(id);
     setShowDeleteModal(true);
   };
 
-// ✅ CONFIRM DELETE SALARY
-const handleConfirmDeleteSalary = async () => {
-  if (!salaryToDelete) return;
+  const handleConfirmDeleteSalary = async () => {
+    if (!salaryToDelete) return;
 
-  try {
-    // Call your backend delete API
-    await deleteSalary(salaryToDelete);
+    try {
+      await deleteSalary(salaryToDelete);
+      setSalaryData((prev) => prev.filter((s) => s._id !== salaryToDelete));
+      setSalaryToDelete(null);
+      setShowDeleteModal(false);
+    } catch (err) {
+      console.error("Failed to delete salary:", err);
+    }
+  };
 
-    // Remove it from local state
-    setSalaryData((prev) => prev.filter((s) => s._id !== salaryToDelete));
-
-    setSalaryToDelete(null);
-    setShowDeleteModal(false);
-  } catch (err) {
-    console.error("Failed to delete salary:", err);
-  }
-};
-
-  // ✅ DELETE EXPENSE
   const handleDeleteExpense = async (salaryId: string, index: number) => {
     if (!confirm("Delete this expense?")) return;
 
@@ -161,7 +149,6 @@ const handleConfirmDeleteSalary = async () => {
     );
   };
 
-  // ✅ OPEN ADD EXPENSE MODAL
   const openAddExpenseModal = (salaryId: string) => {
     setCurrentSalaryId(salaryId);
     setExpenseName("");
@@ -169,7 +156,6 @@ const handleConfirmDeleteSalary = async () => {
     setShowExpenseForm(true);
   };
 
-  // ✅ SAVE EXPENSE
   const handleSaveExpense = async () => {
     if (!currentSalaryId || !expenseName || !expenseAmount) return;
     const amount = Number(expenseAmount);
@@ -195,7 +181,6 @@ const handleConfirmDeleteSalary = async () => {
     setCurrentSalaryId(null);
   };
 
-  // ✅ TOGGLE PAID
   const handleTogglePaid = async (salaryId: string, index: number) => {
     const entry = salaryData.find((s) => s._id === salaryId);
     if (!entry) return;
@@ -216,7 +201,6 @@ const handleConfirmDeleteSalary = async () => {
     );
   };
 
-  // ✅ EDIT ALL EXPENSES
   const handleEditAllExpenses = (entryId: string) => {
     const entry = salaryData.find((s) => s._id === entryId);
     if (!entry) return;
@@ -224,36 +208,35 @@ const handleConfirmDeleteSalary = async () => {
     const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
     setEditingAllEntryId(entryId);
     setEditedExpenses([...expenses]);
+    setOpenMenuId(null);
   };
 
-// ✅ UPDATE handleSaveAllExpenses TO SHOW SNACKBAR
-const handleSaveAllExpenses = async (entryId: string) => {
-  try {
-    showSnackbar("Updating...", "info"); // Show updating
-    const updated = await updateSalary(entryId, { expenses: editedExpenses });
+  const handleSaveAllExpenses = async (entryId: string) => {
+    try {
+      showSnackbar("Updating...", "info");
+      const updated = await updateSalary(entryId, { expenses: editedExpenses });
 
-    setSalaryData((prev) =>
-      prev.map((s) =>
-        s._id === entryId
-          ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
-          : s
-      )
-    );
+      setSalaryData((prev) =>
+        prev.map((s) =>
+          s._id === entryId
+            ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+            : s
+        )
+      );
 
-    setEditingAllEntryId(null);
-    setEditedExpenses([]);
-    showSnackbar("Expenses updated successfully!", "success"); // Show completed
-  } catch (err) {
-    showSnackbar("Failed to update expenses.", "error");
-  }
-};
+      setEditingAllEntryId(null);
+      setEditedExpenses([]);
+      showSnackbar("Expenses updated successfully!", "success");
+    } catch (err) {
+      showSnackbar("Failed to update expenses.", "error");
+    }
+  };
 
   const handleCancelEditAll = () => {
     setEditingAllEntryId(null);
     setEditedExpenses([]);
   };
 
-  // ✅ Filter salaries by tab
   const displayedSalaries = salaryData.filter((entry) => {
     const allPaid = entry.expenses.length > 0 && entry.expenses.every((e) => e.paid);
 
@@ -262,108 +245,72 @@ const handleSaveAllExpenses = async (entryId: string) => {
     return true;
   });
 
-// ✅ SNACKBAR STATE
-const [snackbarOpen, setSnackbarOpen] = useState(false);
-const [snackbarMessage, setSnackbarMessage] = useState("");
-const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "info" | "error">("info");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "info" | "error">("info");
 
-const showSnackbar = (message: string, severity: "success" | "info" | "error" = "info") => {
-  setSnackbarMessage(message);
-  setSnackbarSeverity(severity);
-  setSnackbarOpen(true);
-};
+  const showSnackbar = (message: string, severity: "success" | "info" | "error" = "info") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
-// Close handler
-const handleCloseSnackbar = () => setSnackbarOpen(false);
+  const handleCloseSnackbar = () => setSnackbarOpen(false);
 
+  const handleEditSalaryName = async (id: string) => {
+    const entry = salaryData.find((s) => s._id === id);
+    if (!entry) return;
 
+    const newDate = prompt("Update salary name/date", entry.date);
+    if (!newDate) return;
 
-// ✅ SNACKBAR COMPONENT IN R
+    try {
+      const updated = await updateSalary(id, { date: newDate });
 
+      setSalaryData((prev) =>
+        prev.map((s) =>
+          s._id === id ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] } : s
+        )
+      );
 
-// Function to update salary "date" (name)
-const handleEditSalaryName = async (id: string) => {
-  const entry = salaryData.find((s) => s._id === id);
-  if (!entry) return;
-
-  // Prompt user for new name/date
-  const newDate = prompt("Update salary name/date", entry.date);
-  if (!newDate) return;
-
-  try {
-    // Call API to update the salary date
-    const updated = await updateSalary(id, { date: newDate });
-
-    // Update local state
-    setSalaryData((prev) =>
-      prev.map((s) =>
-        s._id === id ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] } : s
-      )
-    );
-
-    showSnackbar("Salary name updated!", "success"); // optional feedback
-  } catch (err) {
-    showSnackbar("Failed to update salary name.", "error");
-    console.error(err);
-  }
-};
-
-
+      showSnackbar("Salary name updated!", "success");
+    } catch (err) {
+      showSnackbar("Failed to update salary name.", "error");
+      console.error(err);
+    }
+  };
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
-      {/* HEADER */}
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
       <div className="mb-4 flex justify-between items-start">
-        {/* <h1 className="text-lg font-semibold text-[#170B3F]">Salary</h1> */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowForm(true)}
             title="Add Salary"
-            className="mb-0 px-[0.7rem] py-[0.3rem] bg-[#6762FD] text-white font-bold rounded-4xl text-sm"
+            className="mb-0 px-[0.7rem] py-[0.3rem] bg-[#EB5647] text-white font-bold rounded-4xl text-sm"
           >
             +
           </button>
         </div>
       </div>
 
-      {/* TABS */}
-      <div className="flex mb-4 gap-2">
-        <button
-          className={`px-3 py-1 rounded ${
-            activeTab === "active" ? "bg-[#6762FD] text-white font-bold" : "bg-[#EDEAF5] text-[#170B3F] "
-          }`}
-          onClick={() => setActiveTab("active")}
-        >
-          Active
-        </button>
-        <button
-          className={`px-3 py-1 rounded ${
-            activeTab === "completed" ? "bg-[#6762FD] text-white font-bold" : "bg-[#EDEAF5] text-[#170B3F] "
-          }`}
-          onClick={() => setActiveTab("completed")}
-        >
-          Completed
-        </button>
-      </div>
-
-      {/* ADD SALARY MODAL */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#ffffff]/70">
-          <div className="w-full max-w-sm p-5 bg-[#EDEAF5] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-[#170B3F] text-lg font-semibold">Add Salary</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/70">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-white text-lg font-semibold">Add Salary</h2>
             <input
               type="text"
               placeholder="Date (e.g., May 2026)"
               value={newSalaryDate}
               onChange={(e) => setNewSalaryDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
             />
             <input
               type="number"
               placeholder="Salary amount"
               value={newSalaryAmount}
               onChange={(e) => setNewSalaryAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
             />
             <div className="flex justify-end space-x-2 pt-2">
               <button
@@ -374,7 +321,7 @@ const handleEditSalaryName = async (id: string) => {
               </button>
               <button
                 onClick={handleAddSalary}
-                className="px-3 py-1 bg-[#6762FD] text-white font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#EB5647] text-white font-semibold rounded-lg text-sm"
               >
                 Save
               </button>
@@ -383,68 +330,25 @@ const handleEditSalaryName = async (id: string) => {
         </div>
       )}
 
-      {/* ADD EXPENSE MODAL */}
-      {showExpenseForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#ffffff]/70">
-          <div className="w-full max-w-sm p-5 bg-[#EDEAF5] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-[#170B3F] text-lg font-semibold">Add Expense</h2>
-            <input
-              type="text"
-              placeholder="Expense name"
-              value={expenseName}
-              onChange={(e) => setExpenseName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
-            />
-            <input
-              type="number"
-              placeholder="Expense amount"
-              value={expenseAmount}
-              onChange={(e) => setExpenseAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-[#170B3F] border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
-            />
-            <div className="flex justify-end space-x-2 pt-2">
-              <button
-                onClick={() => setShowExpenseForm(false)}
-                className="px-3 py-1 text-sm text-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveExpense}
-                className="px-3 py-1 bg-[#6762FD] text-white font-semibold rounded-lg text-sm"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="flex mb-4 gap-2">
+        <button
+          className={`px-3 py-1 rounded ${
+            activeTab === "active" ? "bg-[#EB5647] text-white font-bold" : "bg-[#1C1C1E] text-white"
+          }`}
+          onClick={() => setActiveTab("active")}
+        >
+          Active
+        </button>
+        <button
+          className={`px-3 py-1 rounded ${
+            activeTab === "completed" ? "bg-[#EB5647] text-white font-bold" : "bg-[#1C1C1E] text-white"
+          }`}
+          onClick={() => setActiveTab("completed")}
+        >
+          Completed
+        </button>
+      </div>
 
-      {/* DELETE SALARY MODAL */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#ffffff]/70">
-          <div className="w-full max-w-sm p-5 bg-[#EDEAF5] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-[#170B3F] text-lg font-semibold">Confirm Delete</h2>
-            <p className="text-gray-400">Are you sure you want to delete this salary?</p>
-            <div className="flex justify-end space-x-2 pt-2">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-3 py-1 text-sm text-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmDeleteSalary}
-                className="px-3 py-1 bg-red-500 text-[#170B3F] font-semibold rounded-lg text-sm"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SALARY LIST */}
       {displayedSalaries.map((entry) => {
         const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
         const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
@@ -452,50 +356,74 @@ const handleEditSalaryName = async (id: string) => {
         const isEditingAll = editingAllEntryId === entry._id;
 
         return (
-          <div key={entry._id} className="mb-6 bg-[#EDEAF5] shadow rounded-xl p-4">
+          <div key={entry._id} className="mb-6 bg-[#1C1C1E] shadow rounded-xl p-4">
             <div className="flex justify-between items-center mb-2">
-              {/* <h2 className="font-semibold text-lg text-[#170B3F]">{entry.date}</h2> */}
+              <button onClick={() => handleEditSalaryName(entry._id)}>
+                <h2 className="font-semibold text-lg text-white">{entry.date}</h2>
+              </button>
 
-<button onClick={() => handleEditSalaryName(entry._id)} >
-  {/* {entry.date} */}
-  <h2 className="font-semibold text-lg text-[#170B3F]">{entry.date}</h2> 
-</button>
+              <div className="relative flex items-center">
+                <button
+                  onClick={() =>
+                    setOpenMenuId(openMenuId === entry._id ? null : entry._id)
+                  }
+                  className="text-[#9C9BA1] text-lg px-2 leading-none"
+                >
+                  •••
+                </button>
 
-              <div className="flex gap-4 items-center">
-                {!isEditingAll && expenses.length > 0 && (
-                  <button
-                    onClick={() => handleEditAllExpenses(entry._id)}
-                    className="text-gray-500 text-sm"
-                  >
-                    Edit
-                  </button>
+                {openMenuId === entry._id && (
+                  <div className="absolute right-0 top-7 min-w-[130px] bg-[#1C1C1E] border border-gray-800 rounded-xl shadow-lg z-30 py-1">
+                    {!isEditingAll && expenses.length > 0 && (
+                      <button
+                        onClick={() => {
+                          handleEditAllExpenses(entry._id);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                      >
+                        Edit
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        openAddExpenseModal(entry._id);
+                        setOpenMenuId(null);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                    >
+                      Add
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        handleDuplicateSalary(entry);
+                        setOpenMenuId(null);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                    >
+                      Duplicate
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        openDeleteSalaryModal(entry._id);
+                        setOpenMenuId(null);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-[#EB5647] hover:bg-[#2A2A2D]"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 )}
-                <button
-                  onClick={() => openAddExpenseModal(entry._id)}
-                  className="text-gray-500 text-sm"
-                >
-                  Add
-                </button>
-                <button
-                  onClick={() => handleDuplicateSalary(entry)}
-                  className="text-gray-500 text-sm"
-                >
-                  Duplicate
-                </button>
-                <button
-                  onClick={() => openDeleteSalaryModal(entry._id)}
-                  className="text-red-500 text-sm"
-                >
-                  Delete
-                </button>
               </div>
             </div>
 
-            {/* Salary & Expenses */}
-            <div className="flex justify-between text-gray-500 mb-2">
+            <div className="flex justify-between text-[#9C9BA1] mb-2">
               <span>Salary</span>
               <button onClick={() => handleEditSalary(entry._id)}>
-                <span className="font-semibold text-[#6762FD]">{format(entry.salary)}</span>
+                <span className="font-semibold text-white">{format(entry.salary)}</span>
               </button>
             </div>
 
@@ -513,13 +441,13 @@ const handleEditSalaryName = async (id: string) => {
           setEditedExpenses(newExpenses);
         }
       }}
-      className="flex-1 border border-mist-900 px-2 py-1 rounded text-[#170B3F]"
+      className="flex-1 border border-mist-900 px-2 py-1 rounded text-white"
     />
   ) : (
     <span
       onClick={() => handleTogglePaid(entry._id, idx)}
       className={`flex-1 break-words cursor-pointer ${
-        expense.paid ? "line-through text-gray-500" : "text-[#170B3F]"
+        expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
       }`}
     >
       {expense.name}
@@ -537,25 +465,26 @@ const handleEditSalaryName = async (id: string) => {
           setEditedExpenses(newExpenses);
         }
       }}
-      className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-[#170B3F]"
+      className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-white"
     />
   ) : (
     <span
       className={`w-24 text-right font-medium ${
-        expense.paid ? "line-through text-gray-500" : "text-[#170B3F]"
+        expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
       }`}
     >
       {format(expense.amount)}
     </span>
   )}
 
-  {/* ✅ Always show Delete button */}
-  <button
-    onClick={() => handleDeleteExpense(entry._id, idx)}
-    className="px-2 py-1 text-[#170B3F] text-sm border border-mist-900 rounded"
-  >
-     <TrashIcon className="w-4 h-4 text-gray-500" />
-  </button>
+  {isEditingAll && (
+    <button
+      onClick={() => handleDeleteExpense(entry._id, idx)}
+      className="px-2 py-1 text-white text-sm border border-mist-900 rounded"
+    >
+      <TrashIcon className="w-4 h-4 text-[#9C9BA1]" />
+    </button>
+  )}
 </li>
               ))}
             </ul>
@@ -564,28 +493,27 @@ const handleEditSalaryName = async (id: string) => {
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleSaveAllExpenses(entry._id)}
-                  className="px-3 py-1 bg-[#6762FD] font-bold rounded text-sm"
+                  className="px-3 py-1 bg-[#EB5647] font-bold rounded text-sm"
                 >
                   Save All
                 </button>
                 <button
                   onClick={handleCancelEditAll}
-                  className="px-3 py-1 bg-[#6762FD] font-bold rounded text-sm"
+                  className="px-3 py-1 bg-[#EB5647] font-bold rounded text-sm"
                 >
                   Cancel
                 </button>
               </div>
             )}
 
-            {/* Totals */}
             <div className="flex justify-between font-semibold pt-2 mb-2">
-              <span className="text-gray-500">Total</span>
-              <span className="text-[#170B3F]">{format(totalExpenses)}</span>
+              <span className="text-[#9C9BA1]">Total</span>
+              <span className="text-white">{format(totalExpenses)}</span>
             </div>
 
             <div className="flex justify-between font-semibold">
               <span></span>
-              <span className={`${remaining < 0 ? "text-red-500" : "text-[#170B3F]"}`}>
+              <span className={`${remaining < 0 ? "text-red-500" : "text-white"}`}>
                 {format(remaining)}
               </span>
             </div>
@@ -593,24 +521,26 @@ const handleEditSalaryName = async (id: string) => {
         );
       })}
 
-
-{/* ✅ SNACKBAR */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={2000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{  vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: "100%",
-                backgroundColor: "rgba(0,0,0,0.6)", // semi-transparent black
-      color: "white",
-      backdropFilter: "blur(8px)",       // blur effect
-      borderRadius: "8px",
-         }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{
+            width: "100%",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            color: "white",
+            backdropFilter: "blur(8px)",
+            borderRadius: "8px",
+          }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>
-
     </div>
   );
 }

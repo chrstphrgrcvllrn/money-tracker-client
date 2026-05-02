@@ -207,16 +207,16 @@ export default function BillsPage() {
     );
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#ffffff]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-start">
-        {/* <h1 className="text-lg font-semibold text-[#170B3F]">
+        {/* <h1 className="text-lg font-semibold text-white">
           Bills
         </h1> */}
 
         <button
           onClick={() => setShowForm(true)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#6762FD] text-white font-bold rounded-4xl text-sm"
+          className="px-[0.7rem] py-[0.3rem] bg-[#EB5647] text-white font-bold rounded-4xl text-sm"
         >
           +
         </button>
@@ -228,8 +228,8 @@ export default function BillsPage() {
           onClick={() => setTab("ongoing")}
           className={`px-3 py-1 rounded-full text-xs ${
             tab === "ongoing"
-              ? "bg-[#6762FD] text-white"
-              : "bg-[#EDEAF5] text-gray-400"
+              ? "bg-[#EB5647] text-white"
+              : "bg-[#1C1C1E] text-gray-400"
           }`}
         >
           Ongoing
@@ -239,8 +239,8 @@ export default function BillsPage() {
           onClick={() => setTab("done")}
           className={`px-3 py-1 rounded-full text-xs ${
             tab === "done"
-              ? "bg-[#6762FD] text-white"
-              : "bg-[#EDEAF5] text-gray-400"
+              ? "bg-[#EB5647] text-white"
+              : "bg-[#1C1C1E] text-gray-400"
           }`}
         >
           Done
@@ -250,21 +250,21 @@ export default function BillsPage() {
       {/* ADD MONTH MODAL */}
       {showForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60">
-          <div className="bg-[#EDEAF5] p-5 rounded-xl w-full max-w-sm">
-            <h2 className="text-[#170B3F] mb-3">Add Month</h2>
+          <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
+            <h2 className="text-white mb-3">Add Month</h2>
 
             <input
               value={newMonth}
               onChange={(e) => setNewMonth(e.target.value)}
               placeholder="May 2026"
-              className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-[#170B3F]"
+              className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-white"
             />
 
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowForm(false)}>Cancel</button>
               <button
                 onClick={handleAddMonth}
-                className="bg-[#6762FD] px-3 py-1 rounded"
+                className="bg-[#EB5647] px-3 py-1 rounded"
               >
                 Save
               </button>
@@ -276,21 +276,21 @@ export default function BillsPage() {
       {/* ADD BILL MODAL */}
       {showBillModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60">
-          <div className="bg-[#EDEAF5] p-5 rounded-xl w-full max-w-sm">
-            <h2 className="text-[#170B3F] mb-3">Add Bill</h2>
+          <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
+            <h2 className="text-white mb-3">Add Bill</h2>
 
             <input
               value={billName}
               onChange={(e) => setBillName(e.target.value)}
               placeholder="Bill name"
-              className="w-full px-3 py-2 mb-2 rounded bg-transparent border border-gray-600 text-[#170B3F]"
+              className="w-full px-3 py-2 mb-2 rounded bg-transparent border border-gray-600 text-white"
             />
 
             <input
               value={billDueDate}
               onChange={(e) => setBillDueDate(e.target.value)}
               placeholder="Due date"
-              className="w-full px-3 py-2 mb-2 rounded bg-transparent border border-gray-600 text-[#170B3F]"
+              className="w-full px-3 py-2 mb-2 rounded bg-transparent border border-gray-600 text-white"
             />
 
             <input
@@ -298,14 +298,14 @@ export default function BillsPage() {
               value={billAmount}
               onChange={(e) => setBillAmount(e.target.value)}
               placeholder="Amount"
-              className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-[#170B3F]"
+              className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-white"
             />
 
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowBillModal(false)}>Cancel</button>
               <button
                 onClick={handleSaveBill}
-                className="bg-[#6762FD] px-3 py-1 rounded"
+                className="bg-[#EB5647] px-3 py-1 rounded"
               >
                 Save
               </button>
@@ -317,21 +317,21 @@ export default function BillsPage() {
       {/* DUPLICATE MODAL */}
       {showDuplicateModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60">
-          <div className="bg-[#EDEAF5] p-5 rounded-xl w-full max-w-sm">
-            <h2 className="text-[#170B3F] mb-3">Duplicate Month</h2>
+          <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
+            <h2 className="text-white mb-3">Duplicate Month</h2>
 
             <input
               value={duplicateMonthName}
               onChange={(e) => setDuplicateMonthName(e.target.value)}
               placeholder="New month"
-              className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-[#170B3F]"
+              className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-white"
             />
 
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowDuplicateModal(false)}>Cancel</button>
               <button
                 onClick={handleSaveDuplicate}
-                className="bg-[#6762FD] px-3 py-1 rounded"
+                className="bg-[#EB5647] px-3 py-1 rounded"
               >
                 Save
               </button>
@@ -356,13 +356,13 @@ export default function BillsPage() {
         const pendingTotal = total - paidTotal;
 
         return (
-          <div key={entry._id} className="mb-6 bg-[#EDEAF5] p-4 rounded-xl">
+          <div key={entry._id} className="mb-6 bg-[#1C1C1E] p-4 rounded-xl">
             <div className="flex justify-between mb-2">
-              <h2 className="text-[#170B3F] font-semibold">
+              <h2 className="text-white font-semibold">
                 {entry.month}
               </h2>
 
-              <div className="flex gap-3 text-sm text-gray-500">
+              <div className="flex gap-3 text-sm text-[#9C9BA1]">
                 <button onClick={() => handleEditAll(entry._id)}>
                   Edit
                 </button>
@@ -387,7 +387,7 @@ export default function BillsPage() {
                           copy[i].name = e.target.value;
                           setEditedBills(copy);
                         }}
-                        className="flex-1 bg-transparent border px-2 text-[#170B3F]"
+                        className="flex-1 bg-transparent border px-2 text-white"
                       />
 
                       <input
@@ -397,7 +397,7 @@ export default function BillsPage() {
                           copy[i].dueDate = e.target.value;
                           setEditedBills(copy);
                         }}
-                        className="w-28 bg-transparent border px-2 text-[#170B3F]"
+                        className="w-28 bg-transparent border px-2 text-white"
                       />
 
                       <input
@@ -408,7 +408,7 @@ export default function BillsPage() {
                           copy[i].amount = Number(e.target.value);
                           setEditedBills(copy);
                         }}
-                        className="w-24 bg-transparent border px-2 text-[#170B3F] text-right"
+                        className="w-24 bg-transparent border px-2 text-white text-right"
                       />
                     </>
                   ) : (
@@ -416,8 +416,8 @@ export default function BillsPage() {
                       onClick={() => handleToggle(entry._id, i)}
                       className={`flex-1 cursor-pointer ${
                         bill.paid
-                          ? "line-through text-gray-500"
-                          : "text-[#170B3F]"
+                          ? "line-through text-[#9C9BA1]"
+                          : "text-white"
                       }`}
                     >
                       {bill.name} • {bill.dueDate}
@@ -428,8 +428,8 @@ export default function BillsPage() {
                     <span
                       className={`w-24 text-right ${
                         bill.paid
-                          ? "line-through text-gray-500"
-                          : "text-[#170B3F]"
+                          ? "line-through text-[#9C9BA1]"
+                          : "text-white"
                       }`}
                     >
                       {format(bill.amount)}
@@ -448,7 +448,7 @@ export default function BillsPage() {
             {isEditing && (
               <button
                 onClick={() => handleSaveAll(entry._id)}
-                className="mt-2 bg-[#6762FD] px-3 py-1 rounded text-sm"
+                className="mt-2 bg-[#EB5647] px-3 py-1 rounded text-sm"
               >
                 Save
               </button>
