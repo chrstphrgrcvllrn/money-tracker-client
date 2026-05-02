@@ -330,6 +330,65 @@ export default function SalaryPage() {
         </div>
       )}
 
+      {showExpenseForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/70">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-white text-lg font-semibold">Add Expense</h2>
+            <input
+              type="text"
+              placeholder="Expense name"
+              value={expenseName}
+              onChange={(e) => setExpenseName(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+            />
+            <input
+              type="number"
+              placeholder="Expense amount"
+              value={expenseAmount}
+              onChange={(e) => setExpenseAmount(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+            />
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                onClick={() => setShowExpenseForm(false)}
+                className="px-3 py-1 text-sm text-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveExpense}
+                className="px-3 py-1 bg-[#EB5647] text-white font-semibold rounded-lg text-sm"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/70">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+            <h2 className="text-white text-lg font-semibold">Confirm Delete</h2>
+            <p className="text-gray-400">Are you sure you want to delete this salary?</p>
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-3 py-1 text-sm text-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDeleteSalary}
+                className="px-3 py-1 bg-red-500 text-white font-semibold rounded-lg text-sm"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex mb-4 gap-2">
         <button
           className={`px-3 py-1 rounded ${
