@@ -256,7 +256,7 @@ export default function LoanPage() {
                   </div>
                 </div>
 
-                <p className="font-bold text-white">
+                <p className="font-bold text-[#EB5647]">
                   {showAmounts ? remaining.toLocaleString() : mask(remaining)}
                 </p>
               </button>

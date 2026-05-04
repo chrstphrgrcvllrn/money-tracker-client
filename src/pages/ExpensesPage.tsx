@@ -183,15 +183,7 @@ const ExpensesPage: React.FC = () => {
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
       {/* HEADER */}
-      <div className="mb-4 flex justify-between items-center">
-        {/* <h1 className="text-lg font-semibold text-white">Expenses</h1> */}
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-[#EB5647] text-white font-bold px-3 py-1 rounded-full"
-        >
-          +
-        </button>
-      </div>
+     
 
       {/* TOTALS */}
       <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
@@ -216,20 +208,31 @@ const ExpensesPage: React.FC = () => {
       </div>
 
       {/* TABS */}
-      <div className="flex gap-2 mb-4">
-        {["pending", "done", "monthly"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab as any)}
-            className={`px-2 py-1 rounded-xl text-xs capitalize ${
-              activeTab === tab
-                ? "bg-[#EB5647] text-white font-bold"
-                : "bg-[#1C1C1E] text-gray-400"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="flex gap-2 mb-4 justify-between">
+          <div className="flex gap-2 mb-4">
+            {["pending", "done", "monthly"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab as any)}
+                className={`px-2 py-1 rounded-xl text-xs capitalize ${
+                  activeTab === tab
+                    ? "bg-[#EB5647] text-white font-bold"
+                    : "bg-[#1C1C1E] text-gray-400"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          <div className="mb-4 flex justify-between items-center">
+            {/* <h1 className="text-lg font-semibold text-white">Expenses</h1> */}
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-[#EB5647] text-white font-bold px-3 py-1 rounded-full"
+            >
+              +
+            </button>
+          </div>
       </div>
 
       {/* LIST */}

@@ -209,43 +209,47 @@ export default function BillsPage() {
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
       {/* HEADER */}
-      <div className="mb-4 flex justify-between items-start">
-        {/* <h1 className="text-lg font-semibold text-white">
-          Bills
-        </h1> */}
-
-        <button
-          onClick={() => setShowForm(true)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#EB5647] text-white font-bold rounded-4xl text-sm"
-        >
-          +
-        </button>
-      </div>
+    
 
       {/* TABS */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setTab("ongoing")}
-          className={`px-3 py-1 rounded-full text-xs ${
-            tab === "ongoing"
-              ? "bg-[#EB5647] text-white"
-              : "bg-[#1C1C1E] text-gray-400"
-          }`}
-        >
-          Ongoing
-        </button>
+       <div className="flex gap-2 mb-4 justify-between">
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setTab("ongoing")}
+              className={`px-3 py-1 rounded-full text-xs ${
+                tab === "ongoing"
+                  ? "bg-[#EB5647] text-white"
+                  : "bg-[#1C1C1E] text-gray-400"
+              }`}
+            >
+              Ongoing
+            </button>
 
-        <button
-          onClick={() => setTab("done")}
-          className={`px-3 py-1 rounded-full text-xs ${
-            tab === "done"
-              ? "bg-[#EB5647] text-white"
-              : "bg-[#1C1C1E] text-gray-400"
-          }`}
-        >
-          Done
-        </button>
-      </div>
+            <button
+              onClick={() => setTab("done")}
+              className={`px-3 py-1 rounded-full text-xs ${
+                tab === "done"
+                  ? "bg-[#EB5647] text-white"
+                  : "bg-[#1C1C1E] text-gray-400"
+              }`}
+            >
+              Done
+            </button>
+          </div>
+
+            <div className="mb-4 flex justify-between items-start">
+            {/* <h1 className="text-lg font-semibold text-white">
+              Bills
+            </h1> */}
+
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-[0.7rem] py-[0.3rem] bg-[#EB5647] text-white font-bold rounded-4xl text-sm"
+            >
+              +
+            </button>
+          </div>
+        </div>
 
       {/* ADD MONTH MODAL */}
       {showForm && (

@@ -282,17 +282,7 @@ export default function SalaryPage() {
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
-      <div className="mb-4 flex justify-between items-start">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowForm(true)}
-            title="Add Salary"
-            className="mb-0 px-[0.7rem] py-[0.3rem] bg-[#EB5647] text-white font-bold rounded-4xl text-sm"
-          >
-            +
-          </button>
-        </div>
-      </div>
+      
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/70">
@@ -389,23 +379,37 @@ export default function SalaryPage() {
         </div>
       )}
 
-      <div className="flex mb-4 gap-2">
-        <button
-          className={`px-3 py-1 rounded ${
-            activeTab === "active" ? "bg-[#EB5647] text-white font-bold" : "bg-[#1C1C1E] text-white"
-          }`}
-          onClick={() => setActiveTab("active")}
-        >
-          Active
-        </button>
-        <button
-          className={`px-3 py-1 rounded ${
-            activeTab === "completed" ? "bg-[#EB5647] text-white font-bold" : "bg-[#1C1C1E] text-white"
-          }`}
-          onClick={() => setActiveTab("completed")}
-        >
-          Completed
-        </button>
+  <div className="flex mb-4 gap-2 justify-between">
+          <div className="flex mb-4 gap-2">
+            <button
+              className={`px-3 py-1 rounded ${
+                activeTab === "active" ? "bg-[#EB5647] text-white font-bold" : "bg-[#1C1C1E] text-white"
+              }`}
+              onClick={() => setActiveTab("active")}
+            >
+              Active
+            </button>
+            <button
+              className={`px-3 py-1 rounded ${
+                activeTab === "completed" ? "bg-[#EB5647] text-white font-bold" : "bg-[#1C1C1E] text-white"
+              }`}
+              onClick={() => setActiveTab("completed")}
+            >
+              Completed
+            </button>
+          </div>
+
+          <div className="mb-4 flex justify-between items-start">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowForm(true)}
+                title="Add Salary"
+                className="mb-0 px-[0.7rem] py-[0.3rem] bg-[#EB5647] text-white font-bold rounded-4xl text-sm"
+              >
+                +
+              </button>
+            </div>
+          </div>
       </div>
 
       {displayedSalaries.map((entry) => {
