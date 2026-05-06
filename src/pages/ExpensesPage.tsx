@@ -181,7 +181,7 @@ const ExpensesPage: React.FC = () => {
   // RENDER
   // =========================
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[rgba(17,19,18,0.55)] backdrop-blur-xl border border-white/10">
       {/* HEADER */}
      
 
