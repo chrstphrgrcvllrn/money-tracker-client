@@ -1,33 +1,65 @@
 const BASE_URL =
-  import.meta.env.NODE_ENV === "production"
+  import.meta.env.MODE === "production"
     ? `${import.meta.env.VITE_PROD_API_URL}/api/watchlist`
     : `${import.meta.env.VITE_DEV_API_URL}/api/watchlist`;
 
-export const getWatchlist = async () => {
-  const res = await fetch(BASE_URL);
-  return res.json();
+// -------------------------
+// SAFE FETCH WRAPPER
+// -------------------------
+const request = async (url: string, options?: RequestInit) => {
+  const res = await fetch(url, options);
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new Error(data?.message || "Request failed");
+  }
+
+  return data;
 };
 
+// -------------------------
+// GET WATCHLIST
+// -------------------------
+export const getWatchlist = async () => {
+  return request(BASE_URL);
+};
+
+// -------------------------
+// CREATE ITEM
+// -------------------------
 export const createWatchItem = async (item: any) => {
-  const res = await fetch(BASE_URL, {
+  return request(BASE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(item),
   });
-
-  return res.json();
 };
 
-export const updateWatchItem = async (id: string, updated: any) => {
+// -------------------------
+// UPDATE ITEM
+// -------------------------
+export const updateWatchItem = async (id: string, data: any) => {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(updated),
+    body: JSON.stringify(data),
   });
 
+  if (!res.ok) throw new Error("Not found");
+
   return res.json();
+};
+
+// -------------------------
+// DELETE ITEM
+// -------------------------
+export const deleteWatchItem = async (id: string) => {
+  return request(`${BASE_URL}/${id}`, {
+    method: "DELETE",
+  });
 };

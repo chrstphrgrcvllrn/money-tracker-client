@@ -5,7 +5,7 @@ export default function AppLayout() {
   return (
     <div className="flex">
       <BottomNavBar />
-      <main className="flex-1 bg-[#000000] p-0 h-[100svh] overflow-y-auto">
+      <main className="flex-1 bg-[#000000] p-0 h-[90svh] overflow-y-auto">
            <Outlet />
       </main>
     </div>

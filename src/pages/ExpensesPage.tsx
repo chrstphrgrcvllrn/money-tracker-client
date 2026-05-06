@@ -181,7 +181,7 @@ const ExpensesPage: React.FC = () => {
   // RENDER
   // =========================
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[rgba(17,19,18,0.55)] backdrop-blur-xl border border-white/10">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6">
       {/* HEADER */}
      
 
@@ -267,7 +267,7 @@ const ExpensesPage: React.FC = () => {
             })
           : sortedDates.map((date) => (
               <li key={date}>
-                <div className="text-gray-400 text-[10px] mb-1 font-semibold">
+                <div className="text-gray-400 text-[10px] mb-1 font-semibold ">
                   {date === today.toDateString()
                     ? "Today"
                     : date === yesterday.toDateString()
@@ -281,7 +281,7 @@ const ExpensesPage: React.FC = () => {
                 {groupedExpenses[date].map((exp) => (
                   <div
                     key={exp._id}
-                    className={`flex justify-between items-center p-2 bg-[#1C1C1E] rounded-xl ${
+                    className={`flex justify-between items-center p-2 bg-[#1C1C1E] rounded-xl mb-2 ${
                       exp.done ? "text-white" : ""
                     }`}
                   >

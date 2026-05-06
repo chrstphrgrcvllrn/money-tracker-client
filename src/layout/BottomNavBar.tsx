@@ -29,7 +29,8 @@ export default function BottomNavBar() {
   ];
 
   return (
-<nav className="fixed bottom-0 left-0 w-full bg-[#111312]  grid grid-cols-5 py-3 z-50 px-4">
+<nav className="fixed bottom-0 left-0 w-full  grid grid-cols-5 py-3 z-50 px-4   bg-[rgba(17,19,18,0.55)] backdrop-blur-xl border border-white/10">
+ {/* bg-[#111312]  */}
   {navItems.map((item) => {
     const Icon = item.icon;
 
