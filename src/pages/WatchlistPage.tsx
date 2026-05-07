@@ -37,6 +37,10 @@ const WatchlistPage: React.FC = () => {
 
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [link, setLink] = useState("");
+
+
+ 
 
   const API_KEY = import.meta.env.VITE_OMDB_API_KEY;
 
@@ -265,16 +269,22 @@ const WatchlistPage: React.FC = () => {
   // -------------------------
   // CRUD
   // -------------------------
-  const addItem = async () => {
-    if (!title) return;
+const addItem = async () => {
+  if (!title) return;
 
-    await createWatchItem({ title, current });
+  await createWatchItem({
+    title,
+    current,
+    link,
+  });
 
-    setTitle("");
-    setCurrent("");
-    setShowAddModal(false);
-    fetchWatchlist();
-  };
+  setTitle("");
+  setCurrent("");
+  setLink("");
+  setShowAddModal(false);
+
+  fetchWatchlist();
+};
 
   const startEdit = () => {
     const init: Record<string, Partial<WatchItem>> = {};
@@ -322,6 +332,34 @@ const handleDelete = async (id: string) => {
       [id]: { ...prev[id], [field]: value },
     }));
   };
+
+
+const openStreamingLink = (link?: string) => {
+  if (!link) return;
+
+  // NETFLIX
+  if (link.includes("netflix.com")) {
+    const netflixIdMatch = link.match(/title\/(\d+)/);
+
+    if (netflixIdMatch?.[1]) {
+      const id = netflixIdMatch[1];
+
+      const appUrl = `nflx://www.netflix.com/title/${id}`;
+
+      window.location.href = appUrl;
+
+      setTimeout(() => {
+        window.open(link, "_blank");
+      }, 800);
+
+      return;
+    }
+  }
+
+  // DEFAULT
+  window.open(link, "_blank");
+};
+
 
   // -------------------------
   // UI
@@ -389,7 +427,13 @@ const handleDelete = async (id: string) => {
               : null;
 
           return (
-            <li key={item._id} className="p-2 bg-[#1C1C1E] rounded text-white">
+         <li
+  key={item._id}
+  onClick={() => openStreamingLink(item.link)}
+  className={`p-2 bg-[#1C1C1E] rounded text-white ${
+    item.link ? "cursor-pointer" : ""
+  }`}
+>
               <div className="flex gap-3">
 
                 {posters[item.title] ? (
@@ -410,6 +454,16 @@ const handleDelete = async (id: string) => {
                         <div className="font-medium text-lg">
                           {item.title}
                         </div>
+                        
+
+                                          {item.link && (
+                    <button
+                      onClick={() => window.open(item.link, "_blank")}
+                      className="mt-2 text-xs bg-[#EB5647] px-2 py-1 rounded"
+                    >
+                      Open
+                    </button>
+                  )}
 
                         {/* CHECK / UNDO */}
                         <button
@@ -464,6 +518,14 @@ const handleDelete = async (id: string) => {
                         className="w-full bg-black p-1 rounded"
                       />
 
+                      <input
+                        value={editItems[item._id]?.link || item.link || ""}
+                        onChange={(e) =>
+                          updateEditField(item._id, "link", e.target.value)
+                        }
+                        placeholder="Streaming link"
+                        className="w-full bg-black p-1 rounded"
+                      />
                       <button
                         onClick={() => handleDelete(item._id)}
                         className="text-red-400 text-xs"
@@ -522,6 +584,12 @@ const handleDelete = async (id: string) => {
         placeholder="S1E1"
         className="w-full p-2 mt-2 bg-[#1C1C1E] rounded"
       />
+      <input
+  value={link}
+  onChange={(e) => setLink(e.target.value)}
+  placeholder="Netflix / Crunchyroll / Any Link"
+  className="w-full p-2 mt-2 bg-[#1C1C1E] rounded"
+/>
 
       <button
         onClick={addItem}

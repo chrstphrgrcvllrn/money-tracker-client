@@ -4,4 +4,5 @@ export type WatchItem = {
   current: string;
   nextRelease: string;
   status: "ongoing" | "completed";
+  link?: string;
 };
