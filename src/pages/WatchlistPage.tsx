@@ -334,31 +334,31 @@ const handleDelete = async (id: string) => {
   };
 
 
-const openStreamingLink = (link?: string) => {
-  if (!link) return;
+// const openStreamingLink = (link?: string) => {
+//   if (!link) return;
 
-  // NETFLIX
-  if (link.includes("netflix.com")) {
-    const netflixIdMatch = link.match(/title\/(\d+)/);
+//   // NETFLIX
+//   if (link.includes("netflix.com")) {
+//     const netflixIdMatch = link.match(/title\/(\d+)/);
 
-    if (netflixIdMatch?.[1]) {
-      const id = netflixIdMatch[1];
+//     if (netflixIdMatch?.[1]) {
+//       const id = netflixIdMatch[1];
 
-      const appUrl = `nflx://www.netflix.com/title/${id}`;
+//       const appUrl = `nflx://www.netflix.com/title/${id}`;
 
-      window.location.href = appUrl;
+//       window.location.href = appUrl;
 
-      setTimeout(() => {
-        window.open(link, "_blank");
-      }, 800);
+//       setTimeout(() => {
+//         window.open(link, "_blank");
+//       }, 800);
 
-      return;
-    }
-  }
+//       return;
+//     }
+//   }
 
-  // DEFAULT
-  window.open(link, "_blank");
-};
+//   // DEFAULT
+//   window.open(link, "_blank");
+// };
 
 
   // -------------------------
@@ -429,7 +429,7 @@ const openStreamingLink = (link?: string) => {
           return (
          <li
   key={item._id}
-  onClick={() => openStreamingLink(item.link)}
+  // onClick={() => openStreamingLink(item.link)}
   className={`p-2 bg-[#1C1C1E] rounded text-white ${
     item.link ? "cursor-pointer" : ""
   }`}
