@@ -495,7 +495,7 @@ const handleDelete = async (id: string) => {
                       {item.link && (
                     <button
                       onClick={() => window.open(item.link, "_blank")}
-                      className="mt-2 text-xs bg-[#2d2d2e] text-[#EB5647]  px-8 py-1 rounded"
+                      className="mt-2 text-xs bg-[#2d2d2e] text-gray-400  px-8 py-1 rounded"
                     >
                       Watch on netflix
                     </button>
