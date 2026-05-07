@@ -383,7 +383,7 @@ export default function SalaryPage() {
           <div className="flex mb-4 gap-2">
             <button
               className={`px-3 py-1 rounded ${
-                activeTab === "active" ? "bg-[#EB5647] text-white font-bold" : "bg-[#1C1C1E] text-white"
+                activeTab === "active" ? " bg-[#1c1c1e] text-[#EB5647]  font-bold" : "bg-[#1C1C1E] text-white"
               }`}
               onClick={() => setActiveTab("active")}
             >
@@ -391,7 +391,7 @@ export default function SalaryPage() {
             </button>
             <button
               className={`px-3 py-1 rounded ${
-                activeTab === "completed" ? "bg-[#EB5647] text-white font-bold" : "bg-[#1C1C1E] text-white"
+                activeTab === "completed" ? " bg-[#1c1c1e] text-[#EB5647]  font-bold" : "bg-[#1C1C1E] text-gray-400"
               }`}
               onClick={() => setActiveTab("completed")}
             >
@@ -404,7 +404,10 @@ export default function SalaryPage() {
               <button
                 onClick={() => setShowForm(true)}
                 title="Add Salary"
-                className="mb-0 px-[0.7rem] py-[0.3rem] bg-[#EB5647] text-white font-bold rounded-4xl text-sm"
+                className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1c1c1e] text-[#EB5647] font-bold rounded-4xl text-sm"
+                // bg-[#EB5647]   text-white
+               
+                
               >
                 +
               </button>

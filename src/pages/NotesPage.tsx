@@ -153,7 +153,7 @@ const highlightText = (text: string, done: boolean) => {
 
         <button
           onClick={addNote}
-          className="bg-[#EB5647] text-white font-bold px-2 py-1 rounded"
+          className=" bg-[#1c1c1e] text-[#EB5647] font-bold px-2 py-1 rounded"
         >
           Add
         </button>
@@ -167,7 +167,7 @@ const highlightText = (text: string, done: boolean) => {
             onClick={() => setActiveTab(tab as any)}
             className={`px-2 py-1 rounded-xl text-xs capitalize ${
               activeTab === tab
-                ? "bg-[#EB5647] text-white font-bold"
+                ? "bg-[#1c1c1e] text-[#EB5647] font-bold"
                 : "bg-[#1C1C1E] text-gray-400"
             }`}
           >

@@ -38,7 +38,7 @@ const ThoughtsPage: React.FC = () => {
 
         <button
           onClick={addThought}
-          className="bg-[#EB5647] text-white font-bold px-2 py-1 rounded"
+          className="bg-[#1c1c1e] text-[#EB5647] font-bold px-2 py-1 rounded"
         >
           Add
         </button>

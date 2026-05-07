@@ -142,7 +142,7 @@ export default function LoanPage() {
 
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-[0.7rem] py-[0.3rem] bg-[#EB5647] font-bold text-white rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem]  bg-[#1c1c1e] text-[#EB5647] font-bold   rounded-4xl text-sm"
           >
             +
           </button>

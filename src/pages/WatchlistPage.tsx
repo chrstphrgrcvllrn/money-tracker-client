@@ -376,7 +376,7 @@ const handleDelete = async (id: string) => {
               onClick={() => setTab(t as any)}
               className={`px-2 py-1 rounded ${
                 tab === t
-                  ? "bg-[#EB5647] text-white"
+                  ? "bg-[#1c1c1e] text-[#EB5647]"
                   : "bg-[#1C1C1E] text-gray-400"
               }`}
             >
@@ -394,7 +394,7 @@ const handleDelete = async (id: string) => {
 
               <button
                 onClick={() => setShowAddModal(true)}
-                className="bg-[#EB5647] px-2 py-1 rounded text-white"
+                className=" bg-[#1c1c1e] text-[#EB5647] px-2 py-1 rounded "
               >
                 +
               </button>
@@ -456,14 +456,7 @@ const handleDelete = async (id: string) => {
                         </div>
                         
 
-                                          {item.link && (
-                    <button
-                      onClick={() => window.open(item.link, "_blank")}
-                      className="mt-2 text-xs bg-[#EB5647] px-2 py-1 rounded"
-                    >
-                      Open
-                    </button>
-                  )}
+                                          
 
                         {/* CHECK / UNDO */}
                         <button
@@ -499,6 +492,14 @@ const handleDelete = async (id: string) => {
                           {progress.next.number}
                         </div>
                       )}
+                      {item.link && (
+                    <button
+                      onClick={() => window.open(item.link, "_blank")}
+                      className="mt-2 text-xs bg-[#2d2d2e] text-[#EB5647]  px-8 py-1 rounded"
+                    >
+                      Watch on netflix
+                    </button>
+                  )}
                     </>
                   ) : (
                     <div className="space-y-1">
