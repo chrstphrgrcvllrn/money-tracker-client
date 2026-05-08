@@ -11,5 +11,6 @@ export type Subscription = {
   amount: number;
   billing: "monthly" | "yearly";
   type: "auto" | "manual";
+  startDate?: string; // ✅ ADD THIS
   payments?: Payment[];
 };
