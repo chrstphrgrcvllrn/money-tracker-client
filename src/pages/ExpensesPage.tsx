@@ -293,10 +293,10 @@ const ExpensesPage: React.FC = () => {
                       >
                         {exp.text}
                       </span>
-                      <span className="text-white text-xs">
+                      <span className="text-[#EB5647] text-xs">
                         ₱{exp.amount.toLocaleString()}
                       </span>
-                      <span className="text-gray-600 text-[10px]">
+                      {/* <span className="text-gray-600 text-[10px]">
                         {new Date(exp.createdAt).toLocaleTimeString(
                           undefined,
                           {
@@ -304,7 +304,7 @@ const ExpensesPage: React.FC = () => {
                             minute: "2-digit",
                           }
                         )}
-                      </span>
+                      </span> */}
                     </div>
 
                     <div className="flex items-center gap-2">

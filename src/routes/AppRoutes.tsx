@@ -7,10 +7,11 @@ import BillsPage from "@/pages/BillsPage";
 import NotesPage from "@/pages/NotesPage";
 import SavingsPage from "@/pages/SavingsPage";
 import ExpensesPage from "@/pages/ExpensesPage";
-import Calculator from "@/pages/Calculator"
+// import Calculator from "@/pages/Calculator"
 import CalendarPage from "@/pages/CalendarPage"
 import ThoughtsPage from "@/pages/ThoughtsPage"
 import WatchlistPage from "@/pages/WatchlistPage"
+import SubscriptionPage from "@/pages/SubscriptionPage";
 // import PatientDetails from "@/pages/Patients/PatientDetails";
 // import AppointmentsList from "@/pages/Appointments/AppointmentsList"
 
@@ -27,10 +28,11 @@ export default function AppRoutes() {
         <Route path="notes" element={<NotesPage/>} />
         <Route path="savings" element={<SavingsPage/>} />
         <Route path="expenses" element={<ExpensesPage/>} />
-        <Route path="calculator" element={<Calculator/>} />
+        {/* <Route path="calculator" element={<Calculator/>} /> */}
         <Route path="calendar" element={<CalendarPage/>} />
         <Route path="thoughts" element={<ThoughtsPage/>} />
         <Route path="watchlist" element={<WatchlistPage/>} />
+        <Route path="subscription" element={<SubscriptionPage/>} />
         
         {/* <Route path="patients/:id" element={<PatientDetails />} /> */}
         {/* <Route path="appointments" element={<AppointmentsList />} /> */}

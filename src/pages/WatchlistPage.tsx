@@ -388,13 +388,17 @@ const handleDelete = async (id: string) => {
         <div className="flex gap-2">
           {!isEditMode ? (
             <>
-              <button onClick={startEdit} className="bg-[#1C1C1E] p-2 rounded">
+              <button onClick={startEdit} 
+              // className="bg-[#1C1C1E] p-2 rounded"
+               className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1c1c1e] text-[#EB5647] font-bold rounded-4xl text-sm"
+              >
                 <PencilIcon className="w-4 h-4 text-white" />
               </button>
 
               <button
                 onClick={() => setShowAddModal(true)}
-                className=" bg-[#1c1c1e] text-[#EB5647] px-2 py-1 rounded "
+                // className=" bg-[#1c1c1e] text-[#EB5647] px-2 py-1 rounded "
+                 className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1c1c1e] text-[#EB5647] font-bold rounded-4xl text-sm"
               >
                 +
               </button>

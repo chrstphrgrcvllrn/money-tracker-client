@@ -118,12 +118,12 @@ const CalendarPage: React.FC = () => {
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={() => changeMonth(-1)}
-          className="bg-[#1C1C1E] px-3 py-1 rounded-xl text-sm"
+          className="bg-[#1C1C1E] px-3 py-1 rounded-2xl text-sm"
         >
           ◀
         </button>
 
-        <h1 className="text-lg font-bold">
+        <h1 className="text-2xl font-bold">
           {monthNames[month]} {year}
         </h1>
 
@@ -172,7 +172,7 @@ const CalendarPage: React.FC = () => {
               onClick={() =>
                 currentMonth && handleAddMinutes(day, month, year)
               }
-              className={`aspect-square p-0.5 flex flex-col justify-between items-center rounded-md text-[10px] font-semibold cursor-pointer ${bgClass}`}
+              className={`aspect-square p-0.5 flex flex-col justify-center items-center  rounded-sm text-[10px] font-semibold cursor-pointer ${bgClass}`}
             >
               <span className="text-sm">{day}</span>
               {minutes > 0 && (

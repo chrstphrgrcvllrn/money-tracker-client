@@ -168,7 +168,7 @@ export default function SavingsPage() {
       <div className="mb-4 flex justify-between items-start">
         {/* <h1 className="text-lg font-semibold text-white">Savings</h1> */}
 
-        <div className="flex items-center gap-3">
+        <div className="flex w-full items-center justify-between gap-3">
           <button
             onClick={() => setShowAmounts((prev) => !prev)}
             className="text-gray-400"
@@ -186,6 +186,7 @@ export default function SavingsPage() {
           >
             +
           </button>
+
         </div>
       </div>
 
@@ -294,12 +295,12 @@ export default function SavingsPage() {
                       {item.name}
                     </p>
 
-                    <p className="text-xs text-[#9C9BA1]">
+                    {/* <p className="text-xs text-[#9C9BA1]">
                       Deposits:{" "}
                       <span className="text-[#9C9BA1] font-medium">
                         {showAmounts ? deposits.toLocaleString() : mask(deposits)}
                       </span>
-                    </p>
+                    </p> */}
                   </div>
                 </div>
 

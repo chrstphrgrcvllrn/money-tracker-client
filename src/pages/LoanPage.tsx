@@ -128,7 +128,8 @@ export default function LoanPage() {
       <div className="mb-4 flex justify-between items-start">
         {/* <h1 className="text-lg font-semibold text-white">Loans</h1> */}
 
-        <div className="flex items-center gap-3">
+       
+        <div className="flex w-full items-center justify-between gap-3">
           <button
             onClick={() => setShowAmounts((prev) => !prev)}
             className="text-gray-400"

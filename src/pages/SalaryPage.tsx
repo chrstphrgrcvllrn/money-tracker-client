@@ -281,7 +281,7 @@ export default function SalaryPage() {
   };
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6  bg-[rgba(17,19,18,0.55)] backdrop-blur-xl border border-white/10">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6  bg-black">
       
 
       {showForm && (
