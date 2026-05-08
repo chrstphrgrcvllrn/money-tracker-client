@@ -19,6 +19,12 @@ type SubType = "auto" | "manual";
 const normalizeType = (type?: string): SubType =>
   type?.toLowerCase().trim() === "manual" ? "manual" : "auto";
 
+const normalizeBilling = (billing?: string) => {
+  const val = billing?.toLowerCase();
+  if (val === "yearly") return "yearly";
+  return "monthly"; // default fallback
+};
+
 const formatDate = (date?: string) => {
   if (!date) return "";
   return new Date(date).toISOString().slice(0, 10);
@@ -86,7 +92,7 @@ export default function SubscriptionPage() {
     const payload = {
       name: form.name.trim(),
       amount: Number(form.amount),
-      billing: form.billing,
+      billing: form.billing ?? "monthly", // ✅ safety fallback
       type: form.type,
       startDate: form.startDate,
     };
@@ -111,7 +117,7 @@ export default function SubscriptionPage() {
     setForm({
       name: item.name ?? "",
       amount: item.amount?.toString() ?? "",
-      billing: item.billing,
+      billing: normalizeBilling(item.billing),
       type: normalizeType(item.type),
       startDate: formatDate(item.startDate),
     });
@@ -193,46 +199,31 @@ export default function SubscriptionPage() {
         </button>
       </div>
 
-{/* 📊 YEARLY DASHBOARD */}
-<div className="mb-6 grid grid-cols-3 gap-3">
+      {/* 📊 YEARLY DASHBOARD */}
+      <div className="mb-6 grid grid-cols-3 gap-3">
 
-  {/* Paid */}
-  <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
-    <p className="text-gray-400 text-xs">
-      Paid
-    </p>
-    <p className="text-lg font-bold text-green-400 mt-2">
-      {showAmounts
-        ? totalPaidThisYear.toLocaleString()
-        : mask(totalPaidThisYear)}
-    </p>
-  </div>
+        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
+          <p className="text-gray-400 text-xs">Paid</p>
+          <p className="text-lg font-bold text-green-400 mt-2">
+            {showAmounts ? totalPaidThisYear.toLocaleString() : mask(totalPaidThisYear)}
+          </p>
+        </div>
 
-  {/* Total */}
-  <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
-    <p className="text-gray-400 text-xs">
-      Total
-    </p>
-    <p className="text-lg font-bold text-white mt-2">
-      {showAmounts
-        ? totalToPayThisYear.toLocaleString()
-        : mask(totalToPayThisYear)}
-    </p>
-  </div>
+        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
+          <p className="text-gray-400 text-xs">Total</p>
+          <p className="text-lg font-bold text-white mt-2">
+            {showAmounts ? totalToPayThisYear.toLocaleString() : mask(totalToPayThisYear)}
+          </p>
+        </div>
 
-  {/* Pending */}
-  <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
-    <p className="text-gray-400 text-xs">
-      Pending 
-    </p>
-    <p className="text-lg font-bold text-yellow-400 mt-2">
-      {showAmounts
-        ? pendingThisYear.toLocaleString()
-        : mask(pendingThisYear)}
-    </p>
-  </div>
+        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
+          <p className="text-gray-400 text-xs">Pending</p>
+          <p className="text-lg font-bold text-yellow-400 mt-2">
+            {showAmounts ? pendingThisYear.toLocaleString() : mask(pendingThisYear)}
+          </p>
+        </div>
 
-</div>
+      </div>
 
       {/* LIST */}
       <div className="space-y-3">
@@ -251,8 +242,9 @@ export default function SubscriptionPage() {
                     {item.name}
                   </p>
 
+                  {/* ✅ FIXED BILLING DISPLAY */}
                   <p className="text-xs text-[#9C9BA1]">
-                    {item.billing} | {normalizeType(item.type)}
+                    {normalizeBilling(item.billing)} | {normalizeType(item.type)}
                   </p>
                 </div>
 
@@ -334,10 +326,9 @@ export default function SubscriptionPage() {
         })}
       </div>
 
-      {/* MODAL */}
+      {/* MODAL (unchanged) */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/70">
-
           <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3">
 
             <h2 className="text-white text-lg font-semibold">
@@ -362,6 +353,20 @@ export default function SubscriptionPage() {
               }
               className="w-full px-3 py-2 rounded-lg text-white border border-gray-600"
             />
+            {/* BILLING */}
+<select
+  value={form.billing}
+  onChange={(e) =>
+    setForm((p) => ({
+      ...p,
+      billing: e.target.value as "monthly" | "yearly",
+    }))
+  }
+  className="w-full px-3 py-2 rounded-lg text-white bg-[#1C1C1E] border border-gray-600"
+>
+  <option value="monthly">Monthly</option>
+  <option value="yearly">Yearly</option>
+</select>
 
             <select
               value={form.type}
