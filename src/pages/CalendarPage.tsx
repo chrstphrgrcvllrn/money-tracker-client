@@ -1,213 +1,427 @@
-import { useEffect, useState } from "react";
-import { getExercise, addExercise } from "../api/exercise";
+import {
+  // useEffect,
+  useMemo,
+  // useRef,
+  useState,
+} from "react";
 
-type ExerciseData = {
-  [key: string]: number; // "YYYY-MM-DD": minutes
-};
+import {
+  // getEvents,
+  createEvent,
+} from "../api/calendar";
+
+import type {
+  CalendarEvent,
+} from "../types/calendar.type";
+
+type ActionType =
+  | "exercise"
+  | "ooo"
+  | "birthday"
+  | "leave"
+  | "event"
+  | "holiday"
+  | "";
 
 const CalendarPage: React.FC = () => {
   const today = new Date();
 
-  const [currentDate, setCurrentDate] = useState(today);
-  const [exerciseData, setExerciseData] = useState<ExerciseData>({});
+  const [events, setEvents] = useState<
+    CalendarEvent[]
+  >([]);
 
-  // Load exercise data
-  useEffect(() => {
-    getExercise().then((data) => {
-      const mapped: ExerciseData = {};
+  // MODAL STATE
+  const [modalOpen, setModalOpen] =
+    useState(false);
 
-      data.forEach((item: any) => {
-        mapped[item.date] = item.minutes;
-      });
+  const [selectedDate, setSelectedDate] =
+    useState<string>("");
 
-      setExerciseData(mapped);
-    });
-  }, []);
+  const [actionType, setActionType] =
+    useState<ActionType>("");
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const [inputValue, setInputValue] =
+    useState("");
 
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const [minutes, setMinutes] =
+    useState<number | "">("");
 
-  const days: { day: number; month: number; year: number; currentMonth: boolean }[] = [];
+  // const currentMonthRef =
+  //   useRef<HTMLDivElement | null>(null);
 
-  // Previous month
-  const prevMonth = month - 1 < 0 ? 11 : month - 1;
-  const prevYear = month - 1 < 0 ? year - 1 : year;
-  const prevMonthLastDate = new Date(year, month, 0).getDate();
+  // useEffect(() => {
+  //   getEvents().then(setEvents);
+  // }, []);
 
-  for (let i = firstDayOfMonth - 1; i >= 0; i--) {
-    days.push({
-      day: prevMonthLastDate - i,
-      month: prevMonth,
-      year: prevYear,
-      currentMonth: false,
-    });
-  }
-
-  // Current month
-  for (let d = 1; d <= daysInMonth; d++) {
-    days.push({ day: d, month, year, currentMonth: true });
-  }
-
-  // Next month
-  const nextMonth = month + 1 > 11 ? 0 : month + 1;
-  const nextYear = month + 1 > 11 ? year + 1 : year;
-
-  let nextDayCounter = 1;
-  while (days.length % 7 !== 0) {
-    days.push({
-      day: nextDayCounter++,
-      month: nextMonth,
-      year: nextYear,
-      currentMonth: false,
-    });
-  }
-
-  const formatKey = (day: number, month: number, year: number) =>
-    `${year}-${month + 1}-${day}`;
-
-  const isToday = (day: number, month: number, year: number) =>
-    day === today.getDate() &&
-    month === today.getMonth() &&
-    year === today.getFullYear();
-
-  const handleAddMinutes = async (day: number, month: number, year: number) => {
-    const key = formatKey(day, month, year);
-
-    const input = prompt("Enter minutes:");
-    if (!input) return;
-
-    const minutes = parseInt(input);
-    if (isNaN(minutes)) return;
-
-    const updated = await addExercise(key, minutes);
-    setExerciseData((prev) => ({
-      ...prev,
-      [key]: updated.minutes,
-    }));
-  };
-
-  const changeMonth = (offset: number) => {
-    setCurrentDate(new Date(year, month + offset, 1));
-  };
+  const currentYear = today.getFullYear();
+  // const currentMonth = today.getMonth();
 
   const monthNames = [
     "January","February","March","April","May","June",
     "July","August","September","October","November","December",
   ];
 
-  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const formatKey = (
+    d: number,
+    m: number,
+    y: number
+  ) => `${y}-${m + 1}-${d}`;
 
-  // ✅ Total run days
-  const totalRunDays = Object.values(exerciseData).filter((m) => m > 0).length;
+  const isToday = (
+    d: number,
+    m: number,
+    y: number
+  ) =>
+    d === today.getDate() &&
+    m === today.getMonth() &&
+    y === today.getFullYear();
 
-  // ✅ Today minutes
-  const todayKey = formatKey(
-    today.getDate(),
-    today.getMonth(),
-    today.getFullYear()
+  // GROUP EVENTS
+  const eventMap = useMemo(() => {
+    const map: Record<string, CalendarEvent[]> = {};
+
+    events.forEach((e) => {
+      if (!map[e.date]) map[e.date] = [];
+      map[e.date].push(e);
+    });
+
+    return map;
+  }, [events]);
+
+  // CREATE EVENT
+  const addEvent = async (
+    type: CalendarEvent["type"],
+    date: string,
+    title?: string,
+    minutes?: number
+  ) => {
+    const newEvent = await createEvent({
+      type,
+      date,
+      title,
+      minutes,
+    });
+
+    setEvents((prev) => [...prev, newEvent]);
+  };
+
+  // OPEN MODAL
+  const openModal = (
+    d: number,
+    m: number,
+    y: number
+  ) => {
+    setSelectedDate(formatKey(d, m, y));
+    setActionType("");
+    setInputValue("");
+    setMinutes("");
+    setModalOpen(true);
+  };
+
+  // SUBMIT
+  const handleSubmit = async () => {
+    if (!actionType) return;
+
+    if (actionType === "exercise") {
+      await addEvent(
+        "exercise",
+        selectedDate,
+        undefined,
+        Number(minutes)
+      );
+    }
+
+    if (actionType === "ooo") {
+      await addEvent(
+        "ooo",
+        selectedDate,
+        inputValue
+      );
+    }
+
+    if (actionType === "birthday") {
+      await addEvent(
+        "birthday",
+        selectedDate,
+        inputValue
+      );
+    }
+
+    if (actionType === "leave") {
+      await addEvent(
+        "leave",
+        selectedDate,
+        inputValue
+      );
+    }
+
+    if (actionType === "event") {
+      await addEvent(
+        "event",
+        selectedDate,
+        inputValue
+      );
+    }
+    if (actionType === "holiday") {
+  await addEvent(
+    "holiday",
+    selectedDate,
+    inputValue
   );
-  const todayMinutes = exerciseData[todayKey] || 0;
+}
+
+    setModalOpen(false);
+  };
+
+  const generateCalendarDays = (
+    month: number,
+    year: number
+  ) => {
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(
+      year,
+      month + 1,
+      0
+    ).getDate();
+
+    const days: any[] = [];
+
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      days.push({
+        day: d,
+        month,
+        year,
+      });
+    }
+
+    return days;
+  };
 
   return (
-    <div className="h-screen max-w-md mx-auto bg-[#000000] flex flex-col px-4 pt-4 pb-4 text-white">
+    <div className="h-screen max-w-md mx-auto bg-black text-white px-4 pt-4 pb-10 overflow-y-auto">
 
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-3">
-        <button
-          onClick={() => changeMonth(-1)}
-          className="bg-[#1C1C1E] px-3 py-1 rounded-2xl text-sm"
-        >
-          ◀
-        </button>
+      {/* TITLE */}
+      <h1 className="text-3xl font-bold mb-5">
+        {currentYear} Calendar
+      </h1>
 
-        <h1 className="text-2xl font-bold">
-          {monthNames[month]} {year}
-        </h1>
+      {/* MODAL */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
+          <div className="bg-[#1C1C1E] p-4 rounded-xl w-72">
 
-        <button
-          onClick={() => changeMonth(1)}
-          className="bg-[#1C1C1E] px-3 py-1 rounded-xl text-sm"
-        >
-          ▶
-        </button>
-      </div>
+            <h2 className="font-bold mb-3">
+              Add Event
+            </h2>
 
-      {/* WEEK DAYS */}
-      <div className="grid grid-cols-7 gap-1 mb-1 text-center text-xs">
-        {weekDays.map((day, i) => (
-          <div
-            key={day}
-            className={i === 0 || i === 6 ? "text-red-500" : "text-gray-400"}
-          >
-            {day}
+            {/* RADIO BUTTONS */}
+            <div className="flex flex-col gap-2 text-sm">
+
+              {[
+                  "exercise",
+                  "ooo",
+                  "birthday",
+                  "leave",
+                  "event",
+                  "holiday",
+                ].map((type, i) => (
+                  <label
+                    key={`${type}-${i}`}
+                    className="flex items-center gap-2"
+                  >
+                    <input
+                      type="radio"
+                      name="type"
+                      value={type}
+                      checked={actionType === type}
+                      onChange={() =>
+                        setActionType(type as ActionType)
+                      }
+                    />
+                    {type.toUpperCase()}
+                  </label>
+                ))}
+            </div>
+
+            {/* INPUTS */}
+            {actionType === "exercise" && (
+              <input
+                type="number"
+                placeholder="Minutes"
+                className="mt-3 w-full p-2 bg-black rounded"
+                value={minutes}
+                onChange={(e) =>
+                  setMinutes(
+                    Number(e.target.value)
+                  )
+                }
+              />
+            )}
+
+            {actionType &&
+              actionType !== "exercise" && (
+                <input
+                  type="text"
+                  placeholder="Title / Reason"
+                  className="mt-3 w-full p-2 bg-black rounded"
+                  value={inputValue}
+                  onChange={(e) =>
+                    setInputValue(
+                      e.target.value
+                    )
+                  }
+                />
+              )}
+
+            {/* ACTIONS */}
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={() =>
+                  setModalOpen(false)
+                }
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleSubmit}
+                className="text-green-400"
+              >
+                Save
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
-      {/* CALENDAR GRID */}
-      <div className="grid grid-cols-7 gap-1">
-        {days.map((d, index) => {
-          const { day, month, year, currentMonth } = d;
-          const key = formatKey(day, month, year);
-          const minutes = exerciseData[key] || 0;
+      {/* GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-          const isCurrent = currentMonth && isToday(day, month, year);
-          const dayOfWeek = index % 7;
-          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        {Array.from({ length: 12 }).map((_, monthIndex) => {
 
-          const bgClass = minutes > 0
-            ? "bg-[#EB5647] text-white"
-            : isCurrent
-            ? "bg-[#1C1C1E] border-2 border-[#EB5647]"
-            : !currentMonth
-            ? "bg-[#1C1C1E] text-[#9C9BA1]"
-            : "bg-[#1C1C1E] " + (isWeekend ? "text-[#9C9BA1]" : "text-white");
+          const days =
+            generateCalendarDays(
+              monthIndex,
+              currentYear
+            );
 
           return (
             <div
-              key={index}
-              onClick={() =>
-                currentMonth && handleAddMinutes(day, month, year)
-              }
-              className={`aspect-square p-0.5 flex flex-col justify-center items-center  rounded-sm text-[10px] font-semibold cursor-pointer ${bgClass}`}
+              key={monthIndex}
+              className="bg-[#0D0D0D] rounded-xl p-3"
             >
-              <span className="text-sm">{day}</span>
-              {minutes > 0 && (
-                <span className="text-[9px] font-bold">{minutes}m</span>
-              )}
+
+              {/* MONTH TITLE */}
+              <div className="text-center font-bold mb-3">
+                {monthNames[monthIndex]}
+              </div>
+
+              {/* WEEK HEADER */}
+              <div className="grid grid-cols-7 gap-1 text-[10px] text-center text-gray-400 mb-1">
+                {["S","M","T","W","T","F","S"].map((d, i) => (
+                  <div key={`${d}-${i}`}>{d}</div>
+                ))}
+              </div>
+
+              {/* DAYS */}
+              <div className="grid grid-cols-7 gap-1">
+
+                {days.map((d, i) => {
+
+                  if (!d) return <div key={i} />;
+
+                  const key = formatKey(
+                    d.day,
+                    d.month,
+                    d.year
+                  );
+
+                  const dayEvents =
+                    eventMap[key] || [];
+
+                  const hasExercise =
+                    dayEvents.some(e => e.type === "exercise");
+
+                  const hasBirthday =
+                    dayEvents.some(e => e.type === "birthday");
+
+                  const hasOOO =
+                    dayEvents.some(e => e.type === "ooo");
+
+                  const hasLeave =
+                    dayEvents.some(e => e.type === "leave");
+
+                  const hasEvent =
+                    dayEvents.some(e => e.type === "event");
+
+                    const hasHoliday =
+                    dayEvents.some(e => e.type === "holiday");
+
+                  const isCurrent =
+                    isToday(
+                      d.day,
+                      d.month,
+                      d.year
+                    );
+
+                  const baseStyle = isCurrent
+                    ? "border border-[#EB5647]"
+                    : "bg-[#1C1C1E]";
+
+                  return (
+                    <div
+                      key={key}
+                      onClick={() =>
+                        openModal(
+                          d.day,
+                          d.month,
+                          d.year
+                        )
+                      }
+                      className={`aspect-square flex flex-col items-center justify-center rounded text-[10px] cursor-pointer ${baseStyle}`}
+                    >
+                      {/* DAY */}
+                      <span>{d.day}</span>
+
+                      {/* DOT INDICATORS */}
+                    <div className="flex gap-[2px] mt-1">
+                      {hasExercise && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      )}
+
+                      {hasBirthday && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-pink-500" />
+                      )}
+
+                      {hasEvent && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                      )}
+
+                      {hasOOO && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+                      )}
+
+                      {hasLeave && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                      )}
+
+                      {hasHoliday && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      )}
+                    </div>
+                    </div>
+                  );
+                })}
+
+              </div>
             </div>
           );
         })}
       </div>
-
-      {/* RUN PROGRESS */}
-      {totalRunDays > 0 && (
-        <div className="mt-3 p-3 rounded-xl bg-[#1C1C1E] text-center">
-
-          <h2 className="text-3xl font-bold text-[#EB5647]">
-            Day {totalRunDays} Complete 🏃
-          </h2>
-
-          <p className="text-xs text-gray-400 mt-1">
-            Keep the streak going
-          </p>
-
-          {todayMinutes > 0 && (
-            <p className="text-sm mt-2 text-white">
-              You&apos;ve finished{" "}
-              <span className="text-[#EB5647] font-bold">
-                {todayMinutes}
-              </span>{" "}
-              minutes today! Good job!
-            </p>
-          )}
-
-        </div>
-      )}
-
     </div>
   );
 };
