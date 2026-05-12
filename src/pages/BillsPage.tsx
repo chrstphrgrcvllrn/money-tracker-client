@@ -253,7 +253,7 @@ export default function BillsPage() {
 
       {/* ADD MONTH MODAL */}
       {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xl">
           <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
             <h2 className="text-white mb-3">Add Month</h2>
 
@@ -264,7 +264,7 @@ export default function BillsPage() {
               className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-white"
             />
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2  text-white">
               <button onClick={() => setShowForm(false)}>Cancel</button>
               <button
                 onClick={handleAddMonth}
@@ -279,7 +279,7 @@ export default function BillsPage() {
 
       {/* ADD BILL MODAL */}
       {showBillModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xl">
           <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
             <h2 className="text-white mb-3">Add Bill</h2>
 
@@ -305,7 +305,7 @@ export default function BillsPage() {
               className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-white"
             />
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2  text-white">
               <button onClick={() => setShowBillModal(false)}>Cancel</button>
               <button
                 onClick={handleSaveBill}
@@ -320,7 +320,7 @@ export default function BillsPage() {
 
       {/* DUPLICATE MODAL */}
       {showDuplicateModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xl">
           <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
             <h2 className="text-white mb-3">Duplicate Month</h2>
 
@@ -331,7 +331,7 @@ export default function BillsPage() {
               className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-white"
             />
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 text-white">
               <button onClick={() => setShowDuplicateModal(false)}>Cancel</button>
               <button
                 onClick={handleSaveDuplicate}

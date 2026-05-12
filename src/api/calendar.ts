@@ -1,9 +1,16 @@
 import type { CalendarEvent } from "../types/calendar.type";
 
-const API_URL =
-  import.meta.env.PROD
-    ? `${import.meta.env.VITE_PROD_API_URL}/api/calendar-events`
-    : `${import.meta.env.VITE_DEV_API_URL}/api/calendar-events`;
+// const API_URL =
+//   import.meta.env.PROD
+//     ? `${import.meta.env.VITE_PROD_API_URL}/api/calendar-events`
+//     : `${import.meta.env.VITE_DEV_API_URL}/api/calendar-events`;
+
+
+    const API_URL = import.meta.env.NODE_ENV === 'production'
+  ? `${import.meta.env.VITE_PROD_API_URL}/api/calendar-events` // actual site
+  : `${import.meta.env.VITE_DEV_API_URL}/api/calendar-events` ; // local/dev
+
+
 
 // GET all events
 export const getEvents = async (): Promise<

@@ -328,7 +328,7 @@ export default function SubscriptionPage() {
 
       {/* MODAL (unchanged) */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl/70">
           <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3">
 
             <h2 className="text-white text-lg font-semibold">

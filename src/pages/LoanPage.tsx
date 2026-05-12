@@ -152,7 +152,7 @@ export default function LoanPage() {
 
       {/* ADD LOAN MODAL */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#000000]/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
           <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
             <h2 className="text-white text-lg font-semibold">Add Loan</h2>
 

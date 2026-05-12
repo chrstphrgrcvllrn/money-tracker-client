@@ -340,7 +340,7 @@ const ExpensesPage: React.FC = () => {
 
       {/* MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-xl flex items-center justify-center">
           <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm">
             <h2 className="text-white mb-3 font-semibold">
               {editingId ? "Edit Expense" : "Add Expense"}
