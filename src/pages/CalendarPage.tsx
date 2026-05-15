@@ -238,7 +238,7 @@ useEffect(() => {
       ========================= */}
       {listModalOpen && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-xl flex items-center justify-center z-[9999]">
-          <div className="bg-[#1C1C1E] w-[90%] max-w-md rounded-xl p-4 max-h-[80vh] overflow-y-auto">
+          <div className="bg-[#1f1b1c] w-[90%] max-w-md rounded-xl p-4 max-h-[80vh] overflow-y-auto">
 
             {/* HEADER */}
             <div className="flex justify-between items-center mb-3">
@@ -281,7 +281,7 @@ useEffect(() => {
               <div key={monthLabel} className="mb-6">
 
                 {/* MONTH SEPARATOR */}
-                <div className="sticky top-0 bg-[#1C1C1E] py-2 mb-3 border-b border-white/10">
+                <div className="sticky top-0 bg-[#1f1b1c] py-2 mb-3 border-b border-white/10">
                   <div className="text-xs uppercase tracking-widest text-gray-400">
                     {monthLabel}
                   </div>
@@ -370,7 +370,7 @@ ref={(el) => {
                 className={`aspect-square flex flex-col items-center justify-center rounded text-[10px] cursor-pointer transition ${
                   isCurrent
                     ? "border border-red-500"
-                    : "bg-[#1C1C1E]"
+                    : "bg-[#1f1b1c]"
                 }`}
               >
 
@@ -411,7 +411,7 @@ ref={(el) => {
       ========================= */}
       {modalOpen && (
 <div className="fixed inset-0 bg-black/30 backdrop-blur-xl flex items-center justify-center z-[9999]">
-    <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm relative">
+    <div className="bg-[#1f1b1c] p-4 rounded-xl w-[90%] max-w-sm relative">
 
       {/* CLOSE BUTTON */}
       <button

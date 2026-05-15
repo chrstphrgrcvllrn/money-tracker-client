@@ -193,7 +193,7 @@ export default function SavingsPage() {
       {/* ✅ MODAL (restored) */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1f1b1c] rounded-xl space-y-3 shadow-lg">
             <h2 className="text-white text-lg font-semibold">Add Savings</h2>
 
             <input
@@ -232,7 +232,7 @@ export default function SavingsPage() {
       )}
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
+      <div className="mb-6 p-4 bg-[#1f1b1c] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Balance</p>
         <p className="text-[2.5rem] font-bold text-[#85D989]">
           {showAmounts ? totalBalance.toLocaleString() : mask(totalBalance)}
@@ -256,7 +256,7 @@ export default function SavingsPage() {
           const paths = getIconPaths(item.name);
 
           return (
-            <div key={item._id} className="bg-[#1C1C1E] rounded-xl overflow-hidden">
+            <div key={item._id} className="bg-[#1f1b1c] rounded-xl overflow-hidden">
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
                 onClick={() => toggleExpand(index)}
@@ -350,7 +350,7 @@ export default function SavingsPage() {
                             [index]: e.target.value as "+" | "-",
                           }))
                         }
-                        className="w-20 px-2 py-2 rounded-lg text-sm text-white bg-[#1C1C1E] border border-gray-600"
+                        className="w-20 px-2 py-2 rounded-lg text-sm text-white bg-[#1f1b1c] border border-gray-600"
                       >
                         <option value="+">+</option>
                         <option value="-">-</option>

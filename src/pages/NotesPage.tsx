@@ -135,7 +135,7 @@ const highlightText = (text: string, done: boolean) => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter note"
-          className="flex-1 bg-[#1C1C1E] px-2 py-1 rounded text-white"
+          className="flex-1 bg-[#1f1b1c] px-2 py-1 rounded text-white"
         />
 
         <select
@@ -143,7 +143,7 @@ const highlightText = (text: string, done: boolean) => {
           onChange={(e) =>
             setCategory(e.target.value as Note["category"])
           }
-          className="bg-[#1C1C1E] px-2 py-1 rounded text-[#fff]"
+          className="bg-[#1f1b1c] px-2 py-1 rounded text-[#fff]"
         >
           <option value="work">Work</option>
           <option value="personal">Personal</option>
@@ -168,7 +168,7 @@ const highlightText = (text: string, done: boolean) => {
             className={`px-2 py-1 rounded-xl text-xs capitalize ${
               activeTab === tab
                 ? "bg-[#DFF966] text-black font-bold"
-                : "bg-[#1C1C1E] text-gray-400"
+                : "bg-[#1f1b1c] text-gray-400"
             }`}
           >
             {tab}
@@ -181,7 +181,7 @@ const highlightText = (text: string, done: boolean) => {
         {sortedNotes.map((note) => (
           <li
             key={note._id}
-            className={`flex justify-between items-center p-2 bg-[#1C1C1E] rounded-xl ${
+            className={`flex justify-between items-center p-2 bg-[#1f1b1c] rounded-xl ${
               note.done ? "text-gray-700 line-through" : ""
             }`}
           >

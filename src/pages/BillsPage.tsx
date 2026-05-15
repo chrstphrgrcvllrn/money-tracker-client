@@ -219,7 +219,7 @@ export default function BillsPage() {
               className={`px-3 py-1 rounded-full text-xs ${
                 tab === "ongoing"
                   ? " bg-[#DFF966] text-black font-bold"
-                  : "bg-[#1C1C1E] text-gray-400"
+                  : "bg-[#1f1b1c] text-gray-400"
               }`}
             >
               Ongoing
@@ -229,8 +229,8 @@ export default function BillsPage() {
               onClick={() => setTab("done")}
               className={`px-3 py-1 rounded-full text-xs ${
                 tab === "done"
-                  ? " bg-[#1c1c1e] text-[#EF6C54]"
-                  : "bg-[#1C1C1E] text-gray-400"
+                  ? " bg-[#1f1b1c] text-[#EF6C54]"
+                  : "bg-[#1f1b1c] text-gray-400"
               }`}
             >
               Done
@@ -254,7 +254,7 @@ export default function BillsPage() {
       {/* ADD MONTH MODAL */}
       {showForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
+          <div className="bg-[#1f1b1c] p-5 rounded-xl w-full max-w-sm">
             <h2 className="text-white mb-3">Add Month</h2>
 
             <input
@@ -280,7 +280,7 @@ export default function BillsPage() {
       {/* ADD BILL MODAL */}
       {showBillModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
+          <div className="bg-[#1f1b1c] p-5 rounded-xl w-full max-w-sm">
             <h2 className="text-white mb-3">Add Bill</h2>
 
             <input
@@ -321,7 +321,7 @@ export default function BillsPage() {
       {/* DUPLICATE MODAL */}
       {showDuplicateModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
+          <div className="bg-[#1f1b1c] p-5 rounded-xl w-full max-w-sm">
             <h2 className="text-white mb-3">Duplicate Month</h2>
 
             <input
@@ -360,9 +360,9 @@ export default function BillsPage() {
         const pendingTotal = total - paidTotal;
 
         return (
-          <div key={entry._id} className="mb-6 bg-[#1C1C1E] p-4 rounded-xl">
-            <div className="flex justify-between border-b border-[#545454] pb-[13px] mb-2">
-              <h2 className="text-[#EF6C54] font-semibold text-[1.5rem]">
+          <div key={entry._id} className="mb-6 bg-[#1f1b1c] p-4 rounded-xl">
+            <div className="flex justify-between  pb-[13px] mb-2">
+              <h2 className="text-white font-semibold text-[1.5rem]">
                 {entry.month}
               </h2>
 
@@ -458,7 +458,7 @@ export default function BillsPage() {
               </button>
             )}
 
-            <div className="mt-3 text-xs space-y-1 mb-3 pt-2 border-t border-[#545454]">
+            <div className="mt-3 text-xs space-y-1 mb-3 pt-2 ">
               <div className="flex justify-between text-gray-400">
                 <span>Total</span>
                 <span>{format(total)}</span>

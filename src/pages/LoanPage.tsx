@@ -153,7 +153,7 @@ export default function LoanPage() {
       {/* ADD LOAN MODAL */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1f1b1c] rounded-xl space-y-3 shadow-lg">
             <h2 className="text-white text-lg font-semibold">Add Loan</h2>
 
             <input
@@ -192,7 +192,7 @@ export default function LoanPage() {
       )}
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
+      <div className="mb-6 p-4 bg-[#1f1b1c] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Remaining</p>
         <p className="text-[2.5rem] font-bold text-[#85d989]">
           {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
@@ -226,7 +226,7 @@ export default function LoanPage() {
           return (
             <div
               key={loan._id || index} 
-              className="bg-[#1C1C1E] rounded-xl overflow-hidden "
+              className="bg-[#1f1b1c] rounded-xl overflow-hidden "
             >
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
@@ -315,7 +315,7 @@ export default function LoanPage() {
                             [index]: e.target.value as "+" | "-",
                           }))
                         }
-                        className="px-3 py-2 rounded-lg text-sm text-white bg-[#1C1C1E] border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+                        className="px-3 py-2 rounded-lg text-sm text-white bg-[#1f1b1c] border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
                       >
                         <option value="+">+</option>
                         <option value="-">-</option>
