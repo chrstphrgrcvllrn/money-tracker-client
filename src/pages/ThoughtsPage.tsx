@@ -42,7 +42,7 @@ const ThoughtsPage: React.FC = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Write a thought..."
-          className="flex-1 bg-[#1f1b1c] px-2 py-7 rounded text-white"
+          className="flex-1 bg-[#1C1C1E] px-2 py-7 rounded text-white"
         />
 
         <button
@@ -61,7 +61,7 @@ const ThoughtsPage: React.FC = () => {
           return (
             <li
               key={t._id}
-              className="px-4 py-5 bg-[#1f1b1c] rounded text-white cursor-pointer"
+              className="px-4 py-5 bg-[#1C1C1E] rounded text-white cursor-pointer"
             >
               <button
                 onClick={() => toggleThought(t._id)}

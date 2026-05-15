@@ -202,21 +202,21 @@ export default function SubscriptionPage() {
       {/* 📊 YEARLY DASHBOARD */}
       <div className="mb-6 grid grid-cols-3 gap-3">
 
-        <div className="p-4 bg-[#1f1b1c] rounded-xl text-center">
+        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
           <p className="text-gray-400 text-xs">Paid</p>
           <p className="text-lg font-bold text-[#85D989] mt-2">
             {showAmounts ? totalPaidThisYear.toLocaleString() : mask(totalPaidThisYear)}
           </p>
         </div>
 
-        <div className="p-4 bg-[#1f1b1c] rounded-xl text-center">
+        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
           <p className="text-gray-400 text-xs">Total</p>
           <p className="text-lg font-bold text-white mt-2">
             {showAmounts ? totalToPayThisYear.toLocaleString() : mask(totalToPayThisYear)}
           </p>
         </div>
 
-        <div className="p-4 bg-[#1f1b1c] rounded-xl text-center">
+        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
           <p className="text-gray-400 text-xs">Pending</p>
           <p className="text-lg font-bold text-[#EF6C54] mt-2">
             {showAmounts ? pendingThisYear.toLocaleString() : mask(pendingThisYear)}
@@ -245,7 +245,7 @@ export default function SubscriptionPage() {
         }, 0);
 
           return (
-            <div key={item._id} className="bg-[#1f1b1c] rounded-xl overflow-hidden">
+            <div key={item._id} className="bg-[#1C1C1E] rounded-xl overflow-hidden">
 
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
@@ -345,7 +345,7 @@ export default function SubscriptionPage() {
       {/* MODAL (unchanged) */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl/70">
-          <div className="w-full max-w-sm p-5 bg-[#1f1b1c] rounded-xl space-y-3">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3">
 
             <h2 className="text-white text-lg font-semibold">
               {editingId ? "Edit Subscription" : "Add Subscription"}
@@ -378,7 +378,7 @@ export default function SubscriptionPage() {
                   billing: e.target.value as "monthly" | "yearly",
                 }))
               }
-              className="w-full px-3 py-2 rounded-lg text-white bg-[#1f1b1c] border border-gray-600"
+              className="w-full px-3 py-2 rounded-lg text-white bg-[#1C1C1E] border border-gray-600"
             >
               <option value="monthly">Monthly</option>
               <option value="yearly">Yearly</option>
@@ -392,7 +392,7 @@ export default function SubscriptionPage() {
                   type: e.target.value as SubType,
                 }))
               }
-              className="w-full px-3 py-2 rounded-lg text-white bg-[#1f1b1c] border border-gray-600"
+              className="w-full px-3 py-2 rounded-lg text-white bg-[#1C1C1E] border border-gray-600"
             >
               <option value="auto">Auto Deduct</option>
               <option value="manual">Manual</option>

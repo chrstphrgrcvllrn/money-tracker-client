@@ -56,7 +56,7 @@ const CalculatorPage: React.FC = () => {
 
       {/* BIG DISPLAY ABOVE KEYPAD */}
       <div className="mb-4">
-        <div className="bg-[#1f1b1c] p-4 rounded-xl text-right">
+        <div className="bg-[#1C1C1E] p-4 rounded-xl text-right">
           <p className="text-6xl text-white font-bold break-all">
             {display}
           </p>
@@ -78,7 +78,7 @@ const CalculatorPage: React.FC = () => {
                   ? "bg-[#EB5647] text-white"
                   : isAction
                   ? "bg-[#2a2a2a] text-white"
-                  : "bg-[#1f1b1c] text-white"
+                  : "bg-[#1C1C1E] text-white"
               }`}
             >
               {btn}

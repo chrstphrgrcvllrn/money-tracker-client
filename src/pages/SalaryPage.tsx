@@ -286,7 +286,7 @@ export default function SalaryPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1f1b1c] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
             <h2 className="text-white text-lg font-semibold">Add Salary</h2>
             <input
               type="text"
@@ -322,7 +322,7 @@ export default function SalaryPage() {
 
       {showExpenseForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1f1b1c] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
             <h2 className="text-white text-lg font-semibold">Add Expense</h2>
             <input
               type="text"
@@ -358,7 +358,7 @@ export default function SalaryPage() {
 
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1f1b1c] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
             <h2 className="text-white text-lg font-semibold">Confirm Delete</h2>
             <p className="text-gray-400">Are you sure you want to delete this salary?</p>
             <div className="flex justify-end space-x-2 pt-2">
@@ -383,7 +383,7 @@ export default function SalaryPage() {
           <div className="flex mb-4 gap-2">
             <button
               className={`px-3 py-1 rounded ${
-                activeTab === "active" ? " bg-[#DFF966] text-black  font-bold" : "bg-[#1f1b1c] text-white"
+                activeTab === "active" ? " bg-[#DFF966] text-black  font-bold" : "bg-[#1C1C1E] text-white"
               }`}
               onClick={() => setActiveTab("active")}
             >
@@ -391,7 +391,7 @@ export default function SalaryPage() {
             </button>
             <button
               className={`px-3 py-1 rounded ${
-                activeTab === "completed" ? " bg-[#1f1b1c] text-[#EF6C54]  font-bold" : "bg-[#1f1b1c] text-gray-400"
+                activeTab === "completed" ? " bg-[#1C1C1E] text-[#EF6C54]  font-bold" : "bg-[#1C1C1E] text-gray-400"
               }`}
               onClick={() => setActiveTab("completed")}
             >
@@ -422,7 +422,7 @@ export default function SalaryPage() {
         const isEditingAll = editingAllEntryId === entry._id;
 
         return (
-          <div key={entry._id} className="mb-6 bg-[#1f1b1c] shadow rounded-xl p-4">
+          <div key={entry._id} className="mb-6 bg-[#1C1C1E] shadow rounded-xl p-4">
             <div className="flex justify-between items-center mb-2">
               <button onClick={() => handleEditSalaryName(entry._id)}>
                 <h2 className="font-semibold text-[1.5rem] text-white">{entry.date}</h2>
@@ -439,7 +439,7 @@ export default function SalaryPage() {
                 </button>
 
                 {openMenuId === entry._id && (
-                  <div className="absolute right-0 top-7 min-w-[130px] bg-[#1f1b1c] border border-gray-800 rounded-xl shadow-lg z-30 py-1">
+                  <div className="absolute right-0 top-7 min-w-[130px] bg-[#1C1C1E] border border-gray-800 rounded-xl shadow-lg z-30 py-1">
                     {!isEditingAll && expenses.length > 0 && (
                       <button
                         onClick={() => {

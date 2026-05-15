@@ -187,19 +187,19 @@ const ExpensesPage: React.FC = () => {
 
       {/* TOTALS */}
       <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
-        <div className="bg-[#1f1b1c] p-2 rounded-xl">
+        <div className="bg-[#1C1C1E] p-2 rounded-xl">
           <p className="text-white font-bold">Today</p>
           <p className="text-[#85D989] font-bold">
             ₱{totalToday.toLocaleString()}
           </p>
         </div>
-        <div className="bg-[#1f1b1c] p-2 rounded-xl">
+        <div className="bg-[#1C1C1E] p-2 rounded-xl">
           <p className="text-white font-bold">Week</p>
           <p className="text-[#85D989] font-bold">
             ₱{totalWeek.toLocaleString()}
           </p>
         </div>
-        <div className="bg-[#1f1b1c] p-2 rounded-xl">
+        <div className="bg-[#1C1C1E] p-2 rounded-xl">
           <p className="text-white font-bold">Month</p>
           <p className="text-[#85D989] font-bold">
             ₱{totalMonth.toLocaleString()}
@@ -217,7 +217,7 @@ const ExpensesPage: React.FC = () => {
                 className={`px-2 py-1 rounded-xl text-xs capitalize ${
                   activeTab === tab
                   ? "bg-[#DFF966] text-black  font-bold"
-                    : "bg-[#1f1b1c] text-gray-400"
+                    : "bg-[#1C1C1E] text-gray-400"
                 }`}
               >
                 {tab}
@@ -254,7 +254,7 @@ const ExpensesPage: React.FC = () => {
 
               return (
                 <li key={monthKey}>
-                  <div className="flex justify-between items-center p-3 bg-[#1f1b1c] rounded-xl">
+                  <div className="flex justify-between items-center p-3 bg-[#1C1C1E] rounded-xl">
                     <span className="text-white font-medium">
                       {label}
                     </span>
@@ -281,7 +281,7 @@ const ExpensesPage: React.FC = () => {
                 {groupedExpenses[date].map((exp) => (
                   <div
                     key={exp._id}
-                    className={`flex justify-between items-center p-2 bg-[#1f1b1c] rounded-xl mb-2 ${
+                    className={`flex justify-between items-center p-2 bg-[#1C1C1E] rounded-xl mb-2 ${
                       exp.done ? "text-white" : ""
                     }`}
                   >
@@ -341,7 +341,7 @@ const ExpensesPage: React.FC = () => {
       {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-xl flex items-center justify-center">
-          <div className="bg-[#1f1b1c] p-4 rounded-xl w-[90%] max-w-sm">
+          <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm">
             <h2 className="text-white mb-3 font-semibold">
               {editingId ? "Edit Expense" : "Add Expense"}
             </h2>

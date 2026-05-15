@@ -377,7 +377,7 @@ const handleDelete = async (id: string) => {
               className={`px-2 py-1 rounded ${
                 tab === t
                   ? "bg-[#DFF966] text-black"
-                  : "bg-[#1f1b1c] text-gray-400"
+                  : "bg-[#1C1C1E] text-gray-400"
               }`}
             >
               {t}
@@ -389,15 +389,15 @@ const handleDelete = async (id: string) => {
           {!isEditMode ? (
             <>
               <button onClick={startEdit} 
-              // className="bg-[#1f1b1c] p-2 rounded"
-               className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1f1b1c] text-[#EF6C54] font-bold rounded-4xl text-sm"
+              // className="bg-[#1C1C1E] p-2 rounded"
+               className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1C1C1E] text-[#EF6C54] font-bold rounded-4xl text-sm"
               >
                 <PencilIcon className="w-4 h-4 text-white" />
               </button>
 
               <button
                 onClick={() => setShowAddModal(true)}
-                // className=" bg-[#1f1b1c] text-[#EF6C54] px-2 py-1 rounded "
+                // className=" bg-[#1C1C1E] text-[#EF6C54] px-2 py-1 rounded "
                   className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
               >
                 +
@@ -409,7 +409,7 @@ const handleDelete = async (id: string) => {
                 Save
               </button>
 
-              <button onClick={cancelEdit} className="bg-[#1f1b1c] p-2 rounded">
+              <button onClick={cancelEdit} className="bg-[#1C1C1E] p-2 rounded">
                 <XMarkIcon className="w-4 h-4 text-white" />
               </button>
             </>
@@ -434,7 +434,7 @@ const handleDelete = async (id: string) => {
          <li
   key={item._id}
   // onClick={() => openStreamingLink(item.link)}
-  className={`p-2 bg-[#1f1b1c] rounded text-white ${
+  className={`p-2 bg-[#1C1C1E] rounded text-white ${
     item.link ? "cursor-pointer" : ""
   }`}
 >
@@ -468,7 +468,7 @@ const handleDelete = async (id: string) => {
                           className={`${
                             tab === "completed"
                               ? "text-yellow-400"
-                              : "text-green-400"
+                              : "text-[#85D989]"
                           }`}
                           title={
                             tab === "completed"
@@ -487,7 +487,7 @@ const handleDelete = async (id: string) => {
                       )}
 
                       {epLabel && (
-                        <div className="text-green-400">{epLabel}</div>
+                        <div className="text-[#85D989]">{epLabel}</div>
                       )}
 
                       {progress.next && (
@@ -554,12 +554,12 @@ const handleDelete = async (id: string) => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title"
-        className="w-full p-2 bg-[#1f1b1c] rounded"
+        className="w-full p-2 bg-[#1C1C1E] rounded"
       />
 
       {/* SUGGESTIONS */}
       {showSuggestions && suggestions.length > 0 && (
-        <ul className="bg-[#1f1b1c] mt-1 rounded max-h-60 overflow-auto">
+        <ul className="bg-[#1C1C1E] mt-1 rounded max-h-60 overflow-auto">
           {suggestions.map((item, idx) => (
             <li
               key={idx}
@@ -587,13 +587,13 @@ const handleDelete = async (id: string) => {
         value={current}
         onChange={(e) => setCurrent(e.target.value)}
         placeholder="S1E1"
-        className="w-full p-2 mt-2 bg-[#1f1b1c] rounded"
+        className="w-full p-2 mt-2 bg-[#1C1C1E] rounded"
       />
       <input
   value={link}
   onChange={(e) => setLink(e.target.value)}
   placeholder="Netflix / Crunchyroll / Any Link"
-  className="w-full p-2 mt-2 bg-[#1f1b1c] rounded"
+  className="w-full p-2 mt-2 bg-[#1C1C1E] rounded"
 />
 
       <button
