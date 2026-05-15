@@ -361,12 +361,12 @@ export default function BillsPage() {
 
         return (
           <div key={entry._id} className="mb-6 bg-[#1C1C1E] p-4 rounded-xl">
-            <div className="flex justify-between mb-2">
-              <h2 className="text-[#EF6C54] font-semibold text-[1.1rem]">
+            <div className="flex justify-between border-b border-[#545454] pb-[13px] mb-2">
+              <h2 className="text-[#EF6C54] font-semibold text-[1.5rem]">
                 {entry.month}
               </h2>
 
-              <div className="flex gap-3 text-sm text-[#9C9BA1]">
+              <div className="flex gap-3 text-sm text-[#9C9BA1] ">
                 <button onClick={() => handleEditAll(entry._id)}>
                   Edit
                 </button>
@@ -458,7 +458,7 @@ export default function BillsPage() {
               </button>
             )}
 
-            <div className="mt-3 text-xs space-y-1">
+            <div className="mt-3 text-xs space-y-1 mb-3 pt-2 border-t border-[#545454]">
               <div className="flex justify-between text-gray-400">
                 <span>Total</span>
                 <span>{format(total)}</span>
