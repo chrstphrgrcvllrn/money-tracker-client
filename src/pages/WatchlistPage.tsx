@@ -548,7 +548,7 @@ const handleDelete = async (id: string) => {
 
 {showAddModal && (
   <div className="fixed inset-0 bg-black/30 backdrop-blur-xl flex items-center justify-center">
-    <div className="bg-[#111] p-4 w-80 rounded text-white">
+    <div className="bg-[#111] px-4 py-8 w-80 rounded text-white text-[1rem]">
 
       <input
         value={title}

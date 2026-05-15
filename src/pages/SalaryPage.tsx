@@ -6,8 +6,10 @@ import {
   updateSalary,
   deleteSalary
 } from "../api/salary";
+
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+
 import { TrashIcon } from "@heroicons/react/24/solid";
 
 export default function SalaryPage() {

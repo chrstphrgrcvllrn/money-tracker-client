@@ -205,21 +205,21 @@ export default function SubscriptionPage() {
         <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
           <p className="text-gray-400 text-xs">Paid</p>
           <p className="text-lg font-bold text-[#85D989] mt-2">
-            {showAmounts ? totalPaidThisYear.toLocaleString() : mask(totalPaidThisYear)}
+            ₱{showAmounts ? totalPaidThisYear.toLocaleString() : mask(totalPaidThisYear)}
           </p>
         </div>
 
         <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
           <p className="text-gray-400 text-xs">Total</p>
           <p className="text-lg font-bold text-white mt-2">
-            {showAmounts ? totalToPayThisYear.toLocaleString() : mask(totalToPayThisYear)}
+            ₱{showAmounts ? totalToPayThisYear.toLocaleString() : mask(totalToPayThisYear)}
           </p>
         </div>
 
         <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
           <p className="text-gray-400 text-xs">Pending</p>
           <p className="text-lg font-bold text-[#EF6C54] mt-2">
-            {showAmounts ? pendingThisYear.toLocaleString() : mask(pendingThisYear)}
+            ₱{showAmounts ? pendingThisYear.toLocaleString() : mask(pendingThisYear)}
           </p>
         </div>
 
@@ -344,7 +344,7 @@ export default function SubscriptionPage() {
 
       {/* MODAL (unchanged) */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
           <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3">
 
             <h2 className="text-white text-lg font-semibold">
@@ -407,14 +407,14 @@ export default function SubscriptionPage() {
               className="w-full px-3 py-2 rounded-lg text-white border border-gray-600"
             />
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-2 pt-2 flex-col w-full">
               <button onClick={resetForm} className="text-gray-400">
                 Cancel
               </button>
 
               <button
                 onClick={handleSave}
-                className="px-3 py-1 bg-[#EB5647] text-white rounded-lg"
+                className="px-3 py-1 bg-[#DFF966] text-black rounded-lg"
               >
                 Save
               </button>

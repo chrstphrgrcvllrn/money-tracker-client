@@ -153,7 +153,7 @@ export default function LoanPage() {
       {/* ADD LOAN MODAL */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg text-[1rem]">
             <h2 className="text-white text-lg font-semibold">Add Loan</h2>
 
             <input
@@ -161,7 +161,7 @@ export default function LoanPage() {
               placeholder="Loan name"
               value={newLoanName}
               onChange={(e) => setNewLoanName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg  text-white border border-gray-600 focus:border-[#DFF966]/30 focus:outline-none"
             />
 
             <input
@@ -169,20 +169,20 @@ export default function LoanPage() {
               placeholder="Initial amount"
               value={newLoanAmount}
               onChange={(e) => setNewLoanAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lgtext-white border border-gray-600 focus:border-[#DFF966]/30 focus:outline-none"
             />
 
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end space-x-2 pt-2 flex-col w-full">
               <button
                 onClick={() => setShowForm(false)}
-                className="px-3 py-1 text-sm text-gray-400"
+                className="px-3 py-1  text-gray-400"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleAddLoan}
-                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg"
               >
                 Save
               </button>

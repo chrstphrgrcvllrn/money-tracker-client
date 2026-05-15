@@ -193,7 +193,7 @@ export default function SavingsPage() {
       {/* ✅ MODAL (restored) */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg text-[1rem]">
             <h2 className="text-white text-lg font-semibold">Add Savings</h2>
 
             <input
@@ -201,7 +201,7 @@ export default function SavingsPage() {
               placeholder="Savings name"
               value={newSavingsName}
               onChange={(e) => setNewSavingsName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
             />
 
             <input
@@ -209,20 +209,20 @@ export default function SavingsPage() {
               placeholder="Initial amount"
               value={newSavingsAmount}
               onChange={(e) => setNewSavingsAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg  text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
             />
 
-            <div className="flex justify-end space-x-2 pt-2">
+            <div className="flex justify-end space-x-2 pt-2 flex-col w-full">
               <button
                 onClick={() => setShowForm(false)}
-                className="px-3 py-1 text-sm text-gray-400"
+                className="px-3 py-1  text-gray-400"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleAddSavings}
-                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg "
               >
                 Save
               </button>

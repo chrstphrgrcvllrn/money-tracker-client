@@ -210,7 +210,7 @@ const ExpensesPage: React.FC = () => {
       {/* TABS */}
       <div className="flex gap-2 mb-4 justify-between">
           <div className="flex gap-2 mb-4">
-            {["pending", "done", "monthly"].map((tab) => (
+            {["all", "monthly"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
@@ -322,7 +322,7 @@ const ExpensesPage: React.FC = () => {
                         <TrashIcon className="w-4 h-4" />
                       </button>
 
-                      <button onClick={() => handleToggle(exp._id)}>
+                      {/* <button onClick={() => handleToggle(exp._id)}>
                         <CheckIcon
                           className={`w-5 h-5 ${
                             exp.done
@@ -330,7 +330,7 @@ const ExpensesPage: React.FC = () => {
                               : "text-[#9C9BA1]"
                           }`}
                         />
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 ))}
@@ -341,7 +341,7 @@ const ExpensesPage: React.FC = () => {
       {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-xl flex items-center justify-center">
-          <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm">
+          <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm text-[1rem]">
             <h2 className="text-white mb-3 font-semibold">
               {editingId ? "Edit Expense" : "Add Expense"}
             </h2>
@@ -362,7 +362,7 @@ const ExpensesPage: React.FC = () => {
               className="w-full mb-3 bg-[#111] px-2 py-2 rounded text-white"
             />
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 w-full flex-col">
               <button onClick={resetForm} className="px-3 py-1 text-gray-400">
                 Cancel
               </button>
