@@ -193,7 +193,7 @@ export default function SubscriptionPage() {
             resetForm();
             setShowForm(true);
           }}
-          className="px-[0.7rem] py-[0.3rem] bg-[#1c1c1e] text-[#EB5647] font-bold rounded-4xl text-sm"
+          className="px-[0.7rem] py-[0.3rem] bg-[#DFF966] text-black font-bold rounded-4xl text-sm"
         >
           +
         </button>
@@ -204,7 +204,7 @@ export default function SubscriptionPage() {
 
         <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
           <p className="text-gray-400 text-xs">Paid</p>
-          <p className="text-lg font-bold text-green-400 mt-2">
+          <p className="text-lg font-bold text-[#85D989] mt-2">
             {showAmounts ? totalPaidThisYear.toLocaleString() : mask(totalPaidThisYear)}
           </p>
         </div>
@@ -218,7 +218,7 @@ export default function SubscriptionPage() {
 
         <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
           <p className="text-gray-400 text-xs">Pending</p>
-          <p className="text-lg font-bold text-yellow-400 mt-2">
+          <p className="text-lg font-bold text-[#EF6C54] mt-2">
             {showAmounts ? pendingThisYear.toLocaleString() : mask(pendingThisYear)}
           </p>
         </div>
@@ -228,7 +228,21 @@ export default function SubscriptionPage() {
       {/* LIST */}
       <div className="space-y-3">
         {subscriptions.map((item, index) => {
-          const amount = Number(item.amount ?? 0);
+          // const amount = Number(item.amount ?? 0);
+
+          const totalPerItem = (item.payments ?? []).reduce((sum, p) => {
+          if (isThisYear(p.date)) {
+            return sum + Number(p.amount);
+          }
+          return sum;
+        }, 0);
+
+        const paidPerItem = (item.payments ?? []).reduce((sum, p) => {
+          if (p.status === "paid" && isThisYear(p.date)) {
+            return sum + Number(p.amount);
+          }
+          return sum;
+        }, 0);
 
           return (
             <div key={item._id} className="bg-[#1C1C1E] rounded-xl overflow-hidden">
@@ -238,7 +252,7 @@ export default function SubscriptionPage() {
                 onClick={() => toggleExpand(index)}
               >
                 <div className="text-left">
-                  <p className="font-medium text-[1.1rem] text-white">
+                  <p className="font-medium text-[0.8rem] text-white">
                     {item.name}
                   </p>
 
@@ -248,9 +262,11 @@ export default function SubscriptionPage() {
                   </p>
                 </div>
 
-                <p className="font-bold text-white">
-                  {showAmounts ? amount.toLocaleString() : mask(amount)}
-                </p>
+               <p className="font-bold text-[#85D989] text-[0.8rem]  ">
+                {showAmounts
+                  ? `${paidPerItem.toLocaleString()} `
+                  : `${mask(paidPerItem)} / ${mask(totalPerItem)}`}
+              </p>
               </button>
 
               {expanded === index && (
@@ -292,8 +308,8 @@ export default function SubscriptionPage() {
                           }}
                           className={`text-sm ${
                             p.status === "paid"
-                              ? "text-green-400"
-                              : "text-yellow-400"
+                              ? "text-[#85D989]"
+                              : "text-[#EF6C54]"
                           }`}
                         >
                           {p.status}
@@ -354,19 +370,19 @@ export default function SubscriptionPage() {
               className="w-full px-3 py-2 rounded-lg text-white border border-gray-600"
             />
             {/* BILLING */}
-<select
-  value={form.billing}
-  onChange={(e) =>
-    setForm((p) => ({
-      ...p,
-      billing: e.target.value as "monthly" | "yearly",
-    }))
-  }
-  className="w-full px-3 py-2 rounded-lg text-white bg-[#1C1C1E] border border-gray-600"
->
-  <option value="monthly">Monthly</option>
-  <option value="yearly">Yearly</option>
-</select>
+            <select
+              value={form.billing}
+              onChange={(e) =>
+                setForm((p) => ({
+                  ...p,
+                  billing: e.target.value as "monthly" | "yearly",
+                }))
+              }
+              className="w-full px-3 py-2 rounded-lg text-white bg-[#1C1C1E] border border-gray-600"
+            >
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
 
             <select
               value={form.type}

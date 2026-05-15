@@ -182,7 +182,7 @@ export default function SavingsPage() {
 
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-[0.7rem] py-[0.3rem]  bg-[#1c1c1e] text-[#EB5647]  font-bold rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black  font-bold rounded-4xl text-sm"
           >
             +
           </button>
@@ -222,7 +222,7 @@ export default function SavingsPage() {
 
               <button
                 onClick={handleAddSavings}
-                className="px-3 py-1 bg-[#EB5647] text-white font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg text-sm"
               >
                 Save
               </button>
@@ -234,7 +234,7 @@ export default function SavingsPage() {
       {/* SUMMARY */}
       <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Balance</p>
-        <p className="text-[2.5rem] font-bold text-white">
+        <p className="text-[2.5rem] font-bold text-[#85D989]">
           {showAmounts ? totalBalance.toLocaleString() : mask(totalBalance)}
         </p>
       </div>
@@ -304,7 +304,7 @@ export default function SavingsPage() {
                   </div>
                 </div>
 
-                <p className="font-bold text-white">
+                <p className="font-bold text-[#85D989]">
                   {showAmounts ? balance.toLocaleString() : mask(balance)}
                 </p>
               </button>
@@ -318,9 +318,9 @@ export default function SavingsPage() {
                         <span
                           className={`${
                             t.amount < 0
-                              ? "text-red-400"
+                              ? "text-[#B2597C]"
                               : t.amount > 0
-                              ? "text-green-400"
+                              ? "text-[#85D989]"
                               : "text-white"
                           }`}
                         >
@@ -371,7 +371,7 @@ export default function SavingsPage() {
                       onClick={() =>
                         handleAddTransaction(item._id, index, transactionType[index] || "+")
                       }
-                      className="w-full bg-[#EB5647] text-white font-bold py-2 rounded-lg text-sm"
+                      className="w-full bg-[#DFF966] text-black font-bold py-2 rounded-lg text-sm"
                     >
                       Add Transaction
                     </button>
@@ -380,7 +380,7 @@ export default function SavingsPage() {
                   <div className="mt-2 flex justify-end">
                     <button
                       onClick={() => handleDeleteSavings(item._id)}
-                      className="px-3 py-1 bg-red-500 text-white font-semibold rounded-lg text-sm"
+                      className="px-3 py-1 bg-[#B2597C] text-white font-semibold rounded-lg text-sm"
                     >
                       Delete
                     </button>

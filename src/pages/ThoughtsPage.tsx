@@ -5,10 +5,12 @@ import { getThoughts, createThought } from "../api/thought";
 const ThoughtsPage: React.FC = () => {
   const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [text, setText] = useState("");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
 
   const fetchThoughts = async () => {
     const data = await getThoughts();
-    setThoughts([...data]); // force re-render
+    setThoughts([...data]);
   };
 
   useEffect(() => {
@@ -23,10 +25,17 @@ const ThoughtsPage: React.FC = () => {
     fetchThoughts();
   };
 
+  const toggleThought = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
-      {/* <h1 className="text-lg font-semibold text-white mb-4">Thoughts</h1> */}
-
       {/* INPUT */}
       <div className="flex gap-2 mb-4">
         <input
@@ -38,7 +47,7 @@ const ThoughtsPage: React.FC = () => {
 
         <button
           onClick={addThought}
-          className="bg-[#1c1c1e] text-[#EB5647] font-bold px-2 py-1 rounded"
+          className="bg-[#DFF966] text-black font-bold px-2 py-1 rounded"
         >
           Add
         </button>
@@ -46,14 +55,32 @@ const ThoughtsPage: React.FC = () => {
 
       {/* LIST */}
       <ul className="space-y-2">
-        {thoughts.map((t) => (
-          <li
-            key={t._id}
-            className="px-4 py-5 bg-[#1C1C1E] rounded text-white"
-          >
-            "{t.text}"
-          </li>
-        ))}
+        {thoughts.map((t) => {
+          const isOpen = expanded.has(t._id);
+
+          return (
+            <li
+              key={t._id}
+              className="px-4 py-5 bg-[#1C1C1E] rounded text-white cursor-pointer"
+            >
+              <button
+                onClick={() => toggleThought(t._id)}
+                className="w-full text-left"
+              >
+                {isOpen ? (
+                  <div>
+                    {/* <div className="text-[10px] text-gray-400"> */}
+                      {/* Click to collapse */}
+                    {/* </div> */}
+                    "{t.text}"
+                  </div>
+                ) : (
+                   <div className="line-clamp-2">"{t.text}"</div>
+                )}
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

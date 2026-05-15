@@ -188,20 +188,20 @@ const ExpensesPage: React.FC = () => {
       {/* TOTALS */}
       <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
-          <p className="text-gray-400">Today</p>
-          <p className="text-white font-bold">
+          <p className="text-white font-bold">Today</p>
+          <p className="text-[#85D989] font-bold">
             ₱{totalToday.toLocaleString()}
           </p>
         </div>
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
-          <p className="text-gray-400">Week</p>
-          <p className="text-white font-bold">
+          <p className="text-white font-bold">Week</p>
+          <p className="text-[#85D989] font-bold">
             ₱{totalWeek.toLocaleString()}
           </p>
         </div>
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
-          <p className="text-gray-400">Month</p>
-          <p className="text-white font-bold">
+          <p className="text-white font-bold">Month</p>
+          <p className="text-[#85D989] font-bold">
             ₱{totalMonth.toLocaleString()}
           </p>
         </div>
@@ -216,7 +216,7 @@ const ExpensesPage: React.FC = () => {
                 onClick={() => setActiveTab(tab as any)}
                 className={`px-2 py-1 rounded-xl text-xs capitalize ${
                   activeTab === tab
-                    ? "bg-[#1c1c1e] text-[#EB5647]  font-bold"
+                  ? "bg-[#DFF966] text-black  font-bold"
                     : "bg-[#1C1C1E] text-gray-400"
                 }`}
               >
@@ -228,7 +228,7 @@ const ExpensesPage: React.FC = () => {
             {/* <h1 className="text-lg font-semibold text-white">Expenses</h1> */}
             <button
               onClick={() => setShowModal(true)}
-              className=" bg-[#1c1c1e] text-[#EB5647]  font-bold px-3 py-1 rounded-full"
+                className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
             >
               +
             </button>
@@ -293,7 +293,7 @@ const ExpensesPage: React.FC = () => {
                       >
                         {exp.text}
                       </span>
-                      <span className="text-[#EB5647] text-xs">
+                      <span className="text-[#B2597C] text-xs">
                         ₱{exp.amount.toLocaleString()}
                       </span>
                       {/* <span className="text-gray-600 text-[10px]">
@@ -317,7 +317,7 @@ const ExpensesPage: React.FC = () => {
 
                       <button
                         onClick={() => handleDelete(exp._id)}
-                        className="text-gray-400 hover:text-[#EB5647]"
+                        className="text-gray-400 hover:text-[#EF6C54]"
                       >
                         <TrashIcon className="w-4 h-4" />
                       </button>
@@ -369,7 +369,7 @@ const ExpensesPage: React.FC = () => {
 
               <button
                 onClick={handleSave}
-                className="bg-[#EB5647] text-white px-3 py-1 rounded font-bold"
+                className="bg-[#DFF966] text-black px-3 py-1 rounded font-bold"
               >
                 {editingId ? "Update" : "Save"}
               </button>

@@ -311,7 +311,7 @@ export default function SalaryPage() {
               </button>
               <button
                 onClick={handleAddSalary}
-                className="px-3 py-1 bg-[#EB5647] text-white font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg text-sm"
               >
                 Save
               </button>
@@ -383,7 +383,7 @@ export default function SalaryPage() {
           <div className="flex mb-4 gap-2">
             <button
               className={`px-3 py-1 rounded ${
-                activeTab === "active" ? " bg-[#1c1c1e] text-[#EB5647]  font-bold" : "bg-[#1C1C1E] text-white"
+                activeTab === "active" ? " bg-[#DFF966] text-black  font-bold" : "bg-[#1C1C1E] text-white"
               }`}
               onClick={() => setActiveTab("active")}
             >
@@ -391,7 +391,7 @@ export default function SalaryPage() {
             </button>
             <button
               className={`px-3 py-1 rounded ${
-                activeTab === "completed" ? " bg-[#1c1c1e] text-[#EB5647]  font-bold" : "bg-[#1C1C1E] text-gray-400"
+                activeTab === "completed" ? " bg-[#1c1c1e] text-[#EF6C54]  font-bold" : "bg-[#1C1C1E] text-gray-400"
               }`}
               onClick={() => setActiveTab("completed")}
             >
@@ -404,7 +404,7 @@ export default function SalaryPage() {
               <button
                 onClick={() => setShowForm(true)}
                 title="Add Salary"
-                className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1c1c1e] text-[#EB5647] font-bold rounded-4xl text-sm"
+                className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
                 // bg-[#EB5647]   text-white
                
                 
@@ -425,7 +425,7 @@ export default function SalaryPage() {
           <div key={entry._id} className="mb-6 bg-[#1C1C1E] shadow rounded-xl p-4">
             <div className="flex justify-between items-center mb-2">
               <button onClick={() => handleEditSalaryName(entry._id)}>
-                <h2 className="font-semibold text-lg text-white">{entry.date}</h2>
+                <h2 className="font-semibold text-lg text-[#EF6C54]">{entry.date}</h2>
               </button>
 
               <div className="relative flex items-center">
@@ -477,7 +477,7 @@ export default function SalaryPage() {
                         openDeleteSalaryModal(entry._id);
                         setOpenMenuId(null);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-[#EB5647] hover:bg-[#2A2A2D]"
+                      className="w-full text-left px-4 py-2 text-sm text-[#EF6C54] hover:bg-[#2A2A2D]"
                     >
                       Delete
                     </button>
@@ -486,10 +486,10 @@ export default function SalaryPage() {
               </div>
             </div>
 
-            <div className="flex justify-between text-[#9C9BA1] mb-2">
+            <div className="flex justify-between text-[#DFF966] mb-2">
               <span>Salary</span>
               <button onClick={() => handleEditSalary(entry._id)}>
-                <span className="font-semibold text-white">{format(entry.salary)}</span>
+                <span className="font-semibold text-[#DFF966]">{format(entry.salary)}</span>
               </button>
             </div>
 
@@ -559,13 +559,13 @@ export default function SalaryPage() {
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleSaveAllExpenses(entry._id)}
-                  className="px-3 py-1 bg-[#EB5647] font-bold rounded text-sm"
+                  className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
                 >
                   Save All
                 </button>
                 <button
                   onClick={handleCancelEditAll}
-                  className="px-3 py-1 bg-[#EB5647] font-bold rounded text-sm"
+                  className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
                 >
                   Cancel
                 </button>
@@ -573,13 +573,13 @@ export default function SalaryPage() {
             )}
 
             <div className="flex justify-between font-semibold pt-2 mb-2">
-              <span className="text-[#9C9BA1]">Total</span>
-              <span className="text-white">{format(totalExpenses)}</span>
+              <span className="text-[#DFF966]">Total</span>
+              <span className="text-[#B2597C]">{format(totalExpenses)}</span>
             </div>
 
             <div className="flex justify-between font-semibold">
               <span></span>
-              <span className={`${remaining < 0 ? "text-red-500" : "text-white"}`}>
+              <span className={`${remaining < 0 ? "text-[#B2597C]" : "text-[#85D989]"}`}>
                 {format(remaining)}
               </span>
             </div>

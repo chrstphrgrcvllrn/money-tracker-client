@@ -143,7 +143,7 @@ export default function LoanPage() {
 
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-[0.7rem] py-[0.3rem]  bg-[#1c1c1e] text-[#EB5647] font-bold   rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
           >
             +
           </button>
@@ -182,7 +182,7 @@ export default function LoanPage() {
 
               <button
                 onClick={handleAddLoan}
-                className="px-3 py-1 bg-[#EB5647] text-white font-semibold rounded-lg text-sm"
+                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg text-sm"
               >
                 Save
               </button>
@@ -194,7 +194,7 @@ export default function LoanPage() {
       {/* SUMMARY */}
       <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total Remaining</p>
-        <p className="text-[2.5rem] font-bold text-white">
+        <p className="text-[2.5rem] font-bold text-[#85d989]">
           {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
         </p>
       </div>
@@ -234,7 +234,7 @@ export default function LoanPage() {
               >
                 <div className="flex items-center gap-3 text-left">
                   <div className="w-10 h-10 rounded-lg bg-[#2C2C2E] flex items-center justify-center">
-                    <BanknotesIcon className="w-5 h-5 text-white" />
+                    <BanknotesIcon className="w-5 h-5 text-[#DFF966]" />
                   </div>
 
                   <div>
@@ -257,7 +257,7 @@ export default function LoanPage() {
                   </div>
                 </div>
 
-                <p className="font-bold text-[#EB5647]">
+                <p className="font-bold text-[#EF6C54]">
                   {showAmounts ? remaining.toLocaleString() : mask(remaining)}
                 </p>
               </button>
@@ -283,7 +283,7 @@ export default function LoanPage() {
 
                       <span
                         className={`${
-                          Number(t.amount) < 0 ? "text-red-400" : "text-white"
+                          Number(t.amount) < 0 ? "text-[#B2597C]" : "text-[#85D989]"
                         }`}
                       >
                         {Number(t.amount).toLocaleString("en-PH")}
@@ -345,7 +345,7 @@ export default function LoanPage() {
 
                         handleAddPayment(loan._id, index, value);
                       }}
-                      className="w-full bg-[#EB5647] text-white font-bold py-2 rounded-lg text-sm"
+                      className="w-full bg-[#DFF966] text-black font-bold py-2 rounded-lg text-sm"
                     >
                       Add Payment
                     </button>

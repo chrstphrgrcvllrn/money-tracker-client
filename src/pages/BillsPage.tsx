@@ -218,7 +218,7 @@ export default function BillsPage() {
               onClick={() => setTab("ongoing")}
               className={`px-3 py-1 rounded-full text-xs ${
                 tab === "ongoing"
-                  ? " bg-[#1c1c1e] text-[#EB5647]"
+                  ? " bg-[#DFF966] text-black font-bold"
                   : "bg-[#1C1C1E] text-gray-400"
               }`}
             >
@@ -229,7 +229,7 @@ export default function BillsPage() {
               onClick={() => setTab("done")}
               className={`px-3 py-1 rounded-full text-xs ${
                 tab === "done"
-                  ? " bg-[#1c1c1e] text-[#EB5647]"
+                  ? " bg-[#1c1c1e] text-[#EF6C54]"
                   : "bg-[#1C1C1E] text-gray-400"
               }`}
             >
@@ -244,7 +244,7 @@ export default function BillsPage() {
 
             <button
               onClick={() => setShowForm(true)}
-              className="px-[0.7rem] py-[0.3rem]  bg-[#1c1c1e] text-[#EB5647] font-bold rounded-4xl text-sm"
+              className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold rounded-4xl text-sm"
             >
               +
             </button>
@@ -268,7 +268,7 @@ export default function BillsPage() {
               <button onClick={() => setShowForm(false)}>Cancel</button>
               <button
                 onClick={handleAddMonth}
-                className="bg-[#EB5647] px-3 py-1 rounded"
+                className="bg-[#DFF966] text-black px-3 py-1 rounded"
               >
                 Save
               </button>
@@ -362,7 +362,7 @@ export default function BillsPage() {
         return (
           <div key={entry._id} className="mb-6 bg-[#1C1C1E] p-4 rounded-xl">
             <div className="flex justify-between mb-2">
-              <h2 className="text-white font-semibold">
+              <h2 className="text-[#EF6C54] font-semibold text-[1.1rem]">
                 {entry.month}
               </h2>
 
@@ -452,7 +452,7 @@ export default function BillsPage() {
             {isEditing && (
               <button
                 onClick={() => handleSaveAll(entry._id)}
-                className="mt-2 bg-[#EB5647] px-3 py-1 rounded text-sm"
+                className="mt-2 bg-[#DFF966] text-black px-3 py-1 rounded text-sm"
               >
                 Save
               </button>
@@ -464,12 +464,12 @@ export default function BillsPage() {
                 <span>{format(total)}</span>
               </div>
 
-              <div className="flex justify-between text-green-400">
+              <div className="flex justify-between text-[#85D989]">
                 <span>Paid</span>
                 <span>{format(paidTotal)}</span>
               </div>
 
-              <div className="flex justify-between text-red-400">
+              <div className="flex justify-between text-[#B2597C]">
                 <span>Pending</span>
                 <span>{format(pendingTotal)}</span>
               </div>

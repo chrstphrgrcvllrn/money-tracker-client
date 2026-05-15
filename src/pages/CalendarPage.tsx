@@ -184,24 +184,24 @@ const CalendarPage: React.FC = () => {
   };
 
   const typeDotColorMap: Record<string, string> = {
-  birthday: "bg-pink-500",
-  event: "bg-purple-500",
-  ooo: "bg-orange-400",
-  holiday: "bg-green-500",
-  exercise: "bg-red-500",
-  leave: "bg-yellow-400",
+  birthday: "bg-[#A1B4F2]",
+  event: "bg-[#555BCA]",
+  ooo: "bg-[#EF6C54]",
+  holiday: "bg-[#85D989]",
+  exercise: "bg-[#B2597C]",
+  leave: "bg-[#DFF966]",
 };
 
   // =========================
   // COLORS
   // =========================
 const typeColorMap: Record<string, string> = {
-  birthday: "border-pink-500",
-  event: "border-purple-500",
-  ooo: "border-orange-400",
-  holiday: "border-green-500",
-  exercise: "border-red-500",
-  leave: "border-yellow-400",
+  birthday: "border-[#A1B4F2]",
+  event: "border-[#555BCA]",
+  ooo: "border-[#EF6C54]",
+  holiday: "border-[#DFF966]",
+  exercise: "border-[#B2597C]",
+  leave: "border-[#DFF966]",
 };
 
 useEffect(() => {
@@ -227,7 +227,8 @@ useEffect(() => {
       {/* FLOAT BUTTON */}
       <button
         onClick={() => setListModalOpen(true)}
-        className="fixed top-6 right-6 bg-white text-black px-4 py-2 rounded-full text-sm font-semibold z-50"
+        className="fixed top-6 right-6  bg-[#DFF966] text-black px-4 py-2 rounded-full text-sm font-semibold z-50"
+          // className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
       >
         View Events
       </button>
@@ -256,7 +257,7 @@ useEffect(() => {
                 onClick={() => setTab("upcoming")}
                 className={`px-3 py-1 rounded text-xs ${
                   tab === "upcoming"
-                    ? "bg-white text-black"
+                    ? "bg-[#DFF966] text-black"
                     : "bg-black text-gray-400"
                 }`}
               >
@@ -322,6 +323,7 @@ useEffect(() => {
           </div>
         </div>
       )}
+
 
       {/* =========================
           CALENDAR GRID
@@ -460,7 +462,7 @@ ref={(el) => {
       {/* SAVE BUTTON */}
       <button
         onClick={handleSubmit}
-        className="w-full bg-white text-black py-2 rounded"
+        className="w-full bg-[#DFF966] text-black py-2 rounded"
       >
         Save
       </button>

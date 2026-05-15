@@ -99,7 +99,7 @@ export default function BottomNavBar() {
           to={item.path}
           className={({ isActive }) =>
             `flex flex-col items-center justify-center text-xs ${
-              isActive ? "text-[#EB5647]" : "text-[#999794]"
+              isActive ? "text-[#dff966]" : "text-[#999794]"
             }`
           }
         >

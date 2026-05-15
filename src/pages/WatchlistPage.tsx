@@ -376,7 +376,7 @@ const handleDelete = async (id: string) => {
               onClick={() => setTab(t as any)}
               className={`px-2 py-1 rounded ${
                 tab === t
-                  ? "bg-[#1c1c1e] text-[#EB5647]"
+                  ? "bg-[#DFF966] text-black"
                   : "bg-[#1C1C1E] text-gray-400"
               }`}
             >
@@ -390,22 +390,22 @@ const handleDelete = async (id: string) => {
             <>
               <button onClick={startEdit} 
               // className="bg-[#1C1C1E] p-2 rounded"
-               className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1c1c1e] text-[#EB5647] font-bold rounded-4xl text-sm"
+               className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1c1c1e] text-[#EF6C54] font-bold rounded-4xl text-sm"
               >
                 <PencilIcon className="w-4 h-4 text-white" />
               </button>
 
               <button
                 onClick={() => setShowAddModal(true)}
-                // className=" bg-[#1c1c1e] text-[#EB5647] px-2 py-1 rounded "
-                 className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1c1c1e] text-[#EB5647] font-bold rounded-4xl text-sm"
+                // className=" bg-[#1c1c1e] text-[#EF6C54] px-2 py-1 rounded "
+                  className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
               >
                 +
               </button>
             </>
           ) : (
             <>
-              <button onClick={saveAll} className="bg-[#EB5647] px-2 py-1 rounded">
+              <button onClick={saveAll} className="bg-[#DFF966] text-black px-2 py-1 rounded">
                 Save
               </button>
 
@@ -533,7 +533,7 @@ const handleDelete = async (id: string) => {
                       />
                       <button
                         onClick={() => handleDelete(item._id)}
-                        className="text-red-400 text-xs"
+                        className="text-[#B2597C] text-xs"
                       >
                         Delete
                       </button>
@@ -598,7 +598,7 @@ const handleDelete = async (id: string) => {
 
       <button
         onClick={addItem}
-        className="w-full mt-3 bg-[#EB5647] p-2 rounded text-white"
+        className="w-full mt-3 bg-[#DFF966] text-black p-2 rounded"
       >
         Add
       </button>
