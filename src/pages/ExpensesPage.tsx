@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import {
   fetchExpenses,
   createExpense,
-  toggleExpense,
+  // toggleExpense,
   updateExpense,
   deleteExpense,
 } from "../api/expenses";
 
-import { CheckIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 type Expense = {
   _id: string;
@@ -70,10 +70,10 @@ const ExpensesPage: React.FC = () => {
   // =========================
   // ACTIONS
   // =========================
-  const handleToggle = async (id: string) => {
-    await toggleExpense(id);
-    loadExpenses();
-  };
+  // const handleToggle = async (id: string) => {
+  //   await toggleExpense(id);
+  //   loadExpenses();
+  // };
 
   const handleEdit = (exp: Expense) => {
     setText(exp.text);
