@@ -2,7 +2,7 @@ export type Payment = {
   _id: string;
   date: string;
   amount: number;
-  status: "paid" | "pending";
+  status: "paid" | "pending" | "prepared";
 };
 
 export type Subscription = {
