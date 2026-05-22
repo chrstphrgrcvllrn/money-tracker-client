@@ -186,17 +186,19 @@ const ExpensesPage: React.FC = () => {
   // =========================
   // GRAPH DATA (CATEGORY PIE)
   // =========================
-  const graphData = Object.values(
-    expenses.reduce((acc: Record<string, Expense[]>, e) => {
-      const key = e.category || "Uncategorized";
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(e);
-      return acc;
-    }, {})
-  ).map((g) => ({
+const graphData = Object.values(
+  expenses.reduce((acc: Record<string, Expense[]>, e) => {
+    const key = e.category || "Uncategorized";
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(e);
+    return acc;
+  }, {})
+)
+  .map((g) => ({
     name: g[0].category || "Uncategorized",
     total: g.reduce((s, e) => s + e.amount, 0),
-  }));
+  }))
+  .sort((a, b) => b.total - a.total); // 👈 SORT HERE
 
   const totalGraph = graphData.reduce((s, i) => s + i.total, 0);
 
@@ -208,6 +210,8 @@ const ExpensesPage: React.FC = () => {
     "#F97316",
     "#A78BFA",
   ];
+
+
 
   // =========================
   // RENDER
@@ -311,12 +315,19 @@ const ExpensesPage: React.FC = () => {
             </div>
           </div>
 
-          {graphData.map((g) => (
+         {graphData.map((g, i) => (
             <div
               key={g.name}
-              className="flex justify-between bg-[#1C1C1E] p-2 rounded-xl text-white"
+              className="flex justify-between items-centerp-2 rounded-xl text-white"
             >
-              <span>{g.name}</span>
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{ backgroundColor: colors[i % colors.length] }}
+                />
+                <span>{g.name}</span>
+              </div>
+
               <span>₱{g.total.toLocaleString()}</span>
             </div>
           ))}
