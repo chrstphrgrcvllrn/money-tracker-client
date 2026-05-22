@@ -311,7 +311,7 @@ const ExpensesPage: React.FC = () => {
             </div>
           </div>
 
-          {graphData.map((g, i) => (
+          {graphData.map((g) => (
             <div
               key={g.name}
               className="flex justify-between bg-[#1C1C1E] p-2 rounded-xl text-white"
