@@ -120,7 +120,7 @@ const ExpensesPage: React.FC = () => {
   // =========================
   // PENDING GROUP
   // =========================
-  const pending = expenses.filter((e) => !e.done);
+  const pending = expenses;
 
   const grouped: Record<string, Expense[]> = {};
   pending.forEach((e) => {
