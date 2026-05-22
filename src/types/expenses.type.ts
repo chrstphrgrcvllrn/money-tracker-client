@@ -3,6 +3,7 @@ export type Expense = {
   text: string;
   amount: number;
   done: boolean;
-  createdAt: string; // ✅ important fix
+  category: string; // ✅ NEW
+  createdAt: string;
   updatedAt?: string;
 };

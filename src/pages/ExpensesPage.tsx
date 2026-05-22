@@ -2,33 +2,29 @@ import { useEffect, useState } from "react";
 import {
   fetchExpenses,
   createExpense,
-  // toggleExpense,
   updateExpense,
   deleteExpense,
 } from "../api/expenses";
 
+import type { Expense } from "../types/expenses.type";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
-
-type Expense = {
-  _id: string;
-  text: string;
-  amount: number;
-  done: boolean;
-  createdAt: string;
-};
 
 const ExpensesPage: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
+
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // ✅ added monthly
   const [activeTab, setActiveTab] = useState<
-    "pending" | "done" | "monthly"
+    "pending" | "monthly" | "biggest" | "graph"
   >("pending");
 
+  // =========================
+  // LOAD
+  // =========================
   const loadExpenses = async () => {
     const data = await fetchExpenses();
     setExpenses(data);
@@ -39,21 +35,21 @@ const ExpensesPage: React.FC = () => {
   }, []);
 
   // =========================
-  // ADD OR UPDATE
+  // SAVE
   // =========================
   const handleSave = async () => {
     if (!text.trim() || !amount) return;
 
+    const payload = {
+       text: text.trim(),
+      amount: Number(amount),
+      category, // 👈 add this
+    };
+
     if (editingId) {
-      await updateExpense(editingId, {
-        text: text.trim(),
-        amount: Number(amount),
-      });
+      await updateExpense(editingId, payload);
     } else {
-      await createExpense({
-        text: text.trim(),
-        amount: Number(amount),
-      });
+      await createExpense(payload);
     }
 
     resetForm();
@@ -63,21 +59,15 @@ const ExpensesPage: React.FC = () => {
   const resetForm = () => {
     setText("");
     setAmount("");
+    setCategory("");
     setEditingId(null);
     setShowModal(false);
   };
 
-  // =========================
-  // ACTIONS
-  // =========================
-  // const handleToggle = async (id: string) => {
-  //   await toggleExpense(id);
-  //   loadExpenses();
-  // };
-
   const handleEdit = (exp: Expense) => {
     setText(exp.text);
     setAmount(String(exp.amount));
+    setCategory(exp.category || "");
     setEditingId(exp._id);
     setShowModal(true);
   };
@@ -91,289 +81,353 @@ const ExpensesPage: React.FC = () => {
   // DATE HELPERS
   // =========================
   const today = new Date();
-  const yesterday = new Date(today);
+  const yesterday = new Date();
   yesterday.setDate(today.getDate() - 1);
 
-  const isToday = (dateStr: string) =>
-    new Date(dateStr).toDateString() === today.toDateString();
+  const isToday = (d: string) =>
+    new Date(d).toDateString() === today.toDateString();
 
-  const isThisWeek = (dateStr: string) => {
-    const d = new Date(dateStr);
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    return d >= startOfWeek && d <= endOfWeek;
+  const isThisWeek = (d: string) => {
+    const date = new Date(d);
+    const start = new Date(today);
+    start.setDate(today.getDate() - today.getDay());
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    return date >= start && date <= end;
   };
 
-  const isThisMonth = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return (
-      d.getMonth() === today.getMonth() &&
-      d.getFullYear() === today.getFullYear()
-    );
-  };
+  const isThisMonth = (d: string) =>
+    new Date(d).getMonth() === today.getMonth() &&
+    new Date(d).getFullYear() === today.getFullYear();
 
   // =========================
   // TOTALS
   // =========================
   const totalToday = expenses
     .filter((e) => isToday(e.createdAt))
-    .reduce((sum, e) => sum + e.amount, 0);
+    .reduce((s, e) => s + e.amount, 0);
 
   const totalWeek = expenses
     .filter((e) => isThisWeek(e.createdAt))
-    .reduce((sum, e) => sum + e.amount, 0);
+    .reduce((s, e) => s + e.amount, 0);
 
   const totalMonth = expenses
     .filter((e) => isThisMonth(e.createdAt))
-    .reduce((sum, e) => sum + e.amount, 0);
+    .reduce((s, e) => s + e.amount, 0);
 
   // =========================
-  // FILTERED LIST (pending/done)
+  // PENDING GROUP
   // =========================
-  const filteredExpenses = expenses
-    .filter((exp) =>
-      activeTab === "done"
-        ? exp.done
-        : activeTab === "pending"
-        ? !exp.done
-        : true
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() -
-        new Date(a.createdAt).getTime()
-    );
+  const pending = expenses.filter((e) => !e.done);
 
-  // =========================
-  // GROUP BY DATE
-  // =========================
-  const groupedExpenses: Record<string, Expense[]> = {};
-  filteredExpenses.forEach((exp) => {
-    const dateKey = new Date(exp.createdAt).toDateString();
-    if (!groupedExpenses[dateKey]) groupedExpenses[dateKey] = [];
-    groupedExpenses[dateKey].push(exp);
+  const grouped: Record<string, Expense[]> = {};
+  pending.forEach((e) => {
+    const key = new Date(e.createdAt).toDateString();
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(e);
   });
 
-  const sortedDates = Object.keys(groupedExpenses).sort(
+  const sortedDates = Object.keys(grouped).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
 
   // =========================
-  // GROUP BY MONTH (for totals only)
+  // MONTHLY GROUP
   // =========================
-  const monthlyExpenses: Record<string, Expense[]> = {};
+  const monthly: Record<string, Expense[]> = {};
 
-  expenses.forEach((exp) => {
-    const d = new Date(exp.createdAt);
+  expenses.forEach((e) => {
+    const d = new Date(e.createdAt);
     const key = `${d.getFullYear()}-${d.getMonth()}`;
 
-    if (!monthlyExpenses[key]) monthlyExpenses[key] = [];
-    monthlyExpenses[key].push(exp);
+    if (!monthly[key]) monthly[key] = [];
+    monthly[key].push(e);
   });
 
-  const sortedMonths = Object.keys(monthlyExpenses).sort(
+  const sortedMonths = Object.keys(monthly).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
+
+  // =========================
+  // BIGGEST BY CATEGORY PER MONTH
+  // =========================
+  const biggest = Object.values(monthly).map((monthGroup) => {
+    const groupedByCategory = Object.values(
+      monthGroup.reduce((acc: Record<string, Expense[]>, e) => {
+        const key = e.category || "Uncategorized";
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(e);
+        return acc;
+      }, {})
+    )
+      .map((g) => ({
+        name: g[0].category || "Uncategorized",
+        total: g.reduce((s, e) => s + e.amount, 0),
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    const date = new Date(monthGroup[0].createdAt);
+
+    return {
+      label: date.toLocaleDateString(undefined, {
+        month: "long",
+        year: "numeric",
+      }),
+      data: groupedByCategory,
+    };
+  });
+
+  const sortedBiggest = [...biggest].sort(
+    (a, b) => new Date(b.label).getTime() - new Date(a.label).getTime()
+  );
+
+  // =========================
+  // GRAPH DATA (CATEGORY PIE)
+  // =========================
+  const graphData = Object.values(
+    expenses.reduce((acc: Record<string, Expense[]>, e) => {
+      const key = e.category || "Uncategorized";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(e);
+      return acc;
+    }, {})
+  ).map((g) => ({
+    name: g[0].category || "Uncategorized",
+    total: g.reduce((s, e) => s + e.amount, 0),
+  }));
+
+  const totalGraph = graphData.reduce((s, i) => s + i.total, 0);
+
+  const colors = [
+    "#DFF966",
+    "#85D989",
+    "#B2597C",
+    "#60A5FA",
+    "#F97316",
+    "#A78BFA",
+  ];
 
   // =========================
   // RENDER
   // =========================
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6">
-      {/* HEADER */}
-     
 
       {/* TOTALS */}
       <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
           <p className="text-white font-bold">Today</p>
-          <p className="text-[#85D989] font-bold">
-            ₱{totalToday.toLocaleString()}
-          </p>
+          <p className="text-[#85D989] font-bold">₱{totalToday.toLocaleString()}</p>
         </div>
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
           <p className="text-white font-bold">Week</p>
-          <p className="text-[#85D989] font-bold">
-            ₱{totalWeek.toLocaleString()}
-          </p>
+          <p className="text-[#85D989] font-bold">₱{totalWeek.toLocaleString()}</p>
         </div>
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
           <p className="text-white font-bold">Month</p>
-          <p className="text-[#85D989] font-bold">
-            ₱{totalMonth.toLocaleString()}
-          </p>
+          <p className="text-[#85D989] font-bold">₱{totalMonth.toLocaleString()}</p>
         </div>
       </div>
 
       {/* TABS */}
-      <div className="flex gap-2 mb-4 justify-between">
-          <div className="flex gap-2 mb-4">
-            {["all", "monthly"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as any)}
-                className={`px-2 py-1 rounded-xl text-xs capitalize ${
-                  activeTab === tab
-                  ? "bg-[#DFF966] text-black  font-bold"
-                    : "bg-[#1C1C1E] text-gray-400"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="mb-4 flex justify-between items-center">
-            {/* <h1 className="text-lg font-semibold text-white">Expenses</h1> */}
+      <div className="flex justify-between mb-4">
+        <div className="flex gap-2 flex-wrap">
+          {["pending", "monthly", "biggest", "graph"].map((tab) => (
             <button
-              onClick={() => setShowModal(true)}
-                className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
+              key={tab}
+              onClick={() => setActiveTab(tab as any)}
+              className={`px-2 py-1 rounded-xl text-xs capitalize ${
+                activeTab === tab
+                  ? "bg-[#DFF966] text-black font-bold"
+                  : "bg-[#1C1C1E] text-gray-400"
+              }`}
             >
-              +
+              {tab}
             </button>
-          </div>
+          ))}
+        </div>
+
+        <button
+          onClick={() => setShowModal(true)}
+          className="px-[0.7rem] py-[0.3rem] bg-[#DFF966] text-black font-bold rounded-4xl text-sm"
+        >
+          +
+        </button>
       </div>
 
-      {/* LIST */}
-      <ul className="space-y-2 text-sm">
-        {activeTab === "monthly"
-          ? sortedMonths.map((monthKey) => {
-              const monthList = monthlyExpenses[monthKey];
+      {/* ========================= */}
+      {/* BIGGEST */}
+      {/* ========================= */}
+      {activeTab === "biggest" &&
+        sortedBiggest.map((m) => (
+          <div key={m.label} className="mb-3">
+            <div className="text-gray-400 text-[10px] mb-2">{m.label}</div>
 
-              const total = monthList.reduce(
-                (sum, e) => sum + e.amount,
-                0
-              );
+            {m.data.map((item) => (
+              <div
+                key={item.name}
+                className="flex justify-between bg-[#1C1C1E] p-3 rounded-xl mb-2 text-white"
+              >
+                <span>{item.name}</span>
+                <span>₱{item.total.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        ))}
 
-              const date = new Date(monthList[0].createdAt);
-              const label = date.toLocaleDateString(undefined, {
-                month: "long",
-                year: "numeric",
-              });
+      {/* ========================= */}
+      {/* GRAPH */}
+      {/* ========================= */}
+      {activeTab === "graph" && (
+        <div className="space-y-3">
 
-              return (
-                <li key={monthKey}>
-                  <div className="flex justify-between items-center p-3 bg-[#1C1C1E] rounded-xl">
-                    <span className="text-white font-medium">
-                      {label}
-                    </span>
-                    <span className="text-white font-bold">
-                      ₱{total.toLocaleString()}
-                    </span>
+          <div className="flex justify-center">
+            <div
+              className="w-48 h-48 rounded-full relative"
+              style={{
+                background: `conic-gradient(${graphData
+                  .map((item, i) => {
+                    const start =
+                      graphData
+                        .slice(0, i)
+                        .reduce((s, d) => s + d.total, 0) / totalGraph;
+
+                    const end = start + item.total / totalGraph;
+
+                    return `${colors[i % colors.length]} ${
+                      start * 360
+                    }deg ${end * 360}deg`;
+                  })
+                  .join(", ")})`,
+              }}
+            >
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                <div className="text-lg font-bold">
+                  ₱{totalGraph.toLocaleString()}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {graphData.map((g, i) => (
+            <div
+              key={g.name}
+              className="flex justify-between bg-[#1C1C1E] p-2 rounded-xl text-white"
+            >
+              <span>{g.name}</span>
+              <span>₱{g.total.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ========================= */}
+      {/* MONTHLY */}
+      {/* ========================= */}
+      {activeTab === "monthly" &&
+        sortedMonths.map((key) => {
+          const list = monthly[key];
+          const total = list.reduce((s, e) => s + e.amount, 0);
+          const date = new Date(list[0].createdAt);
+
+          return (
+            <div
+              key={key}
+              className="flex justify-between bg-[#1C1C1E] p-3 rounded-xl mb-2 text-white"
+            >
+              <span>
+                {date.toLocaleDateString(undefined, {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+              <span>₱{total.toLocaleString()}</span>
+            </div>
+          );
+        })}
+
+      {/* ========================= */}
+      {/* PENDING */}
+      {/* ========================= */}
+      {activeTab === "pending" &&
+        sortedDates.map((date) => (
+          <div key={date} className="mb-3">
+            <div className="text-gray-400 text-[10px] mb-1">
+              {date === today.toDateString()
+                ? "Today"
+                : date === yesterday.toDateString()
+                ? "Yesterday"
+                : new Date(date).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })}
+            </div>
+
+            {grouped[date].map((exp) => (
+              <div
+                key={exp._id}
+                className="flex justify-between bg-[#1C1C1E] p-2 rounded-xl mb-2 text-white"
+              >
+                <div>
+                  <div>{exp.text} •   <span className="text-gray-400 text-[10px]">{exp.category}</span></div>
+                 
+
+
+                  <div className="text-[#B2597C] text-xs">
+                    ₱{exp.amount.toLocaleString()}
                   </div>
-                </li>
-              );
-            })
-          : sortedDates.map((date) => (
-              <li key={date}>
-                <div className="text-gray-400 text-[10px] mb-1 font-semibold ">
-                  {date === today.toDateString()
-                    ? "Today"
-                    : date === yesterday.toDateString()
-                    ? "Yesterday"
-                    : new Date(date).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })}
                 </div>
 
-                {groupedExpenses[date].map((exp) => (
-                  <div
-                    key={exp._id}
-                    className={`flex justify-between items-center p-2 bg-[#1C1C1E] rounded-xl mb-2 ${
-                      exp.done ? "text-white" : ""
-                    }`}
-                  >
-                    <div className="flex flex-col">
-                      <span
-                        className={
-                          exp.done ? "text-white" : "text-white"
-                        }
-                      >
-                        {exp.text}
-                      </span>
-                      <span className="text-[#B2597C] text-xs">
-                        ₱{exp.amount.toLocaleString()}
-                      </span>
-                      {/* <span className="text-gray-600 text-[10px]">
-                        {new Date(exp.createdAt).toLocaleTimeString(
-                          undefined,
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )}
-                      </span> */}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEdit(exp)}
-                        className="text-gray-400 hover:text-blue-400"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        onClick={() => handleDelete(exp._id)}
-                        className="text-gray-400 hover:text-[#EF6C54]"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-
-                      {/* <button onClick={() => handleToggle(exp._id)}>
-                        <CheckIcon
-                          className={`w-5 h-5 ${
-                            exp.done
-                              ? "text-white"
-                              : "text-[#9C9BA1]"
-                          }`}
-                        />
-                      </button> */}
-                    </div>
-                  </div>
-                ))}
-              </li>
+                <div className="flex gap-2">
+                  <button onClick={() => handleEdit(exp)}>
+                    <PencilIcon className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDelete(exp._id)}>
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             ))}
-      </ul>
+          </div>
+        ))}
 
+      {/* ========================= */}
       {/* MODAL */}
+      {/* ========================= */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-xl flex items-center justify-center">
-          <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm text-[1rem]">
-            <h2 className="text-white mb-3 font-semibold">
-              {editingId ? "Edit Expense" : "Add Expense"}
-            </h2>
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm">
 
             <input
-              type="text"
-              placeholder="Expense name"
+              className="w-full mb-2 p-2 bg-black text-white"
+              placeholder="Expense"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              className="w-full mb-2 bg-[#111] px-2 py-2 rounded text-white"
             />
 
             <input
-              type="number"
+              className="w-full mb-2 p-2 bg-black text-white"
               placeholder="Amount"
+              type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full mb-3 bg-[#111] px-2 py-2 rounded text-white"
             />
 
-            <div className="flex justify-end gap-2 w-full flex-col">
-              <button onClick={resetForm} className="px-3 py-1 text-gray-400">
-                Cancel
-              </button>
+            <input
+              className="w-full mb-3 p-2 bg-black text-white"
+              placeholder="Category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
 
-              <button
-                onClick={handleSave}
-                className="bg-[#DFF966] text-black px-3 py-1 rounded font-bold"
-              >
-                {editingId ? "Update" : "Save"}
-              </button>
-            </div>
+            <button
+              onClick={handleSave}
+              className="w-full bg-[#DFF966] text-black font-bold p-2 rounded"
+            >
+              Save
+            </button>
           </div>
         </div>
       )}
