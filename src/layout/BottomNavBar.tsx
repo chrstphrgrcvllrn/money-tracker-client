@@ -7,7 +7,7 @@ import {
   DocumentTextIcon as DocumentTextOutline,
   // CalculatorIcon as CalculatorOutline,
   CalendarDaysIcon as CalendarDaysOutline,
-  TvIcon as TvOutline,
+  // TvIcon as TvOutline,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -18,7 +18,7 @@ import {
   DocumentTextIcon as DocumentTextSolid,
   // CalculatorIcon as CalculatorSolid,
   CalendarDaysIcon as CalendarDaysSolid,
-  TvIcon as TvSolid,
+  // TvIcon as TvSolid,
 } from "@heroicons/react/24/solid";
 
 export default function BottomNavBar() {
@@ -65,15 +65,15 @@ export default function BottomNavBar() {
       icon: DocumentTextOutline,
       activeIcon: DocumentTextSolid,
     },
+    // {
+    //   name: "Watchlist",
+    //   path: "/watchlist",
+    //   icon: TvOutline,
+    //   activeIcon: TvSolid,
+    // },
     {
-      name: "Watchlist",
-      path: "/watchlist",
-      icon: TvOutline,
-      activeIcon: TvSolid,
-    },
-    {
-      name: "Calendar",
-      path: "/calendar",
+      name: "House",
+      path: "/house-expenses",
       icon: CalendarDaysOutline,
       activeIcon: CalendarDaysSolid,
     },
