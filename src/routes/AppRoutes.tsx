@@ -15,6 +15,7 @@ import ThoughtsPage from "@/pages/ThoughtsPage"
 import SubscriptionPage from "@/pages/SubscriptionPage";
 // import PatientDetails from "@/pages/Patients/PatientDetails";
 // import AppointmentsList from "@/pages/Appointments/AppointmentsList"
+import NotebookPage from "@/pages/NotebookPage";
 
 
 export default function AppRoutes() {
@@ -35,6 +36,7 @@ export default function AppRoutes() {
         <Route path="thoughts" element={<ThoughtsPage/>} />
         {/* <Route path="watchlist" element={<WatchlistPage/>} /> */}
         <Route path="subscription" element={<SubscriptionPage/>} />
+        <Route path="notebook" element={<NotebookPage />} />
         
         {/* <Route path="patients/:id" element={<PatientDetails />} /> */}
         {/* <Route path="appointments" element={<AppointmentsList />} /> */}

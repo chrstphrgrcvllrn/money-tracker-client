@@ -7,6 +7,7 @@ import {
   DocumentTextIcon as DocumentTextOutline,
   // CalculatorIcon as CalculatorOutline,
   CalendarDaysIcon as CalendarDaysOutline,
+    BookOpenIcon as BookOpenOutline,
   // TvIcon as TvOutline,
 } from "@heroicons/react/24/outline";
 
@@ -18,8 +19,11 @@ import {
   DocumentTextIcon as DocumentTextSolid,
   // CalculatorIcon as CalculatorSolid,
   CalendarDaysIcon as CalendarDaysSolid,
+    BookOpenIcon as BookOpenSolid,
   // TvIcon as TvSolid,
 } from "@heroicons/react/24/solid";
+
+ 
 
 export default function BottomNavBar() {
   const navItems = [
@@ -89,6 +93,12 @@ export default function BottomNavBar() {
     //   icon: CalculatorOutline,
     //   activeIcon: CalculatorSolid,
     // },
+    {
+  name: "Notebook",
+  path: "/notebook",
+  icon: BookOpenOutline,
+  activeIcon: BookOpenSolid,
+},
   ];
 
   return (
