@@ -26,7 +26,6 @@ const NotebookPage: React.FC = () => {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
 
   const [activeTab, setActiveTab] = useState<
     "all" | "open" | "closed"
@@ -46,8 +45,9 @@ const NotebookPage: React.FC = () => {
   // Selected note
   // --------------------------------
 
-  const selectedNote = notes.find(
-    (note) => note._id === selectedNoteId
+  const selectedNote = useMemo(
+    () => notes.find((note) => note._id === selectedNoteId),
+    [notes, selectedNoteId]
   );
 
   // --------------------------------
@@ -78,8 +78,13 @@ const NotebookPage: React.FC = () => {
   // --------------------------------
 
   useEffect(() => {
-    if (!selectedNoteId || !editorRef.current) {
+    if (!selectedNoteId || !selectedNote || !editorRef.current) {
       return;
+    }
+
+    // Prevent creating multiple Quill instances
+    if (quillRef.current) {
+      quillRef.current = null;
     }
 
     const quill = new Quill(editorRef.current, {
@@ -102,34 +107,21 @@ const NotebookPage: React.FC = () => {
 
     quillRef.current = quill;
 
-    // Load selected note content
-    const note = notes.find(
-      (item) => item._id === selectedNoteId
-    );
+    // Load selected note content into Quill
+    quill.root.innerHTML = selectedNote.content || "";
 
-    if (note) {
-      quill.root.innerHTML = note.content || "";
-      setContent(note.content || "");
-    }
-
-    // Listen for content changes
-    const handleTextChange = () => {
-      setContent(quill.root.innerHTML);
-    };
-
-    quill.on("text-change", handleTextChange);
-
-    // Cleanup
     return () => {
-      quill.off("text-change", handleTextChange);
+      if (quillRef.current === quill) {
+        quillRef.current = null;
+      }
 
-      quillRef.current = null;
+      quill.disable();
 
       if (editorRef.current) {
         editorRef.current.innerHTML = "";
       }
     };
-  }, [selectedNoteId]);
+  }, [selectedNoteId, selectedNote]);
 
   // --------------------------------
   // Fetch notes
@@ -138,9 +130,11 @@ const NotebookPage: React.FC = () => {
   const fetchNotes = async () => {
     try {
       const data = await getNotebookNotes();
+
       setNotes(data);
     } catch (error) {
       console.error("Fetch notes error:", error);
+
       showSnackbar("Failed to load notes");
     }
   };
@@ -150,27 +144,23 @@ const NotebookPage: React.FC = () => {
   }, []);
 
   // --------------------------------
-  // Open note modal
+  // Open note
   // --------------------------------
 
   const openNote = (note: NotebookNote) => {
     setSelectedNoteId(note._id);
     setTitle(note.title);
-    setContent(note.content || "");
   };
 
   // --------------------------------
-  // Close modal
+  // Close note
   // --------------------------------
 
   const closeNote = () => {
     setSelectedNoteId(null);
     setTitle("");
-    setContent("");
 
-    if (quillRef.current) {
-      quillRef.current = null;
-    }
+    quillRef.current = null;
   };
 
   // --------------------------------
@@ -186,11 +176,13 @@ const NotebookPage: React.FC = () => {
 
       setNotes((prev) => [note, ...prev]);
 
-      openNote(note);
+      setSelectedNoteId(note._id);
+      setTitle(note.title);
 
       showSnackbar("Note created");
     } catch (error) {
       console.error("Create note error:", error);
+
       showSnackbar("Failed to create note");
     }
   };
@@ -200,67 +192,78 @@ const NotebookPage: React.FC = () => {
   // --------------------------------
 
   const saveNote = async () => {
-  console.log("🔥 SAVE BUTTON CLICKED");
+    console.log("🔥 SAVE BUTTON CLICKED");
 
-  console.log("selectedNoteId:", selectedNoteId);
-  console.log("title:", title);
-  console.log("quill:", quillRef.current);
+    console.log("selectedNoteId:", selectedNoteId);
+    console.log("title:", title);
+    console.log("quill:", quillRef.current);
 
-  if (!selectedNoteId) {
-    console.log("❌ No selected note");
-    showSnackbar("No note selected");
-    return;
-  }
+    if (!selectedNoteId) {
+      console.log("❌ No selected note");
 
-  if (!title.trim()) {
-    console.log("❌ Empty title");
-    showSnackbar("Please enter a title");
-    return;
-  }
+      showSnackbar("No note selected");
 
-  setSaving(true);
+      return;
+    }
 
-  try {
-    const currentContent =
-      quillRef.current?.root.innerHTML || "";
+    if (!title.trim()) {
+      console.log("❌ Empty title");
 
-    console.log("📝 Content:", currentContent);
+      showSnackbar("Please enter a title");
 
-    const payload = {
-      title: title.trim(),
-      content: currentContent,
-    };
+      return;
+    }
 
-    console.log("📤 Sending update:", {
-      id: selectedNoteId,
-      payload,
-    });
+    if (!quillRef.current) {
+      console.log("❌ Quill is not initialized");
 
-    const updatedNote = await updateNotebookNote(
-      selectedNoteId,
-      payload
-    );
+      showSnackbar("Editor is not ready");
 
-    console.log("✅ API RESPONSE:", updatedNote);
+      return;
+    }
 
-    setNotes((prev) =>
-      prev.map((note) =>
-        note._id === updatedNote._id
-          ? updatedNote
-          : note
-      )
-    );
+    setSaving(true);
 
-    setContent(currentContent);
+    try {
+      // Quill is the source of truth for content
+      const currentContent = quillRef.current.root.innerHTML;
 
-    showSnackbar("Note saved successfully");
-  } catch (error) {
-    console.error("❌ SAVE ERROR:", error);
-    showSnackbar("Failed to save note");
-  } finally {
-    setSaving(false);
-  }
-};
+      console.log("📝 Content:", currentContent);
+
+      const payload = {
+        title: title.trim(),
+        content: currentContent,
+      };
+
+      console.log("📤 Sending update:", {
+        id: selectedNoteId,
+        payload,
+      });
+
+      const updatedNote = await updateNotebookNote(
+        selectedNoteId,
+        payload
+      );
+
+      console.log("✅ API RESPONSE:", updatedNote);
+
+      setNotes((prev) =>
+        prev.map((note) =>
+          note._id === updatedNote._id
+            ? updatedNote
+            : note
+        )
+      );
+
+      showSnackbar("Note saved successfully");
+    } catch (error) {
+      console.error("❌ SAVE ERROR:", error);
+
+      showSnackbar("Failed to save note");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // --------------------------------
   // Toggle status
@@ -348,6 +351,10 @@ const NotebookPage: React.FC = () => {
       (note) => note.status === activeTab
     );
   }, [notes, activeTab]);
+
+  // --------------------------------
+  // Render
+  // --------------------------------
 
   return (
     <div className="min-h-[calc(100vh-80px)] text-xs bg-black text-white">
@@ -508,12 +515,13 @@ const NotebookPage: React.FC = () => {
             </div>
 
             {/* QUILL */}
-                <div className="flex-1 min-h-0 overflow-hidden notebook-editor">
-                <div
-                    ref={editorRef}
-                    className="h-full"
-                />
-                </div>
+            <div className="flex-1 min-h-0 overflow-hidden notebook-editor">
+              <div
+                ref={editorRef}
+                className="h-full"
+              />
+            </div>
+
             {/* MODAL FOOTER */}
             <div className="flex items-center justify-between px-5 py-4 border-t border-white/10">
 
@@ -522,7 +530,10 @@ const NotebookPage: React.FC = () => {
                 className="flex items-center gap-2 text-gray-500 hover:text-red-400"
               >
                 <TrashIcon className="w-5 h-5" />
-                <span>Delete</span>
+
+                <span>
+                  Delete
+                </span>
               </button>
 
               <div className="flex items-center gap-2">
