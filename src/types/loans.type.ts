@@ -9,4 +9,5 @@ export type Loan = {
   name: string;
   initialAmount: number;
   transactions: Transaction[];
+  archived?: boolean;
 };
