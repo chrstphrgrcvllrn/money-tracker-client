@@ -7,12 +7,14 @@ import {
   deleteSalary
 } from "../api/salary";
 
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-
 import { TrashIcon } from "@heroicons/react/24/solid";
 
+import Modal from "../components/Modal";
+import { useToast } from "../components/useToast";
+
 export default function SalaryPage() {
+  const showToast = useToast();
+
   const [salaryData, setSalaryData] = useState<SalaryEntry[]>([]);
   const [editingAllEntryId, setEditingAllEntryId] = useState<string | null>(null);
   const [editedExpenses, setEditedExpenses] = useState<Expense[]>([]);
@@ -34,24 +36,30 @@ export default function SalaryPage() {
   const [salaryToDelete, setSalaryToDelete] = useState<string | null>(null);
 
   // ✅ TAB STATE
-  const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
+  const [activeTab, setActiveTab] = useState<"active" | "completed" | "totals">("active");
 
   const format = (value: unknown) => Number(value || 0).toLocaleString();
 
   useEffect(() => {
     const load = async () => {
-      const data = await fetchSalaries();
+      try {
+        const data = await fetchSalaries();
 
-      const normalized = data.map((entry) => ({
-        ...entry,
-        expenses: Array.isArray(entry.expenses) ? entry.expenses : [],
-        salary: entry.salary ?? 0,
-      }));
+        const normalized = data.map((entry) => ({
+          ...entry,
+          expenses: Array.isArray(entry.expenses) ? entry.expenses : [],
+          salary: entry.salary ?? 0,
+        }));
 
-      setSalaryData(normalized);
+        setSalaryData(normalized);
+      } catch (error) {
+        console.error("Failed to load salaries:", error);
+        showToast("Failed to load salaries", "error");
+      }
     };
 
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddSalary = async () => {
@@ -60,39 +68,51 @@ export default function SalaryPage() {
     const salary = Number(newSalaryAmount);
     if (isNaN(salary)) return;
 
-    const newEntry = await createSalary({
-      date: newSalaryDate,
-      salary,
-      expenses: [],
-    });
+    try {
+      const newEntry = await createSalary({
+        date: newSalaryDate,
+        salary,
+        expenses: [],
+      });
 
-    setSalaryData((prev) => [
-      ...prev,
-      {
-        ...newEntry,
-        expenses: Array.isArray(newEntry.expenses) ? newEntry.expenses : [],
-      },
-    ]);
+      setSalaryData((prev) => [
+        ...prev,
+        {
+          ...newEntry,
+          expenses: Array.isArray(newEntry.expenses) ? newEntry.expenses : [],
+        },
+      ]);
 
-    setNewSalaryDate("");
-    setNewSalaryAmount("");
-    setShowForm(false);
+      setNewSalaryDate("");
+      setNewSalaryAmount("");
+      setShowForm(false);
+      showToast("Salary added successfully!", "success");
+    } catch (error) {
+      console.error("Failed to add salary:", error);
+      showToast("Failed to add salary", "error");
+    }
   };
 
   const handleDuplicateSalary = async (entry: SalaryEntry) => {
-    const duplicateEntry = await createSalary({
-      date: entry.date + " (Copy)",
-      salary: entry.salary,
-      expenses: [...(entry.expenses ?? [])],
-    });
+    try {
+      const duplicateEntry = await createSalary({
+        date: entry.date + " (Copy)",
+        salary: entry.salary,
+        expenses: [...(entry.expenses ?? [])],
+      });
 
-    setSalaryData((prev) => [
-      ...prev,
-      {
-        ...duplicateEntry,
-        expenses: Array.isArray(duplicateEntry.expenses) ? duplicateEntry.expenses : [],
-      },
-    ]);
+      setSalaryData((prev) => [
+        ...prev,
+        {
+          ...duplicateEntry,
+          expenses: Array.isArray(duplicateEntry.expenses) ? duplicateEntry.expenses : [],
+        },
+      ]);
+      showToast("Salary duplicated!", "success");
+    } catch (error) {
+      console.error("Failed to duplicate salary:", error);
+      showToast("Failed to duplicate salary", "error");
+    }
   };
 
   const handleEditSalary = async (id: string) => {
@@ -101,15 +121,21 @@ export default function SalaryPage() {
 
     const newSalary = Number(prompt("Update salary", String(entry.salary)));
     if (!isNaN(newSalary)) {
-      const updated = await updateSalary(id, { salary: newSalary });
+      try {
+        const updated = await updateSalary(id, { salary: newSalary });
 
-      setSalaryData((prev) =>
-        prev.map((s) =>
-          s._id === id
-            ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
-            : s
-        )
-      );
+        setSalaryData((prev) =>
+          prev.map((s) =>
+            s._id === id
+              ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+              : s
+          )
+        );
+        showToast("Salary updated!", "success");
+      } catch (error) {
+        console.error("Failed to update salary:", error);
+        showToast("Failed to update salary", "error");
+      }
     }
   };
 
@@ -126,29 +152,11 @@ export default function SalaryPage() {
       setSalaryData((prev) => prev.filter((s) => s._id !== salaryToDelete));
       setSalaryToDelete(null);
       setShowDeleteModal(false);
+      showToast("Salary deleted!", "success");
     } catch (err) {
       console.error("Failed to delete salary:", err);
+      showToast("Failed to delete salary", "error");
     }
-  };
-
-  const handleDeleteExpense = async (salaryId: string, index: number) => {
-    if (!confirm("Delete this expense?")) return;
-
-    const entry = salaryData.find((s) => s._id === salaryId);
-    if (!entry) return;
-
-    const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
-    const updatedExpenses = expenses.filter((_, i) => i !== index);
-
-    const updated = await updateSalary(salaryId, { expenses: updatedExpenses });
-
-    setSalaryData((prev) =>
-      prev.map((s) =>
-        s._id === salaryId
-          ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
-          : s
-      )
-    );
   };
 
   const openAddExpenseModal = (salaryId: string) => {
@@ -169,18 +177,24 @@ export default function SalaryPage() {
     const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
     const updatedExpenses = [...expenses, { name: expenseName, amount, paid: false }];
 
-    const updated = await updateSalary(currentSalaryId, { expenses: updatedExpenses });
+    try {
+      const updated = await updateSalary(currentSalaryId, { expenses: updatedExpenses });
 
-    setSalaryData((prev) =>
-      prev.map((s) =>
-        s._id === currentSalaryId
-          ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
-          : s
-      )
-    );
+      setSalaryData((prev) =>
+        prev.map((s) =>
+          s._id === currentSalaryId
+            ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+            : s
+        )
+      );
 
-    setShowExpenseForm(false);
-    setCurrentSalaryId(null);
+      setShowExpenseForm(false);
+      setCurrentSalaryId(null);
+      showToast("Expense added!", "success");
+    } catch (error) {
+      console.error("Failed to add expense:", error);
+      showToast("Failed to add expense", "error");
+    }
   };
 
   const handleTogglePaid = async (salaryId: string, index: number) => {
@@ -192,15 +206,20 @@ export default function SalaryPage() {
       i === index ? { ...e, paid: !e.paid } : e
     );
 
-    const updated = await updateSalary(salaryId, { expenses: updatedExpenses });
+    try {
+      const updated = await updateSalary(salaryId, { expenses: updatedExpenses });
 
-    setSalaryData((prev) =>
-      prev.map((s) =>
-        s._id === salaryId
-          ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
-          : s
-      )
-    );
+      setSalaryData((prev) =>
+        prev.map((s) =>
+          s._id === salaryId
+            ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+            : s
+        )
+      );
+    } catch (error) {
+      console.error("Failed to toggle expense:", error);
+      showToast("Failed to update expense", "error");
+    }
   };
 
   const handleEditAllExpenses = (entryId: string) => {
@@ -215,7 +234,6 @@ export default function SalaryPage() {
 
   const handleSaveAllExpenses = async (entryId: string) => {
     try {
-      showSnackbar("Updating...", "info");
       const updated = await updateSalary(entryId, { expenses: editedExpenses });
 
       setSalaryData((prev) =>
@@ -228,9 +246,9 @@ export default function SalaryPage() {
 
       setEditingAllEntryId(null);
       setEditedExpenses([]);
-      showSnackbar("Expenses updated successfully!", "success");
+      showToast("Expenses updated successfully!", "success");
     } catch {
-      showSnackbar("Failed to update expenses.", "error");
+      showToast("Failed to update expenses.", "error");
     }
   };
 
@@ -239,25 +257,19 @@ export default function SalaryPage() {
     setEditedExpenses([]);
   };
 
+  const handleDeleteExpenseInEdit = (index: number) => {
+    const newExpenses = editedExpenses.filter((_, i) => i !== index);
+    setEditedExpenses(newExpenses);
+  };
+
   const displayedSalaries = salaryData.filter((entry) => {
     const allPaid = entry.expenses.length > 0 && entry.expenses.every((e) => e.paid);
 
     if (activeTab === "completed") return allPaid;
     if (activeTab === "active") return !allPaid;
+    if (activeTab === "totals") return false;
     return true;
   });
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "info" | "error">("info");
-
-  const showSnackbar = (message: string, severity: "success" | "info" | "error" = "info") => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
-
-  const handleCloseSnackbar = () => setSnackbarOpen(false);
 
   const handleEditSalaryName = async (id: string) => {
     const entry = salaryData.find((s) => s._id === id);
@@ -275,340 +287,347 @@ export default function SalaryPage() {
         )
       );
 
-      showSnackbar("Salary name updated!", "success");
+      showToast("Salary name updated!", "success");
     } catch (error) {
-      showSnackbar("Failed to update salary name.", "error");
+      showToast("Failed to update salary name.", "error");
       console.error(error);
     }
   };
 
+  // Compute totals by expense name, sorted highest to lowest
+  const calculateTotals = () => {
+    const totalsMap: Record<string, number> = {};
+
+    salaryData.forEach((entry) => {
+      const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
+      expenses.forEach((expense) => {
+        if (!totalsMap[expense.name]) {
+          totalsMap[expense.name] = 0;
+        }
+        totalsMap[expense.name] += Number(expense.amount || 0);
+      });
+    });
+
+    return Object.entries(totalsMap)
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+  };
+
+  const totals = calculateTotals();
+
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6  bg-black">
-      
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-black">
 
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-white text-lg font-semibold">Add Salary</h2>
-            <input
-              type="text"
-              placeholder="Date (e.g., May 2026)"
-              value={newSalaryDate}
-              onChange={(e) => setNewSalaryDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
-            />
-            <input
-              type="number"
-              placeholder="Salary amount"
-              value={newSalaryAmount}
-              onChange={(e) => setNewSalaryAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
-            />
-            <div className="flex justify-end space-x-2 pt-2">
-              <button
-                onClick={() => setShowForm(false)}
-                className="px-3 py-1 text-sm text-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddSalary}
-                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg text-sm"
-              >
-                Save
-              </button>
-            </div>
-          </div>
+      {/* ADD SALARY MODAL */}
+      <Modal open={showForm} onClose={() => setShowForm(false)} title="Add Salary">
+        <input
+          type="text"
+          placeholder="Date (e.g., May 2026)"
+          value={newSalaryDate}
+          onChange={(e) => setNewSalaryDate(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+        />
+        <input
+          type="number"
+          placeholder="Salary amount"
+          value={newSalaryAmount}
+          onChange={(e) => setNewSalaryAmount(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+        />
+        <div className="flex justify-end space-x-2 pt-2">
+          <button
+            onClick={() => setShowForm(false)}
+            className="px-3 py-1 text-sm text-gray-400"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleAddSalary}
+            className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg text-sm"
+          >
+            Save
+          </button>
         </div>
-      )}
+      </Modal>
 
-      {showExpenseForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-white text-lg font-semibold">Add Expense</h2>
-            <input
-              type="text"
-              placeholder="Expense name"
-              value={expenseName}
-              onChange={(e) => setExpenseName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
-            />
-            <input
-              type="number"
-              placeholder="Expense amount"
-              value={expenseAmount}
-              onChange={(e) => setExpenseAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
-            />
-            <div className="flex justify-end space-x-2 pt-2">
-              <button
-                onClick={() => setShowExpenseForm(false)}
-                className="px-3 py-1 text-sm text-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveExpense}
-                className="px-3 py-1 bg-[#EB5647] text-white font-semibold rounded-lg text-sm"
-              >
-                Save
-              </button>
-            </div>
-          </div>
+      {/* ADD EXPENSE MODAL */}
+      <Modal open={showExpenseForm} onClose={() => setShowExpenseForm(false)} title="Add Expense">
+        <input
+          type="text"
+          placeholder="Expense name"
+          value={expenseName}
+          onChange={(e) => setExpenseName(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+        />
+        <input
+          type="number"
+          placeholder="Expense amount"
+          value={expenseAmount}
+          onChange={(e) => setExpenseAmount(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+        />
+        <div className="flex justify-end space-x-2 pt-2">
+          <button
+            onClick={() => setShowExpenseForm(false)}
+            className="px-3 py-1 text-sm text-gray-400"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSaveExpense}
+            className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg text-sm"
+          >
+            Save
+          </button>
         </div>
-      )}
+      </Modal>
 
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
-            <h2 className="text-white text-lg font-semibold">Confirm Delete</h2>
-            <p className="text-gray-400">Are you sure you want to delete this salary?</p>
-            <div className="flex justify-end space-x-2 pt-2">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-3 py-1 text-sm text-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmDeleteSalary}
-                className="px-3 py-1 bg-red-500 text-white font-semibold rounded-lg text-sm"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+      {/* DELETE CONFIRM MODAL */}
+      <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Confirm Delete">
+        <p className="text-gray-400">Are you sure you want to delete this salary?</p>
+        <div className="flex justify-end space-x-2 pt-2">
+          <button
+            onClick={() => setShowDeleteModal(false)}
+            className="px-3 py-1 text-sm text-gray-400"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirmDeleteSalary}
+            className="px-3 py-1 bg-red-500 text-white font-semibold rounded-lg text-sm"
+          >
+            Delete
+          </button>
         </div>
-      )}
+      </Modal>
 
-  <div className="flex mb-4 gap-2 justify-between">
-          <div className="flex mb-4 gap-2">
+      <div className="flex mb-4 gap-2 justify-between flex-wrap">
+        <div className="flex mb-4 gap-2">
+          <button
+            className={`px-3 py-1 rounded text-sm ${
+              activeTab === "active" ? " bg-[#DFF966] text-black  font-bold" : "bg-[#1C1C1E] text-white"
+            }`}
+            onClick={() => setActiveTab("active")}
+          >
+            Active
+          </button>
+          <button
+            className={`px-3 py-1 rounded text-sm ${
+              activeTab === "completed" ? " bg-[#1C1C1E] text-[#EF6C54]  font-bold" : "bg-[#1C1C1E] text-gray-400"
+            }`}
+            onClick={() => setActiveTab("completed")}
+          >
+            Completed
+          </button>
+          <button
+            className={`px-3 py-1 rounded text-sm ${
+              activeTab === "totals" ? " bg-[#1C1C1E] text-[#85D989]  font-bold" : "bg-[#1C1C1E] text-gray-400"
+            }`}
+            onClick={() => setActiveTab("totals")}
+          >
+            Totals
+          </button>
+        </div>
+
+        <div className="mb-4 flex justify-between items-start">
+          <div className="flex items-center gap-3">
             <button
-              className={`px-3 py-1 rounded ${
-                activeTab === "active" ? " bg-[#DFF966] text-black  font-bold" : "bg-[#1C1C1E] text-white"
-              }`}
-              onClick={() => setActiveTab("active")}
+              onClick={() => setShowForm(true)}
+              title="Add Salary"
+              className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
             >
-              Active
-            </button>
-            <button
-              className={`px-3 py-1 rounded ${
-                activeTab === "completed" ? " bg-[#1C1C1E] text-[#EF6C54]  font-bold" : "bg-[#1C1C1E] text-gray-400"
-              }`}
-              onClick={() => setActiveTab("completed")}
-            >
-              Completed
+              +
             </button>
           </div>
-
-          <div className="mb-4 flex justify-between items-start">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowForm(true)}
-                title="Add Salary"
-                className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
-                // bg-[#EB5647]   text-white
-               
-                
-              >
-                +
-              </button>
-            </div>
-          </div>
+        </div>
       </div>
 
-      {displayedSalaries.map((entry) => {
-        const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
-        const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
-        const remaining = Number(entry.salary || 0) - totalExpenses;
-        const isEditingAll = editingAllEntryId === entry._id;
+      {activeTab === "totals" ? (
+        <div className="space-y-2">
+          {totals.length === 0 ? (
+            <div className="text-gray-600 text-center py-8">No expenses to show</div>
+          ) : (
+            totals.map((item, idx) => (
+              <div key={idx} className="flex justify-between items-center p-3 bg-[#1C1C1E] rounded-lg">
+                <span className="text-white font-semibold">{item.name}</span>
+                <span className="text-[#DFF966] font-bold">{format(item.total)}</span>
+              </div>
+            ))
+          )}
+        </div>
+      ) : (
+        displayedSalaries.map((entry) => {
+          const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
+          const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+          const remaining = Number(entry.salary || 0) - totalExpenses;
+          const isEditingAll = editingAllEntryId === entry._id;
 
-        return (
-          <div key={entry._id} className="mb-6 bg-[#1C1C1E] shadow rounded-xl p-4">
-            <div className="flex justify-between items-center mb-2">
-              <button onClick={() => handleEditSalaryName(entry._id)}>
-                <h2 className="font-semibold text-[1.5rem] text-white">{entry.date}</h2>
-              </button>
-
-              <div className="relative flex items-center">
-                <button
-                  onClick={() =>
-                    setOpenMenuId(openMenuId === entry._id ? null : entry._id)
-                  }
-                  className="text-[#9C9BA1] text-lg px-2 leading-none"
-                >
-                  •••
+          return (
+            <div key={entry._id} className="mb-6 bg-[#1C1C1E] shadow rounded-xl p-4">
+              <div className="flex justify-between items-center mb-2">
+                <button onClick={() => handleEditSalaryName(entry._id)}>
+                  <h2 className="font-semibold text-[1.5rem] text-white">{entry.date}</h2>
                 </button>
 
-                {openMenuId === entry._id && (
-                  <div className="absolute right-0 top-7 min-w-[130px] bg-[#1C1C1E] border border-gray-800 rounded-xl shadow-lg z-30 py-1">
-                    {!isEditingAll && expenses.length > 0 && (
+                <div className="relative flex items-center">
+                  <button
+                    onClick={() =>
+                      setOpenMenuId(openMenuId === entry._id ? null : entry._id)
+                    }
+                    className="text-[#9C9BA1] text-lg px-2 leading-none"
+                  >
+                    •••
+                  </button>
+
+                  {openMenuId === entry._id && (
+                    <div className="absolute right-0 top-7 min-w-[130px] bg-[#1C1C1E] border border-gray-800 rounded-xl shadow-lg z-30 py-1">
+                      {!isEditingAll && expenses.length > 0 && (
+                        <button
+                          onClick={() => {
+                            handleEditAllExpenses(entry._id);
+                            setOpenMenuId(null);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                        >
+                          Edit
+                        </button>
+                      )}
+
                       <button
                         onClick={() => {
-                          handleEditAllExpenses(entry._id);
+                          openAddExpenseModal(entry._id);
                           setOpenMenuId(null);
                         }}
                         className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
                       >
-                        Edit
+                        Add
                       </button>
+
+                      <button
+                        onClick={() => {
+                          handleDuplicateSalary(entry);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                      >
+                        Duplicate
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          openDeleteSalaryModal(entry._id);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-[#EF6C54] hover:bg-[#2A2A2D]"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between text-white mb-2">
+                <span>Salary</span>
+                <button onClick={() => handleEditSalary(entry._id)}>
+                  <span className="font-semibold text-[#DFF966]">{format(entry.salary)}</span>
+                </button>
+              </div>
+
+              <ul className="border border-gray-800 rounded divide-y divide-mist-900 text-xs">
+                {expenses.map((expense, idx) => (
+                  <li key={idx} className="flex justify-between items-center gap-2 m-2">
+                    {isEditingAll ? (
+                      <input
+                        type="text"
+                        value={editedExpenses[idx]?.name || ""}
+                        onChange={(e) => {
+                          const newExpenses = [...editedExpenses];
+                          if (newExpenses[idx]) {
+                            newExpenses[idx].name = e.target.value;
+                            setEditedExpenses(newExpenses);
+                          }
+                        }}
+                        className="flex-1 border border-mist-900 px-2 py-1 rounded text-white"
+                      />
+                    ) : (
+                      <span
+                        onClick={() => handleTogglePaid(entry._id, idx)}
+                        className={`flex-1 break-words cursor-pointer ${
+                          expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
+                        }`}
+                      >
+                        {expense.name}
+                      </span>
                     )}
 
-                    <button
-                      onClick={() => {
-                        openAddExpenseModal(entry._id);
-                        setOpenMenuId(null);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
-                    >
-                      Add
-                    </button>
+                    {isEditingAll ? (
+                      <input
+                        type="number"
+                        value={editedExpenses[idx]?.amount || 0}
+                        onChange={(e) => {
+                          const newExpenses = [...editedExpenses];
+                          if (newExpenses[idx]) {
+                            newExpenses[idx].amount = Number(e.target.value);
+                            setEditedExpenses(newExpenses);
+                          }
+                        }}
+                        className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-white"
+                      />
+                    ) : (
+                      <span
+                        className={`w-24 text-right font-medium ${
+                          expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
+                        }`}
+                      >
+                        {format(expense.amount)}
+                      </span>
+                    )}
 
-                    <button
-                      onClick={() => {
-                        handleDuplicateSalary(entry);
-                        setOpenMenuId(null);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
-                    >
-                      Duplicate
-                    </button>
+                    {isEditingAll && (
+                      <button
+                        onClick={() => handleDeleteExpenseInEdit(idx)}
+                        className="px-2 py-1 text-white text-sm border border-red-500 rounded hover:bg-red-500/20"
+                      >
+                        <TrashIcon className="w-4 h-4 text-red-400" />
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
 
-                    <button
-                      onClick={() => {
-                        openDeleteSalaryModal(entry._id);
-                        setOpenMenuId(null);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-[#EF6C54] hover:bg-[#2A2A2D]"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
+              {isEditingAll && (
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => handleSaveAllExpenses(entry._id)}
+                    className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
+                  >
+                    Save All
+                  </button>
+                  <button
+                    onClick={handleCancelEditAll}
+                    className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              <div className="flex justify-between font-semibold pt-2 mb-2">
+                <span className="text-white">Total</span>
+                <span className="text-[#B2597C]">{format(totalExpenses)}</span>
+              </div>
+
+              <div className="flex justify-between font-semibold">
+                <span></span>
+                <span className={`${remaining < 0 ? "text-[#B2597C]" : "text-[#85D989]"}`}>
+                  {format(remaining)}
+                </span>
               </div>
             </div>
-
-            <div className="flex justify-between text-white mb-2">
-              <span>Salary</span>
-              <button onClick={() => handleEditSalary(entry._id)}>
-                <span className="font-semibold text-[#DFF966]">{format(entry.salary)}</span>
-              </button>
-            </div>
-
-            <ul className="border border-gray-800 rounded divide-y divide-mist-900 text-xs">
-              {expenses.map((expense, idx) => (
-                <li key={idx} className="flex justify-between items-center gap-2 m-2">
-  {isEditingAll ? (
-    <input
-      type="text"
-      value={editedExpenses[idx]?.name || ""}
-      onChange={(e) => {
-        const newExpenses = [...editedExpenses];
-        if (newExpenses[idx]) {
-          newExpenses[idx].name = e.target.value;
-          setEditedExpenses(newExpenses);
-        }
-      }}
-      className="flex-1 border border-mist-900 px-2 py-1 rounded text-white"
-    />
-  ) : (
-    <span
-      onClick={() => handleTogglePaid(entry._id, idx)}
-      className={`flex-1 break-words cursor-pointer ${
-        expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
-      }`}
-    >
-      {expense.name}
-    </span>
-  )}
-
-  {isEditingAll ? (
-    <input
-      type="number"
-      value={editedExpenses[idx]?.amount || 0}
-      onChange={(e) => {
-        const newExpenses = [...editedExpenses];
-        if (newExpenses[idx]) {
-          newExpenses[idx].amount = Number(e.target.value);
-          setEditedExpenses(newExpenses);
-        }
-      }}
-      className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-white"
-    />
-  ) : (
-    <span
-      className={`w-24 text-right font-medium ${
-        expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
-      }`}
-    >
-      {format(expense.amount)}
-    </span>
-  )}
-
-  {isEditingAll && (
-    <button
-      onClick={() => handleDeleteExpense(entry._id, idx)}
-      className="px-2 py-1 text-white text-sm border border-mist-900 rounded"
-    >
-      <TrashIcon className="w-4 h-4 text-[#9C9BA1]" />
-    </button>
-  )}
-</li>
-              ))}
-            </ul>
-
-            {isEditingAll && (
-              <div className="flex gap-2 mt-2">
-                <button
-                  onClick={() => handleSaveAllExpenses(entry._id)}
-                  className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
-                >
-                  Save All
-                </button>
-                <button
-                  onClick={handleCancelEditAll}
-                  className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-
-            <div className="flex justify-between font-semibold pt-2 mb-2">
-              <span className="text-white">Total</span>
-              <span className="text-[#B2597C]">{format(totalExpenses)}</span>
-            </div>
-
-            <div className="flex justify-between font-semibold">
-              <span></span>
-              <span className={`${remaining < 0 ? "text-[#B2597C]" : "text-[#85D989]"}`}>
-                {format(remaining)}
-              </span>
-            </div>
-          </div>
-        );
-      })}
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={2000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbarSeverity}
-          sx={{
-            width: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            color: "white",
-            backdropFilter: "blur(8px)",
-            borderRadius: "8px",
-          }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+          );
+        })
+      )}
     </div>
   );
 }

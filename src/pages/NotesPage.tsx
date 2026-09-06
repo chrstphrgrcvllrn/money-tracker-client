@@ -7,8 +7,11 @@ import {
   // deleteNote,
 } from "../api/note";
 import { CheckIcon } from "@heroicons/react/24/solid";
+import { useToast } from "../components/useToast";
 
 const NotesPage: React.FC = () => {
+  const showToast = useToast();
+
   const [notes, setNotes] = useState<Note[]>([]);
   const [text, setText] = useState("");
   const [category, setCategory] = useState<Note["category"]>("work");
@@ -18,32 +21,46 @@ const NotesPage: React.FC = () => {
   >("pending");
 
   const fetchNotes = async () => {
-    const data = await getNotes();
-    setNotes(data);
+    try {
+      const data = await getNotes();
+      setNotes(data);
+    } catch (error) {
+      console.error("Failed to load notes:", error);
+      showToast("Failed to load notes", "error");
+    }
   };
 
-   
-   
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addNote = async () => {
     if (!text.trim()) return;
 
-    await createNote({
-      text: text.trim(),
-      category,
-    });
+    try {
+      await createNote({
+        text: text.trim(),
+        category,
+      });
 
-    setText("");
-    fetchNotes();
+      setText("");
+      fetchNotes();
+      showToast("Note added!", "success");
+    } catch (error) {
+      console.error("Failed to add note:", error);
+      showToast("Failed to add note", "error");
+    }
   };
 
   const handleToggle = async (id: string) => {
-    await toggleNote(id);
-    fetchNotes();
+    try {
+      await toggleNote(id);
+      fetchNotes();
+    } catch (error) {
+      console.error("Failed to toggle note:", error);
+      showToast("Failed to update note", "error");
+    }
   };
 
 const filteredNotes = notes.filter((note) => {

@@ -2,8 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 
-import Snackbar from "@mui/material/Snackbar";
-
 import type { NotebookNote } from "../types/notebook.type";
 
 import {
@@ -22,6 +20,7 @@ import {
   PencilIcon,
 } from "@heroicons/react/24/outline";
 
+import { useToast } from "../components/useToast";
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error && typeof error === "object") {
@@ -32,6 +31,8 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
 };
 
 const NotebookPage: React.FC = () => {
+  const showToast = useToast();
+
   const [notes, setNotes] = useState<NotebookNote[]>([]);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
@@ -43,13 +44,16 @@ const NotebookPage: React.FC = () => {
 
   const [saving, setSaving] = useState(false);
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-  });
-
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<Quill | null>(null);
+
+  // Keep a ref to the latest notes so the Quill init effect can read
+  // initial content without depending on `notes` (which changes on every
+  // save and would otherwise tear down + recreate the editor + toolbar).
+  const notesRef = useRef<NotebookNote[]>(notes);
+  useEffect(() => {
+    notesRef.current = notes;
+  }, [notes]);
 
   // --------------------------------
   // Selected note
@@ -61,40 +65,21 @@ const NotebookPage: React.FC = () => {
   );
 
   // --------------------------------
-  // Snackbar
-  // --------------------------------
-
-  const showSnackbar = (message: string) => {
-    setSnackbar({
-      open: true,
-      message,
-    });
-  };
-
-  const handleSnackbarClose = (
-    _event?: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === "clickaway") return;
-
-    setSnackbar((prev) => ({
-      ...prev,
-      open: false,
-    }));
-  };
-
-  // --------------------------------
   // Initialize / destroy Quill
   // --------------------------------
+  // Only re-creates the editor when a DIFFERENT note is opened
+  // (selectedNoteId changes) — not on every save, which previously caused
+  // the toolbar (a sibling DOM node Quill inserts before the container) to
+  // be duplicated on every save since it was never removed on cleanup.
 
   useEffect(() => {
-    if (!selectedNoteId || !selectedNote || !editorRef.current) {
+    if (!selectedNoteId || !editorRef.current) {
       return;
     }
 
     const editorNode = editorRef.current;
+    const noteAtOpen = notesRef.current.find((n) => n._id === selectedNoteId);
 
-    // Prevent creating multiple Quill instances
     if (quillRef.current) {
       quillRef.current = null;
     }
@@ -119,8 +104,11 @@ const NotebookPage: React.FC = () => {
 
     quillRef.current = quill;
 
-    // Load selected note content into Quill
-    quill.root.innerHTML = selectedNote.content || "";
+    // Load note content into Quill (only on open, not on every save)
+    quill.root.innerHTML = noteAtOpen?.content || "";
+
+    const toolbarModule = quill.getModule("toolbar") as { container?: HTMLElement };
+    const toolbarEl = toolbarModule?.container;
 
     return () => {
       if (quillRef.current === quill) {
@@ -130,8 +118,15 @@ const NotebookPage: React.FC = () => {
       quill.disable();
 
       editorNode.innerHTML = "";
+
+      // Quill inserts the toolbar as a SIBLING before the editor container,
+      // not inside it — must be removed explicitly or it duplicates on
+      // every re-init.
+      if (toolbarEl && toolbarEl.parentNode) {
+        toolbarEl.parentNode.removeChild(toolbarEl);
+      }
     };
-  }, [selectedNoteId, selectedNote]);
+  }, [selectedNoteId]);
 
   // --------------------------------
   // Fetch notes
@@ -145,7 +140,7 @@ const NotebookPage: React.FC = () => {
     } catch (error) {
       console.error("Fetch notes error:", error);
 
-      showSnackbar("Failed to load notes");
+      showToast("Failed to load notes", "error");
     }
   };
 
@@ -190,11 +185,11 @@ const NotebookPage: React.FC = () => {
       setSelectedNoteId(note._id);
       setTitle(note.title);
 
-      showSnackbar("Note created");
+      showToast("Note created", "success");
     } catch (error) {
       console.error("Create note error:", error);
 
-      showSnackbar("Failed to create note");
+      showToast("Failed to create note", "error");
     }
   };
 
@@ -203,33 +198,18 @@ const NotebookPage: React.FC = () => {
   // --------------------------------
 
   const saveNote = async () => {
-    console.log("🔥 SAVE BUTTON CLICKED");
-
-    console.log("selectedNoteId:", selectedNoteId);
-    console.log("title:", title);
-    console.log("quill:", quillRef.current);
-
     if (!selectedNoteId) {
-      console.log("❌ No selected note");
-
-      showSnackbar("No note selected");
-
+      showToast("No note selected", "error");
       return;
     }
 
     if (!title.trim()) {
-      console.log("❌ Empty title");
-
-      showSnackbar("Please enter a title");
-
+      showToast("Please enter a title", "error");
       return;
     }
 
     if (!quillRef.current) {
-      console.log("❌ Quill is not initialized");
-
-      showSnackbar("Editor is not ready");
-
+      showToast("Editor is not ready", "error");
       return;
     }
 
@@ -239,24 +219,15 @@ const NotebookPage: React.FC = () => {
       // Quill is the source of truth for content
       const currentContent = quillRef.current.root.innerHTML;
 
-      console.log("📝 Content:", currentContent);
-
       const payload = {
         title: title.trim(),
         content: currentContent,
       };
 
-      console.log("📤 Sending update:", {
-        id: selectedNoteId,
-        payload,
-      });
-
       const updatedNote = await updateNotebookNote(
         selectedNoteId,
         payload
       );
-
-      console.log("✅ API RESPONSE:", updatedNote);
 
       setNotes((prev) =>
         prev.map((note) =>
@@ -266,11 +237,11 @@ const NotebookPage: React.FC = () => {
         )
       );
 
-      showSnackbar("Note saved successfully");
+      showToast("Note saved successfully", "success");
     } catch (error) {
-      console.error("❌ SAVE ERROR:", error);
+      console.error("Save note error:", error);
 
-      showSnackbar("Failed to save note");
+      showToast("Failed to save note", "error");
     } finally {
       setSaving(false);
     }
@@ -295,17 +266,18 @@ const NotebookPage: React.FC = () => {
         )
       );
 
-      showSnackbar(
+      showToast(
         updatedNote.status === "closed"
           ? "Note closed"
-          : "Note reopened"
+          : "Note reopened",
+        "success"
       );
     } catch (error: unknown) {
       console.error("Toggle status error:", error);
 
       const message = getErrorMessage(error, "Failed to update note status");
 
-      showSnackbar(message);
+      showToast(message, "error");
     }
   };
 
@@ -333,13 +305,13 @@ const NotebookPage: React.FC = () => {
 
       closeNote();
 
-      showSnackbar("Note deleted");
+      showToast("Note deleted", "success");
     } catch (error: unknown) {
       console.error("Delete note error:", error);
 
       const message = getErrorMessage(error, "Failed to delete note");
 
-      showSnackbar(message);
+      showToast(message, "error");
     }
   };
 
@@ -364,18 +336,12 @@ const NotebookPage: React.FC = () => {
   return (
     <div className="min-h-[calc(100vh-80px)] text-xs bg-black text-white">
       <style>{`
-        @keyframes zoom-in {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
+        @keyframes modal-scale-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
         }
-        .modal-zoom-in {
-          animation: zoom-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .modal-animate {
+          animation: modal-scale-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
       `}</style>
 
@@ -501,7 +467,7 @@ const NotebookPage: React.FC = () => {
           }}
         >
 
-          <div className="w-full max-w-5xl h-[90vh] bg-[#1C1C1E] rounded-2xl shadow-2xl overflow-hidden flex flex-col modal-zoom-in">
+          <div className="w-full max-w-5xl h-[90vh] bg-[#1C1C1E] rounded-2xl shadow-2xl overflow-hidden flex flex-col modal-animate">
 
             {/* MODAL HEADER */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
@@ -592,18 +558,6 @@ const NotebookPage: React.FC = () => {
 
         </div>
       )}
-
-      {/* SNACKBAR */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        message={snackbar.message}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-      />
 
     </div>
   );

@@ -1,31 +1,43 @@
 import { useEffect, useState } from "react";
 import type { Thought } from "../types/thoughts.type";
 import { getThoughts, createThought } from "../api/thought";
+import { useToast } from "../components/useToast";
 
 const ThoughtsPage: React.FC = () => {
+  const showToast = useToast();
+
   const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [text, setText] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
 
   const fetchThoughts = async () => {
-    const data = await getThoughts();
-    setThoughts([...data]);
+    try {
+      const data = await getThoughts();
+      setThoughts([...data]);
+    } catch (error) {
+      console.error("Failed to load thoughts:", error);
+      showToast("Failed to load thoughts", "error");
+    }
   };
 
-   
-   
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchThoughts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addThought = async () => {
     if (!text.trim()) return;
 
-    await createThought(text.trim());
-    setText("");
-    fetchThoughts();
+    try {
+      await createThought(text.trim());
+      setText("");
+      fetchThoughts();
+      showToast("Thought added!", "success");
+    } catch (error) {
+      console.error("Failed to add thought:", error);
+      showToast("Failed to add thought", "error");
+    }
   };
 
   const toggleThought = (id: string) => {

@@ -9,7 +9,14 @@ import {
 import type { HouseExpense } from "../types/houseExpense.type";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 
+import Modal from "../components/Modal";
+import { useToast } from "../components/useToast";
+
+const BUDGET_STORAGE_KEY = "houseExpenseBudgets";
+
 const HouseExpensesPage: React.FC = () => {
+  const showToast = useToast();
+
   const [expenses, setExpenses] = useState<HouseExpense[]>([]);
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
@@ -19,22 +26,36 @@ const HouseExpensesPage: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<
-    "pending" | "monthly" | "biggest" | "graph"
-  >("pending");
+    "monthly" | "pending" | "biggest" | "graph"
+  >("monthly");
+
+  const [monthlyBudgets, setMonthlyBudgets] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem(BUDGET_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [editingBudgetMonth, setEditingBudgetMonth] = useState<string | null>(null);
+  const [budgetInput, setBudgetInput] = useState("");
 
   // =========================
   // LOAD
   // =========================
   const loadExpenses = async () => {
-    const data = await fetchHouseExpenses();
-    setExpenses(data);
+    try {
+      const data = await fetchHouseExpenses();
+      setExpenses(data);
+    } catch (error) {
+      console.error("Failed to load house expenses:", error);
+      showToast("Failed to load expenses", "error");
+    }
   };
 
-   
-   
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadExpenses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // =========================
@@ -44,19 +65,26 @@ const HouseExpensesPage: React.FC = () => {
     if (!text.trim() || !amount) return;
 
     const payload = {
-       text: text.trim(),
+      text: text.trim(),
       amount: Number(amount),
-      category, // 👈 add this
+      category,
     };
 
-    if (editingId) {
-      await updateHouseExpense(editingId, payload);
-    } else {
-      await createHouseExpense(payload);
-    }
+    try {
+      if (editingId) {
+        await updateHouseExpense(editingId, payload);
+        showToast("Expense updated!", "success");
+      } else {
+        await createHouseExpense(payload);
+        showToast("Expense added!", "success");
+      }
 
-    resetForm();
-    loadExpenses();
+      resetForm();
+      loadExpenses();
+    } catch (error) {
+      console.error("Failed to save expense:", error);
+      showToast("Failed to save expense", "error");
+    }
   };
 
   const resetForm = () => {
@@ -76,8 +104,31 @@ const HouseExpensesPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteHouseExpense(id);
-    loadExpenses();
+    if (!confirm("Delete this expense?")) return;
+
+    try {
+      await deleteHouseExpense(id);
+      loadExpenses();
+      showToast("Expense deleted!", "success");
+    } catch (error) {
+      console.error("Failed to delete expense:", error);
+      showToast("Failed to delete expense", "error");
+    }
+  };
+
+  const handleSaveBudget = (month: string) => {
+    const budget = Number(budgetInput);
+    if (isNaN(budget) || budget < 0) {
+      showToast("Please enter a valid budget amount", "error");
+      return;
+    }
+
+    const updated = { ...monthlyBudgets, [month]: budget };
+    setMonthlyBudgets(updated);
+    localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(updated));
+    setEditingBudgetMonth(null);
+    setBudgetInput("");
+    showToast("Budget updated!", "success");
   };
 
   // =========================
@@ -137,13 +188,13 @@ const HouseExpensesPage: React.FC = () => {
   );
 
   // =========================
-  // MONTHLY GROUP
+  // MONTHLY GROUP (key = YYYY-MM so it matches budget storage keys)
   // =========================
   const monthly: Record<string, HouseExpense[]> = {};
 
   expenses.forEach((e) => {
     const d = new Date(e.createdAt);
-    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 
     if (!monthly[key]) monthly[key] = [];
     monthly[key].push(e);
@@ -189,19 +240,19 @@ const HouseExpensesPage: React.FC = () => {
   // =========================
   // GRAPH DATA (CATEGORY PIE)
   // =========================
-const graphData = Object.values(
-  expenses.reduce((acc: Record<string, HouseExpense[]>, e) => {
-    const key = e.category || "Uncategorized";
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(e);
-    return acc;
-  }, {})
-)
-  .map((g) => ({
-    name: g[0].category || "Uncategorized",
-    total: g.reduce((s, e) => s + e.amount, 0),
-  }))
-  .sort((a, b) => b.total - a.total); // 👈 SORT HERE
+  const graphData = Object.values(
+    expenses.reduce((acc: Record<string, HouseExpense[]>, e) => {
+      const key = e.category || "Uncategorized";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(e);
+      return acc;
+    }, {})
+  )
+    .map((g) => ({
+      name: g[0].category || "Uncategorized",
+      total: g.reduce((s, e) => s + e.amount, 0),
+    }))
+    .sort((a, b) => b.total - a.total);
 
   const totalGraph = graphData.reduce((s, i) => s + i.total, 0);
 
@@ -214,13 +265,11 @@ const graphData = Object.values(
     "#A78BFA",
   ];
 
-
-
   // =========================
   // RENDER
   // =========================
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-black text-white">
 
       {/* TOTALS */}
       <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
@@ -241,10 +290,10 @@ const graphData = Object.values(
       {/* TABS */}
       <div className="flex justify-between mb-4">
         <div className="flex gap-2 flex-wrap">
-          {["pending", "monthly", "biggest", "graph"].map((tab) => (
+          {["monthly", "pending", "biggest", "graph"].map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as "pending" | "monthly" | "biggest" | "graph")}
+              onClick={() => setActiveTab(tab as "monthly" | "pending" | "biggest" | "graph")}
               className={`px-2 py-1 rounded-xl text-xs capitalize ${
                 activeTab === tab
                   ? "bg-[#DFF966] text-black font-bold"
@@ -263,6 +312,111 @@ const graphData = Object.values(
           +
         </button>
       </div>
+
+      {/* ========================= */}
+      {/* MONTHLY (with BUDGET + REMAINING) */}
+      {/* ========================= */}
+      {activeTab === "monthly" && (
+        <div className="space-y-4">
+          {sortedMonths.length === 0 ? (
+            <div className="text-gray-600 text-center py-8">No expenses yet</div>
+          ) : (
+            sortedMonths.map((month) => {
+              const monthExpenses = monthly[month];
+              const monthTotal = monthExpenses.reduce((s, e) => s + e.amount, 0);
+              const budget = monthlyBudgets[month] || 0;
+              const remaining = budget - monthTotal;
+              const [year, monthNum] = month.split("-");
+              const monthDate = new Date(parseInt(year), parseInt(monthNum) - 1);
+              const monthLabel = monthDate.toLocaleDateString(undefined, {
+                month: "long",
+                year: "numeric",
+              });
+
+              return (
+                <div key={month} className="bg-[#1C1C1E] rounded-xl p-4">
+                  <h3 className="text-white font-semibold mb-3">{monthLabel}</h3>
+
+                  {/* BUDGET & REMAINING */}
+                  <div className="space-y-2 mb-3">
+                    <div className="bg-[#2C2C2E] rounded-lg p-2">
+                      <p className="text-gray-400 text-[10px]">Budget</p>
+                      {editingBudgetMonth === month ? (
+                        <div className="flex gap-1 mt-2">
+                          <input
+                            type="number"
+                            value={budgetInput}
+                            onChange={(e) => setBudgetInput(e.target.value)}
+                            placeholder="0"
+                            className="flex-1 px-2 py-2 bg-[#1C1C1E] text-white rounded text-sm"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => handleSaveBudget(month)}
+                            className="px-3 py-2 bg-[#DFF966] text-black text-xs font-bold rounded"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={() => setEditingBudgetMonth(null)}
+                            className="px-3 py-2 bg-[#2C2C2E] text-gray-400 text-xs font-bold rounded"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setEditingBudgetMonth(month);
+                            setBudgetInput(String(budget));
+                          }}
+                          className="text-[#DFF966] font-bold mt-2 hover:underline text-sm"
+                        >
+                          {budget > 0 ? `₱${budget.toLocaleString()}` : "Set Budget"}
+                        </button>
+                      )}
+                    </div>
+
+                    <div className={`rounded-lg p-2 ${remaining >= 0 ? "bg-green-900/30" : "bg-red-900/30"}`}>
+                      <p className="text-gray-400 text-[10px]">Remaining</p>
+                      <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[#85D989]" : "text-[#EF6C54]"}`}>
+                        {remaining < 0 ? "-" : ""}₱{Math.abs(remaining).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* TOTAL SPENT */}
+                  <div className="mb-3 pb-3 border-b border-gray-700 flex justify-between text-white">
+                    <span>Total Spent</span>
+                    <span className="font-bold text-[#DFF966]">₱{monthTotal.toLocaleString()}</span>
+                  </div>
+
+                  {/* EXPENSES LIST */}
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {monthExpenses.map((exp) => (
+                      <div key={exp._id} className="flex justify-between text-sm bg-[#2C2C2E] p-2 rounded">
+                        <div className="flex-1">
+                          <p className="text-white">{exp.text}</p>
+                          <p className="text-gray-500 text-[10px]">{exp.category}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 font-medium">₱{exp.amount.toLocaleString()}</span>
+                          <button onClick={() => handleEdit(exp)} className="text-gray-500 hover:text-white">
+                            <PencilIcon className="w-3 h-3" />
+                          </button>
+                          <button onClick={() => handleDelete(exp._id)} className="text-red-500 hover:text-red-600">
+                            <TrashIcon className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* ========================= */}
       {/* BIGGEST */}
@@ -321,7 +475,7 @@ const graphData = Object.values(
          {graphData.map((g, i) => (
             <div
               key={g.name}
-              className="flex justify-between items-centerp-2 rounded-xl text-white"
+              className="flex justify-between items-center p-2 rounded-xl text-white"
             >
               <div className="flex items-center gap-2">
                 <span
@@ -336,31 +490,6 @@ const graphData = Object.values(
           ))}
         </div>
       )}
-
-      {/* ========================= */}
-      {/* MONTHLY */}
-      {/* ========================= */}
-      {activeTab === "monthly" &&
-        sortedMonths.map((key) => {
-          const list = monthly[key];
-          const total = list.reduce((s, e) => s + e.amount, 0);
-          const date = new Date(list[0].createdAt);
-
-          return (
-            <div
-              key={key}
-              className="flex justify-between bg-[#1C1C1E] p-3 rounded-xl mb-2 text-white"
-            >
-              <span>
-                {date.toLocaleDateString(undefined, {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </span>
-              <span>₱{total.toLocaleString()}</span>
-            </div>
-          );
-        })}
 
       {/* ========================= */}
       {/* PENDING */}
@@ -386,8 +515,6 @@ const graphData = Object.values(
               >
                 <div>
                   <div>{exp.text} •   <span className="text-gray-400 text-[10px]">{exp.category}</span></div>
-                 
-
 
                   <div className="text-[#B2597C] text-xs">
                     ₱{exp.amount.toLocaleString()}
@@ -410,41 +537,48 @@ const graphData = Object.values(
       {/* ========================= */}
       {/* MODAL */}
       {/* ========================= */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
-          <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm animate-scale">
+      <Modal
+        open={showModal}
+        onClose={resetForm}
+        title={editingId ? "Edit Expense" : "Add Expense"}
+      >
+        <input
+          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          placeholder="Expense"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
 
-            <input
-              className="w-full mb-2 p-2 bg-black text-white"
-              placeholder="Expense"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
+        <input
+          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          placeholder="Amount"
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
 
-            <input
-              className="w-full mb-2 p-2 bg-black text-white"
-              placeholder="Amount"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
+        <input
+          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          placeholder="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
 
-            <input
-              className="w-full mb-3 p-2 bg-black text-white"
-              placeholder="Category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            />
-
-            <button
-              onClick={handleSave}
-              className="w-full bg-[#DFF966] text-black font-bold p-2 rounded"
-            >
-              Save
-            </button>
-          </div>
+        <div className="flex gap-2 pt-2">
+          <button
+            onClick={resetForm}
+            className="flex-1 p-2 bg-[#2C2C2E] text-gray-400 rounded-lg hover:text-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="flex-1 bg-[#DFF966] text-black font-bold p-2 rounded-lg"
+          >
+            Save
+          </button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

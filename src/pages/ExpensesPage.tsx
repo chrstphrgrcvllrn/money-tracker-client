@@ -7,11 +7,13 @@ import {
 } from "../api/expenses";
 
 import type { Expense } from "../types/expenses.type";
-import { PencilIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/solid";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import Modal from "../components/Modal";
+import { useToast } from "../components/useToast";
 
 const ExpensesPage: React.FC = () => {
+  const showToast = useToast();
+
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
@@ -19,9 +21,6 @@ const ExpensesPage: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "info" | "error">("info");
 
   const [activeTab, setActiveTab] = useState<
     "pending" | "monthly" | "biggest" | "graph"
@@ -31,24 +30,19 @@ const ExpensesPage: React.FC = () => {
   // LOAD
   // =========================
   const loadExpenses = async () => {
-    const data = await fetchExpenses();
-    setExpenses(data);
+    try {
+      const data = await fetchExpenses();
+      setExpenses(data);
+    } catch (error) {
+      console.error("Failed to load expenses:", error);
+      showToast("Failed to load expenses", "error");
+    }
   };
 
-   
-   
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadExpenses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const showSnackbar = (message: string, severity: "success" | "info" | "error" = "info") => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
-
-  const handleCloseSnackbar = () => setSnackbarOpen(false);
 
   // =========================
   // SAVE
@@ -62,16 +56,21 @@ const ExpensesPage: React.FC = () => {
       category, // 👈 add this
     };
 
-    if (editingId) {
-      await updateExpense(editingId, payload);
-      showSnackbar("Expense updated!", "success");
-    } else {
-      await createExpense(payload);
-      showSnackbar("Expense added!", "success");
-    }
+    try {
+      if (editingId) {
+        await updateExpense(editingId, payload);
+        showToast("Expense updated!", "success");
+      } else {
+        await createExpense(payload);
+        showToast("Expense added!", "success");
+      }
 
-    resetForm();
-    loadExpenses();
+      resetForm();
+      loadExpenses();
+    } catch (error) {
+      console.error("Failed to save expense:", error);
+      showToast("Failed to save expense", "error");
+    }
   };
 
   const resetForm = () => {
@@ -92,9 +91,15 @@ const ExpensesPage: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this expense?")) return;
-    await deleteExpense(id);
-    loadExpenses();
-    showSnackbar("Expense deleted!", "success");
+
+    try {
+      await deleteExpense(id);
+      loadExpenses();
+      showToast("Expense deleted!", "success");
+    } catch (error) {
+      console.error("Failed to delete expense:", error);
+      showToast("Failed to delete expense", "error");
+    }
   };
 
   // =========================
@@ -427,69 +432,48 @@ const graphData = Object.values(
       {/* ========================= */}
       {/* MODAL */}
       {/* ========================= */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
-          <div className="bg-[#1C1C1E] p-5 rounded-xl w-[90%] max-w-sm space-y-3 animate-scale">
-            <style>{`
-              @keyframes scale-in {
-                from {
-                  opacity: 0;
-                  transform: scale(0.95);
-                }
-                to {
-                  opacity: 1;
-                  transform: scale(1);
-                }
-              }
-              .animate-scale {
-                animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-              }
-            `}</style>
+      <Modal
+        open={showModal}
+        onClose={resetForm}
+        title={editingId ? "Edit Expense" : "Add Expense"}
+      >
+        <input
+          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          placeholder="Expense"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
 
-            <div className="flex justify-between items-center">
-              <h2 className="text-white font-semibold">Add Expense</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white">
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
+        <input
+          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          placeholder="Amount"
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
 
-            <input
-              className="w-full mb-2 p-2 bg-black text-white"
-              placeholder="Expense"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
+        <input
+          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          placeholder="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
 
-            <input
-              className="w-full mb-2 p-2 bg-black text-white"
-              placeholder="Amount"
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-
-            <input
-              className="w-full mb-3 p-2 bg-black text-white"
-              placeholder="Category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            />
-
-            <button
-              onClick={handleSave}
-              className="w-full bg-[#DFF966] text-black font-bold p-2 rounded"
-            >
-              Save
-            </button>
-          </div>
+        <div className="flex gap-2 pt-2">
+          <button
+            onClick={resetForm}
+            className="flex-1 p-2 bg-[#2C2C2E] text-gray-400 rounded-lg hover:text-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="flex-1 bg-[#DFF966] text-black font-bold p-2 rounded-lg"
+          >
+            Save
+          </button>
         </div>
-      )}
-
-      <Snackbar open={snackbarOpen} autoHideDuration={2000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: "100%", backgroundColor: "rgba(0,0,0,0.6)", color: "white", backdropFilter: "blur(8px)", borderRadius: "8px" }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+      </Modal>
     </div>
   );
 };

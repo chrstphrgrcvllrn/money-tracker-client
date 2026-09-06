@@ -6,21 +6,12 @@ import {
 } from "../api/bills";
 
 import type { BillsEntry, Bill } from "../types/bills.type";
-
-// type Bill = {
-//   name: string;
-//   amount: number;
-//   dueDate: string;
-//   paid: boolean;
-// };
-
-// type BillsEntry = {
-//   _id: string;
-//   month: string;
-//   bills: Bill[];
-// };
+import Modal from "../components/Modal";
+import { useToast } from "../components/useToast";
 
 export default function BillsPage() {
+  const showToast = useToast();
+
   const [data, setData] = useState<BillsEntry[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editedBills, setEditedBills] = useState<Bill[]>([]);
@@ -51,31 +42,43 @@ export default function BillsPage() {
 
   useEffect(() => {
     const load = async () => {
-      const res = await fetchBills();
+      try {
+        const res = await fetchBills();
 
-      const normalized = res.map((e: BillsEntry) => ({
-        ...e,
-        bills: Array.isArray(e.bills) ? e.bills : [],
-      }));
+        const normalized = res.map((e: BillsEntry) => ({
+          ...e,
+          bills: Array.isArray(e.bills) ? e.bills : [],
+        }));
 
-      setData(normalized);
+        setData(normalized);
+      } catch (error) {
+        console.error("Failed to load bills:", error);
+        showToast("Failed to load bills", "error");
+      }
     };
 
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // CREATE MONTH
   const handleAddMonth = async () => {
     if (!newMonth) return;
 
-    const newEntry = await createBill({
-      month: newMonth,
-      bills: [],
-    });
+    try {
+      const newEntry = await createBill({
+        month: newMonth,
+        bills: [],
+      });
 
-    setData((prev) => [...prev, newEntry]);
-    setNewMonth("");
-    setShowForm(false);
+      setData((prev) => [...prev, newEntry]);
+      setNewMonth("");
+      setShowForm(false);
+      showToast("Month added!", "success");
+    } catch (error) {
+      console.error("Failed to add month:", error);
+      showToast("Failed to add month", "error");
+    }
   };
 
   // OPEN ADD BILL MODAL
@@ -91,29 +94,35 @@ export default function BillsPage() {
     const entry = data.find((d) => d._id === activeMonthId);
     if (!entry) return;
 
-    const updated = await updateBill(activeMonthId, {
-      bills: [
-        ...entry.bills,
-        {
-          name: billName,
-          amount: Number(billAmount),
-          dueDate: billDueDate,
-          paid: false,
-        },
-      ],
-    });
+    try {
+      const updated = await updateBill(activeMonthId, {
+        bills: [
+          ...entry.bills,
+          {
+            name: billName,
+            amount: Number(billAmount),
+            dueDate: billDueDate,
+            paid: false,
+          },
+        ],
+      });
 
-    setData((prev) =>
-      prev.map((d) =>
-        d._id === activeMonthId ? updated : d
-      )
-    );
+      setData((prev) =>
+        prev.map((d) =>
+          d._id === activeMonthId ? updated : d
+        )
+      );
 
-    setShowBillModal(false);
-    setBillName("");
-    setBillAmount("");
-    setBillDueDate("");
-    setActiveMonthId(null);
+      setShowBillModal(false);
+      setBillName("");
+      setBillAmount("");
+      setBillDueDate("");
+      setActiveMonthId(null);
+      showToast("Bill added!", "success");
+    } catch (error) {
+      console.error("Failed to add bill:", error);
+      showToast("Failed to add bill", "error");
+    }
   };
 
   // OPEN DUPLICATE MODAL
@@ -131,16 +140,22 @@ export default function BillsPage() {
       paid: false,
     }));
 
-    const newEntry = await createBill({
-      month: duplicateMonthName,
-      bills: duplicatedBills,
-    });
+    try {
+      const newEntry = await createBill({
+        month: duplicateMonthName,
+        bills: duplicatedBills,
+      });
 
-    setData((prev) => [...prev, newEntry]);
+      setData((prev) => [...prev, newEntry]);
 
-    setShowDuplicateModal(false);
-    setDuplicateMonthName("");
-    setDuplicateSource(null);
+      setShowDuplicateModal(false);
+      setDuplicateMonthName("");
+      setDuplicateSource(null);
+      showToast("Month duplicated!", "success");
+    } catch (error) {
+      console.error("Failed to duplicate month:", error);
+      showToast("Failed to duplicate month", "error");
+    }
   };
 
   // TOGGLE PAID
@@ -152,13 +167,18 @@ export default function BillsPage() {
       i === index ? { ...b, paid: !b.paid } : b
     );
 
-    const updated = await updateBill(id, {
-      bills: updatedBills,
-    });
+    try {
+      const updated = await updateBill(id, {
+        bills: updatedBills,
+      });
 
-    setData((prev) =>
-      prev.map((d) => (d._id === id ? updated : d))
-    );
+      setData((prev) =>
+        prev.map((d) => (d._id === id ? updated : d))
+      );
+    } catch (error) {
+      console.error("Failed to toggle bill:", error);
+      showToast("Failed to update bill", "error");
+    }
   };
 
   // EDIT MODE
@@ -171,29 +191,41 @@ export default function BillsPage() {
   };
 
   const handleSaveAll = async (id: string) => {
-    const updated = await updateBill(id, {
-      bills: editedBills,
-    });
+    try {
+      const updated = await updateBill(id, {
+        bills: editedBills,
+      });
 
-    setData((prev) =>
-      prev.map((d) => (d._id === id ? updated : d))
-    );
+      setData((prev) =>
+        prev.map((d) => (d._id === id ? updated : d))
+      );
 
-    setEditingId(null);
-    setEditedBills([]);
+      setEditingId(null);
+      setEditedBills([]);
+      showToast("Bills updated!", "success");
+    } catch (error) {
+      console.error("Failed to save bills:", error);
+      showToast("Failed to save bills", "error");
+    }
   };
 
   const handleDelete = async (id: string, index: number) => {
     const entry = data.find((d) => d._id === id);
     if (!entry) return;
 
-    const updated = await updateBill(id, {
-      bills: entry.bills.filter((_, i) => i !== index),
-    });
+    try {
+      const updated = await updateBill(id, {
+        bills: entry.bills.filter((_, i) => i !== index),
+      });
 
-    setData((prev) =>
-      prev.map((d) => (d._id === id ? updated : d))
-    );
+      setData((prev) =>
+        prev.map((d) => (d._id === id ? updated : d))
+      );
+      showToast("Bill deleted!", "success");
+    } catch (error) {
+      console.error("Failed to delete bill:", error);
+      showToast("Failed to delete bill", "error");
+    }
   };
 
   // FILTER + SORT
@@ -210,16 +242,6 @@ export default function BillsPage() {
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
-      <style>{`
-        @keyframes scale-in {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .animate-scale { animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-      `}</style>
-      {/* HEADER */}
-    
-
       {/* TABS */}
        <div className="flex gap-2 mb-4 justify-between">
           <div className="flex gap-2 mb-4">
@@ -247,10 +269,6 @@ export default function BillsPage() {
           </div>
 
             <div className="mb-4 flex justify-between items-start">
-            {/* <h1 className="text-lg font-semibold text-white">
-              Bills
-            </h1> */}
-
             <button
               onClick={() => setShowForm(true)}
               className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold rounded-4xl text-sm"
@@ -261,97 +279,85 @@ export default function BillsPage() {
         </div>
 
       {/* ADD MONTH MODAL */}
-      {showForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm text-[1rem]">
-            <h2 className="text-white mb-3">Add Month</h2>
+      <Modal open={showForm} onClose={() => setShowForm(false)} title="Add Month">
+        <input
+          value={newMonth}
+          onChange={(e) => setNewMonth(e.target.value)}
+          placeholder="May 2026"
+          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+        />
 
-            <input
-              value={newMonth}
-              onChange={(e) => setNewMonth(e.target.value)}
-              placeholder="May 2026"
-              className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-white"
-            />
-
-            <div className="flex justify-end gap-2  text-white text-[1rem] flex-col w-full">
-              <button onClick={() => setShowForm(false)}>Cancel</button>
-              <button
-                onClick={handleAddMonth}
-                className="bg-[#DFF966] text-black px-3 py-1 rounded"
-              >
-                Save
-              </button>
-            </div>
-          </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button onClick={() => setShowForm(false)} className="px-3 py-1 text-gray-400">
+            Cancel
+          </button>
+          <button
+            onClick={handleAddMonth}
+            className="bg-[#DFF966] text-black font-semibold px-3 py-1 rounded"
+          >
+            Save
+          </button>
         </div>
-      )}
+      </Modal>
 
       {/* ADD BILL MODAL */}
-      {showBillModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xl text-[1rem]">
-          <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm">
-            <h2 className="text-white mb-3">Add Bill</h2>
+      <Modal open={showBillModal} onClose={() => setShowBillModal(false)} title="Add Bill">
+        <input
+          value={billName}
+          onChange={(e) => setBillName(e.target.value)}
+          placeholder="Bill name"
+          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+        />
 
-            <input
-              value={billName}
-              onChange={(e) => setBillName(e.target.value)}
-              placeholder="Bill name"
-              className="w-full px-3 py-2 mb-2 rounded bg-transparent border border-gray-600 text-white"
-            />
+        <input
+          value={billDueDate}
+          onChange={(e) => setBillDueDate(e.target.value)}
+          placeholder="Due date"
+          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+        />
 
-            <input
-              value={billDueDate}
-              onChange={(e) => setBillDueDate(e.target.value)}
-              placeholder="Due date"
-              className="w-full px-3 py-2 mb-2 rounded bg-transparent border border-gray-600 text-white"
-            />
+        <input
+          type="number"
+          value={billAmount}
+          onChange={(e) => setBillAmount(e.target.value)}
+          placeholder="Amount"
+          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+        />
 
-            <input
-              type="number"
-              value={billAmount}
-              onChange={(e) => setBillAmount(e.target.value)}
-              placeholder="Amount"
-              className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-white"
-            />
-
-            <div className="flex justify-end gap-2  text-white text-[1rem] flex-col w-full">
-              <button onClick={() => setShowBillModal(false)}>Cancel</button>
-              <button
-                onClick={handleSaveBill}
-                className="bg-[#DFF966] text-black px-3 py-1 rounded"
-              >
-                Save
-              </button>
-            </div>
-          </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button onClick={() => setShowBillModal(false)} className="px-3 py-1 text-gray-400">
+            Cancel
+          </button>
+          <button
+            onClick={handleSaveBill}
+            className="bg-[#DFF966] text-black font-semibold px-3 py-1 rounded"
+          >
+            Save
+          </button>
         </div>
-      )}
+      </Modal>
 
       {/* DUPLICATE MODAL */}
-      {showDuplicateModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="bg-[#1C1C1E] p-5 rounded-xl w-full max-w-sm ">
-            <h2 className="text-white mb-3">Duplicate Month</h2>
+      <Modal open={showDuplicateModal} onClose={() => setShowDuplicateModal(false)} title="Duplicate Month">
+        <input
+          value={duplicateMonthName}
+          onChange={(e) => setDuplicateMonthName(e.target.value)}
+          placeholder="New month"
+          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+        />
 
-            <input
-              value={duplicateMonthName}
-              onChange={(e) => setDuplicateMonthName(e.target.value)}
-              placeholder="New month"
-              className="w-full px-3 py-2 mb-3 rounded bg-transparent border border-gray-600 text-white text-[1rem]"
-            />
-
-            <div className="flex justify-end gap-2 text-white text-[1rem] flex-col w-full">
-              <button onClick={() => setShowDuplicateModal(false)}>Cancel</button>
-              <button
-                onClick={handleSaveDuplicate}
-                className="bg-[#DFF966] text-black px-3 py-1 rounded text-[1rem]"
-              >
-                Save
-              </button>
-            </div>
-          </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button onClick={() => setShowDuplicateModal(false)} className="px-3 py-1 text-gray-400">
+            Cancel
+          </button>
+          <button
+            onClick={handleSaveDuplicate}
+            className="bg-[#DFF966] text-black font-semibold px-3 py-1 rounded"
+          >
+            Save
+          </button>
         </div>
-      )}
+      </Modal>
 
       {/* LIST */}
       {filteredData.map((entry) => {

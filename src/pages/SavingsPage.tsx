@@ -8,8 +8,11 @@ import {
 } from "../api/savings";
 
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import Modal from "../components/Modal";
+import { useToast } from "../components/useToast";
 
 export default function SavingsPage() {
+  const showToast = useToast();
   const [savings, setSavings] = useState<Savings[]>([]);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,11 +51,13 @@ export default function SavingsPage() {
         setSavings(withTransactions);
       } catch (err) {
         console.error(err);
+        showToast("Failed to load savings", "error");
       } finally {
         setLoading(false);
       }
     };
     fetchSavings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleExpand = (index: number) => {
@@ -84,8 +89,10 @@ export default function SavingsPage() {
       setNewSavingsName("");
       setNewSavingsAmount("");
       setShowForm(false);
+      showToast("Savings added successfully!", "success");
     } catch (err) {
       console.error(err);
+      showToast("Failed to add savings", "error");
     }
   };
 
@@ -119,8 +126,10 @@ export default function SavingsPage() {
       setAmountInputs((prev) => ({ ...prev, [index]: "" }));
       setDateInputs((prev) => ({ ...prev, [index]: "" }));
       setTransactionType((prev) => ({ ...prev, [index]: "+" }));
+      showToast("Transaction added!", "success");
     } catch (err) {
       console.error(err);
+      showToast("Failed to add transaction", "error");
     }
   };
 
@@ -130,8 +139,10 @@ export default function SavingsPage() {
     try {
       await deleteSavings(id);
       setSavings((prev) => prev.filter((s) => s._id !== id));
+      showToast("Savings deleted!", "success");
     } catch (err) {
       console.error(err);
+      showToast("Failed to delete savings", "error");
     }
   };
 
@@ -190,46 +201,40 @@ export default function SavingsPage() {
         </div>
       </div>
 
-      {/* ✅ MODAL (restored) */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg text-[1rem]">
-            <h2 className="text-white text-lg font-semibold">Add Savings</h2>
+      {/* ✅ MODAL */}
+      <Modal open={showForm} onClose={() => setShowForm(false)} title="Add Savings">
+        <input
+          type="text"
+          placeholder="Savings name"
+          value={newSavingsName}
+          onChange={(e) => setNewSavingsName(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+        />
 
-            <input
-              type="text"
-              placeholder="Savings name"
-              value={newSavingsName}
-              onChange={(e) => setNewSavingsName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
-            />
+        <input
+          type="number"
+          placeholder="Initial amount"
+          value={newSavingsAmount}
+          onChange={(e) => setNewSavingsAmount(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+        />
 
-            <input
-              type="number"
-              placeholder="Initial amount"
-              value={newSavingsAmount}
-              onChange={(e) => setNewSavingsAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg  text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
-            />
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            onClick={() => setShowForm(false)}
+            className="px-3 py-1 text-gray-400"
+          >
+            Cancel
+          </button>
 
-            <div className="flex justify-end space-x-2 pt-2 flex-col w-full">
-              <button
-                onClick={() => setShowForm(false)}
-                className="px-3 py-1  text-gray-400"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleAddSavings}
-                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg "
-              >
-                Save
-              </button>
-            </div>
-          </div>
+          <button
+            onClick={handleAddSavings}
+            className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg"
+          >
+            Save
+          </button>
         </div>
-      )}
+      </Modal>
 
       {/* SUMMARY */}
       <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">

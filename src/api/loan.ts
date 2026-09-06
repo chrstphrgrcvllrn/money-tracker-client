@@ -39,6 +39,24 @@ export const createLoan = async (
   return res.json();
 };
 
+// UPDATE loan (rename, edit amount, archive/unarchive)
+export const updateLoan = async (
+  id: string,
+  data: Partial<Pick<Loan, "name" | "initialAmount" | "archived">>
+): Promise<Loan> => {
+  const res = await fetch(`${API_URL}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error("Failed to update loan");
+
+  return res.json();
+};
+
 // ADD transaction
 export const addTransaction = async (id: string, data: unknown) => {
   const res = await fetch(`${API_URL}/${id}/transactions`, {

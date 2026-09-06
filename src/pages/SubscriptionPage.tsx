@@ -15,6 +15,9 @@ import {
   PencilIcon,
 } from "@heroicons/react/24/outline";
 
+import Modal from "../components/Modal";
+import { useToast } from "../components/useToast";
+
 type PaymentStatus = "pending" | "prepared" | "paid";
 
 const formatDate = (date?: string) => {
@@ -28,6 +31,8 @@ const isThisYear = (date?: string) => {
 };
 
 export default function SubscriptionPage() {
+  const showToast = useToast();
+
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +58,7 @@ export default function SubscriptionPage() {
       setSubscriptions(data);
     } catch (err) {
       console.error(err);
+      showToast("Failed to load subscriptions", "error");
     } finally {
       setLoading(false);
     }
@@ -60,6 +66,7 @@ export default function SubscriptionPage() {
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleExpand = (index: number) => {
@@ -90,8 +97,10 @@ export default function SubscriptionPage() {
 
       await load();
       resetForm();
+      showToast(editingId ? "Subscription updated!" : "Subscription added!", "success");
     } catch (err) {
       console.error("SAVE ERROR:", err);
+      showToast("Failed to save subscription", "error");
     }
   };
 
@@ -104,8 +113,14 @@ export default function SubscriptionPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this subscription?")) return;
 
-    await deleteSubscription(id);
-    await load();
+    try {
+      await deleteSubscription(id);
+      await load();
+      showToast("Subscription deleted!", "success");
+    } catch (err) {
+      console.error("DELETE ERROR:", err);
+      showToast("Failed to delete subscription", "error");
+    }
   };
 
   // =========================
@@ -130,8 +145,10 @@ export default function SubscriptionPage() {
 
       setNewPayment({ date: "", amount: "" });
       load();
+      showToast("Payment added!", "success");
     } catch (err) {
       console.error("createPayment error:", err);
+      showToast("Failed to add payment", "error");
     }
   };
 
@@ -144,13 +161,18 @@ export default function SubscriptionPage() {
   return;
 }
 
-    await updatePayment({
-      subId: item._id,
-      paymentId: p._id,
-      status: nextStatus(p.status as PaymentStatus),
-    });
+    try {
+      await updatePayment({
+        subId: item._id,
+        paymentId: p._id,
+        status: nextStatus(p.status as PaymentStatus),
+      });
 
-    load();
+      load();
+    } catch (err) {
+      console.error("updatePayment error:", err);
+      showToast("Failed to update payment", "error");
+    }
   };
 
   const handleUpdateDate = async (
@@ -160,14 +182,19 @@ export default function SubscriptionPage() {
   ) => {
     if (!item?._id || !p?._id) return;
 
-    await updatePayment({
-      subId: item._id,
-      paymentId: p._id,
-      date,
-      status: p.status,
-    });
+    try {
+      await updatePayment({
+        subId: item._id,
+        paymentId: p._id,
+        date,
+        status: p.status,
+      });
 
-    load();
+      load();
+    } catch (err) {
+      console.error("updatePayment date error:", err);
+      showToast("Failed to update payment date", "error");
+    }
   };
 
   // =========================
@@ -405,43 +432,33 @@ export default function SubscriptionPage() {
       </div>
 
       {/* MODAL */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
+      <Modal
+        open={showForm}
+        onClose={resetForm}
+        title={editingId ? "Edit Subscription" : "Add Subscription"}
+      >
+        <input
+          placeholder="Name"
+          value={form.name}
+          onChange={(e) =>
+            setForm(p => ({ ...p, name: e.target.value }))
+          }
+          className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600"
+        />
 
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 animate-scale">
+        <div className="flex justify-end gap-2 pt-2">
+          <button onClick={resetForm} className="px-3 py-1 text-gray-400">
+            Cancel
+          </button>
 
-            <h2 className="text-white text-lg font-semibold">
-              {editingId ? "Edit Subscription" : "Add Subscription"}
-            </h2>
-
-            <input
-              placeholder="Name"
-              value={form.name}
-              onChange={(e) =>
-                setForm(p => ({ ...p, name: e.target.value }))
-              }
-              className="w-full px-3 py-2 rounded-lg text-white border border-gray-600"
-            />
-
-            <div className="flex justify-end gap-2 pt-2 flex-col w-full">
-
-              <button onClick={resetForm} className="text-gray-400">
-                Cancel
-              </button>
-
-              <button
-                onClick={handleSave}
-                className="px-3 py-1 bg-[#DFF966] text-black rounded-lg"
-              >
-                Save
-              </button>
-
-            </div>
-
-          </div>
-
+          <button
+            onClick={handleSave}
+            className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg"
+          >
+            Save
+          </button>
         </div>
-      )}
+      </Modal>
 
     </div>
   );

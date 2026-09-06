@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Loan } from "../types/loans.type";
-import { getLoans, createLoan, addTransaction } from "../api/loan";
+import { getLoans, createLoan, addTransaction, updateLoan } from "../api/loan";
 
 import {
   PaperClipIcon,
@@ -8,10 +8,12 @@ import {
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import Modal from "../components/Modal";
+import { useToast } from "../components/useToast";
 
 export default function LoanPage() {
+  const showToast = useToast();
+
   const [loans, setLoans] = useState<Loan[]>([]);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,10 +29,6 @@ export default function LoanPage() {
   const [showAmounts, setShowAmounts] = useState(true);
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "info" | "error">("info");
-
   useEffect(() => {
     const fetchLoans = async () => {
       try {
@@ -44,21 +42,15 @@ export default function LoanPage() {
         setLoans(withTransactions);
       } catch (err) {
         console.error(err);
+        showToast("Failed to load loans", "error");
       } finally {
         setLoading(false);
       }
     };
 
     fetchLoans();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const showSnackbar = (message: string, severity: "success" | "info" | "error" = "info") => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
-
-  const handleCloseSnackbar = () => setSnackbarOpen(false);
 
   const toggleExpand = (index: number) => {
     setExpanded(expanded === index ? null : index);
@@ -83,29 +75,57 @@ export default function LoanPage() {
       setNewLoanName("");
       setNewLoanAmount("");
       setShowForm(false);
-      showSnackbar("Loan added successfully!", "success");
+      showToast("Loan added successfully!", "success");
     } catch (err) {
       console.error(err);
-      showSnackbar("Failed to add loan", "error");
+      showToast("Failed to add loan", "error");
     }
   };
 
-  const handleArchiveLoan = (loanId: string) => {
+  const handleArchiveLoan = async (loanId: string) => {
+    // Optimistic update
     setLoans((prev) =>
       prev.map((loan) =>
         loan._id === loanId ? { ...loan, archived: true } : loan
       )
     );
-    showSnackbar("Loan archived!", "success");
+
+    try {
+      await updateLoan(loanId, { archived: true });
+      showToast("Loan archived!", "success");
+    } catch (err) {
+      console.error(err);
+      // Roll back on failure
+      setLoans((prev) =>
+        prev.map((loan) =>
+          loan._id === loanId ? { ...loan, archived: false } : loan
+        )
+      );
+      showToast("Failed to archive loan", "error");
+    }
   };
 
-  const handleUnarchiveLoan = (loanId: string) => {
+  const handleUnarchiveLoan = async (loanId: string) => {
+    // Optimistic update
     setLoans((prev) =>
       prev.map((loan) =>
         loan._id === loanId ? { ...loan, archived: false } : loan
       )
     );
-    showSnackbar("Loan unarchived!", "success");
+
+    try {
+      await updateLoan(loanId, { archived: false });
+      showToast("Loan unarchived!", "success");
+    } catch (err) {
+      console.error(err);
+      // Roll back on failure
+      setLoans((prev) =>
+        prev.map((loan) =>
+          loan._id === loanId ? { ...loan, archived: true } : loan
+        )
+      );
+      showToast("Failed to unarchive loan", "error");
+    }
   };
 
   const handleAddPayment = async (loanId: string, index: number, amount: number) => {
@@ -125,7 +145,7 @@ export default function LoanPage() {
 
     try {
       await addTransaction(loanId, transaction);
-      showSnackbar("Payment added!", "success");
+      showToast("Payment added!", "success");
     } catch (err) {
       console.error(err);
       // Optionally: remove transaction if failed
@@ -141,7 +161,7 @@ export default function LoanPage() {
             : loan
         )
       );
-      showSnackbar("Failed to add payment", "error");
+      showToast("Failed to add payment", "error");
     }
 
     // Clear inputs
@@ -170,13 +190,6 @@ export default function LoanPage() {
 
   return (
     <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans text-gray-800 bg-[#000000]">
-      <style>{`
-        @keyframes scale-in {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .animate-scale { animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-      `}</style>
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
         <div className="flex gap-2">
@@ -220,45 +233,39 @@ export default function LoanPage() {
       </div>
 
       {/* ADD LOAN MODAL */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg text-[1rem] animate-scale">
-            <h2 className="text-white text-lg font-semibold">Add Loan</h2>
+      <Modal open={showForm} onClose={() => setShowForm(false)} title="Add Loan">
+        <input
+          type="text"
+          placeholder="Loan name"
+          value={newLoanName}
+          onChange={(e) => setNewLoanName(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-white border border-gray-600 focus:border-[#DFF966]/30 focus:outline-none"
+        />
 
-            <input
-              type="text"
-              placeholder="Loan name"
-              value={newLoanName}
-              onChange={(e) => setNewLoanName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg  text-white border border-gray-600 focus:border-[#DFF966]/30 focus:outline-none"
-            />
+        <input
+          type="number"
+          placeholder="Initial amount"
+          value={newLoanAmount}
+          onChange={(e) => setNewLoanAmount(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-white border border-gray-600 focus:border-[#DFF966]/30 focus:outline-none"
+        />
 
-            <input
-              type="number"
-              placeholder="Initial amount"
-              value={newLoanAmount}
-              onChange={(e) => setNewLoanAmount(e.target.value)}
-              className="w-full px-3 py-2 rounded-lgtext-white border border-gray-600 focus:border-[#DFF966]/30 focus:outline-none"
-            />
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            onClick={() => setShowForm(false)}
+            className="px-3 py-1 text-gray-400"
+          >
+            Cancel
+          </button>
 
-            <div className="flex justify-end space-x-2 pt-2 flex-col w-full">
-              <button
-                onClick={() => setShowForm(false)}
-                className="px-3 py-1  text-gray-400"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleAddLoan}
-                className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg"
-              >
-                Save
-              </button>
-            </div>
-          </div>
+          <button
+            onClick={handleAddLoan}
+            className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg"
+          >
+            Save
+          </button>
         </div>
-      )}
+      </Modal>
 
       {/* SUMMARY */}
       <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
@@ -289,7 +296,7 @@ export default function LoanPage() {
 
           return (
             <div
-              key={loan._id || index} 
+              key={loan._id || index}
               className="bg-[#1C1C1E] rounded-xl overflow-hidden "
             >
               <button
@@ -438,27 +445,6 @@ export default function LoanPage() {
           );
         })}
       </div>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={2000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbarSeverity}
-          sx={{
-            width: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            color: "white",
-            backdropFilter: "blur(8px)",
-            borderRadius: "8px",
-          }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </div>
   );
 }
