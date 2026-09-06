@@ -43,7 +43,7 @@ export default function BillsPage() {
   const [duplicateSource, setDuplicateSource] =
     useState<BillsEntry | null>(null);
 
-  const format = (val: any) =>
+  const format = (val: unknown) =>
     Number(val || 0).toLocaleString();
 
   // ✅ PARSE MONTH
@@ -53,7 +53,7 @@ export default function BillsPage() {
     const load = async () => {
       const res = await fetchBills();
 
-      const normalized = res.map((e: any) => ({
+      const normalized = res.map((e: BillsEntry) => ({
         ...e,
         bills: Array.isArray(e.bills) ? e.bills : [],
       }));

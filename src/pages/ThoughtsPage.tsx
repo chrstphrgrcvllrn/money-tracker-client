@@ -13,7 +13,10 @@ const ThoughtsPage: React.FC = () => {
     setThoughts([...data]);
   };
 
+   
+   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchThoughts();
   }, []);
 

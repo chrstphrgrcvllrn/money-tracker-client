@@ -28,7 +28,7 @@ export const getWatchlist = async () => {
 // -------------------------
 // CREATE ITEM
 // -------------------------
-export const createWatchItem = async (item: any) => {
+export const createWatchItem = async (item: unknown) => {
   return request(BASE_URL, {
     method: "POST",
     headers: {
@@ -41,7 +41,7 @@ export const createWatchItem = async (item: any) => {
 // -------------------------
 // UPDATE ITEM
 // -------------------------
-export const updateWatchItem = async (id: string, data: any) => {
+export const updateWatchItem = async (id: string, data: unknown) => {
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PATCH",
     headers: {

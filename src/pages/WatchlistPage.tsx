@@ -12,6 +12,13 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/solid";
 
+interface OmdbSuggestion {
+  Title: string;
+  Poster: string;
+  imdbID: string;
+  Year?: string;
+}
+
 type Episode = {
   season: number;
   number: number;
@@ -35,7 +42,7 @@ const WatchlistPage: React.FC = () => {
     Record<string, Episode[]>
   >({});
 
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<OmdbSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [link, setLink] = useState("");
 
@@ -52,7 +59,11 @@ const WatchlistPage: React.FC = () => {
     setWatchlist(data);
   };
 
+   
+   
+   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchWatchlist();
   }, []);
 
@@ -149,18 +160,21 @@ const WatchlistPage: React.FC = () => {
     }
   };
 
+   
   useEffect(() => {
     watchlist.forEach((item) => {
       fetchPoster(item.title);
       fetchEpisodes(item.title);
     });
-  }, [watchlist]);
+  }, [watchlist]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // -------------------------
   // SUGGESTIONS
   // -------------------------
+   
   useEffect(() => {
     if (!title.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions([]);
       setShowSuggestions(false);
       return;
@@ -189,9 +203,9 @@ const WatchlistPage: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [title]);
+  }, [title]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const selectSuggestion = (item: any) => {
+  const selectSuggestion = (item: OmdbSuggestion) => {
     setTitle(item.Title);
     setShowSuggestions(false);
   };
@@ -373,7 +387,7 @@ const handleDelete = async (id: string) => {
           {["ongoing", "completed"].map((t) => (
             <button
               key={t}
-              onClick={() => setTab(t as any)}
+              onClick={() => setTab(t as "ongoing" | "completed")}
               className={`px-2 py-1 rounded ${
                 tab === t
                   ? "bg-[#DFF966] text-black"

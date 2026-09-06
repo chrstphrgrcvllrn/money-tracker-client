@@ -11,6 +11,11 @@ type ActionType =
   | "holiday"
   | "";
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 const CalendarPage: React.FC = () => {
   const today = new Date();
 
@@ -27,11 +32,6 @@ const CalendarPage: React.FC = () => {
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
 
   const currentYear = today.getFullYear();
-
-  const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December",
-  ];
 
   // =========================
   // HELPERS
@@ -71,7 +71,7 @@ const CalendarPage: React.FC = () => {
       setEvents(data);
     };
     load();
-  }, []);
+  }, []);  
 
   // =========================
   // GROUP EVENTS (CALENDAR)
@@ -106,6 +106,7 @@ const CalendarPage: React.FC = () => {
   // =========================
   // GROUP EVENTS (MODAL)
   // =========================
+   
   const groupedEvents = useMemo(() => {
     const grouped: Record<string, CalendarEvent[]> = {};
 
@@ -113,14 +114,14 @@ const CalendarPage: React.FC = () => {
 
     list.forEach((e) => {
       const d = new Date(e.date);
-      const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+      const key = `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
 
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(e);
     });
 
     return grouped;
-  }, [tab, events]);
+  }, [tab, upcomingEvents, pastEvents]);
 
   // =========================
   // CREATE EVENT
@@ -148,7 +149,7 @@ const CalendarPage: React.FC = () => {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    const days: any[] = [];
+    const days: ({ day: number; month: number; year: number } | null)[] = [];
 
     for (let i = 0; i < firstDay; i++) days.push(null);
 
@@ -211,7 +212,7 @@ useEffect(() => {
     behavior: "smooth",
     block: "start",
   });
-}, []);
+}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   // =========================
@@ -344,7 +345,7 @@ ref={(el) => {
 
         {/* MONTH TITLE */}
         <div className="text-center font-bold mb-3">
-          {monthNames[monthIndex]}
+          {MONTH_NAMES[monthIndex]}
         </div>
 
         {/* WEEK HEADER */}

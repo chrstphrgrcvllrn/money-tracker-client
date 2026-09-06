@@ -22,7 +22,10 @@ const NotesPage: React.FC = () => {
     setNotes(data);
   };
 
+   
+   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotes();
   }, []);
 
@@ -164,7 +167,7 @@ const highlightText = (text: string, done: boolean) => {
         {["pending", "work", "personal", "others", "to buy", "done"].map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab as any)}
+            onClick={() => setActiveTab(tab as "all" | "done" | "pending" | "work" | "personal" | "others" | "to buy")}
             className={`px-2 py-1 rounded-xl text-xs capitalize ${
               activeTab === tab
                 ? "bg-[#DFF966] text-black font-bold"

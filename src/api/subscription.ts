@@ -10,12 +10,12 @@ export const getSubscriptions = async () => {
   return res.data;
 };
 
-export const createSubscription = async (data: any) => {
+export const createSubscription = async (data: unknown) => {
   const res = await axios.post(BASE_URL, data);
   return res.data;
 };
 
-export const updateSubscription = async (id: string, data: any) => {
+export const updateSubscription = async (id: string, data: unknown) => {
   const res = await axios.put(`${BASE_URL}/${id}`, data);
   return res.data;
 };
@@ -28,7 +28,7 @@ export const deleteSubscription = async (id: string) => {
 /**
  * ✅ CREATE PAYMENT (NEW - THIS FIXES YOUR + BUTTON)
  */
-export const createPayment = async (subId: string, data: any) => {
+export const createPayment = async (subId: string, data: unknown) => {
   const res = await axios.post(`${BASE_URL}/${subId}/payment`, data);
   return res.data;
 };

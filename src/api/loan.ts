@@ -40,7 +40,7 @@ export const createLoan = async (
 };
 
 // ADD transaction
-export const addTransaction = async (id: string, data: any) => {
+export const addTransaction = async (id: string, data: unknown) => {
   const res = await fetch(`${API_URL}/${id}/transactions`, {
     method: "POST",
     headers: {

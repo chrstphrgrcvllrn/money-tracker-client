@@ -24,9 +24,33 @@ const CalculatorPage: React.FC = () => {
     setDisplay(display.slice(0, -1));
   };
 
+  const evaluateExpression = (expr: string): number => {
+    const tokens = expr.match(/(\d+\.?\d*|\.\d+|[+\-*/])/g);
+    if (!tokens) throw new Error("Invalid expression");
+
+    // First pass: handle * and /
+    const stack: number[] = [parseFloat(tokens[0])];
+    for (let i = 1; i < tokens.length; i += 2) {
+      const op = tokens[i];
+      const num = parseFloat(tokens[i + 1]);
+      if (op === "*") {
+        stack[stack.length - 1] *= num;
+      } else if (op === "/") {
+        stack[stack.length - 1] /= num;
+      } else {
+        stack.push(op === "-" ? -num : num);
+      }
+    }
+
+    return stack.reduce((sum, n) => sum + n, 0);
+  };
+
   const handleCalculate = () => {
     try {
-      const result = eval(display);
+      const result = evaluateExpression(display);
+      if (Number.isNaN(result) || !Number.isFinite(result)) {
+        throw new Error("Invalid result");
+      }
       setDisplay(String(result));
     } catch {
       setDisplay("Error");

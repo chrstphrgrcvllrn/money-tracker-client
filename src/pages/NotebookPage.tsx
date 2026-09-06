@@ -22,6 +22,15 @@ import {
   PencilIcon,
 } from "@heroicons/react/24/outline";
 
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (error && typeof error === "object") {
+    const err = error as { response?: { data?: { message?: string } }; message?: string };
+    return err.response?.data?.message || err.message || fallback;
+  }
+  return fallback;
+};
+
 const NotebookPage: React.FC = () => {
   const [notes, setNotes] = useState<NotebookNote[]>([]);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
@@ -83,12 +92,14 @@ const NotebookPage: React.FC = () => {
       return;
     }
 
+    const editorNode = editorRef.current;
+
     // Prevent creating multiple Quill instances
     if (quillRef.current) {
       quillRef.current = null;
     }
 
-    const quill = new Quill(editorRef.current, {
+    const quill = new Quill(editorNode, {
       theme: "snow",
 
       modules: {
@@ -118,9 +129,7 @@ const NotebookPage: React.FC = () => {
 
       quill.disable();
 
-      if (editorRef.current) {
-        editorRef.current.innerHTML = "";
-      }
+      editorNode.innerHTML = "";
     };
   }, [selectedNoteId, selectedNote]);
 
@@ -142,6 +151,7 @@ const NotebookPage: React.FC = () => {
 
   useEffect(() => {
     fetchNotes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --------------------------------
@@ -290,13 +300,10 @@ const NotebookPage: React.FC = () => {
           ? "Note closed"
           : "Note reopened"
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Toggle status error:", error);
 
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to update note status";
+      const message = getErrorMessage(error, "Failed to update note status");
 
       showSnackbar(message);
     }
@@ -327,13 +334,10 @@ const NotebookPage: React.FC = () => {
       closeNote();
 
       showSnackbar("Note deleted");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Delete note error:", error);
 
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to delete note";
+      const message = getErrorMessage(error, "Failed to delete note");
 
       showSnackbar(message);
     }
