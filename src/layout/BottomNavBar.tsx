@@ -5,10 +5,9 @@ import {
   CurrencyDollarIcon as CurrencyDollarOutline,
   ReceiptPercentIcon as ReceiptPercentOutline,
   DocumentTextIcon as DocumentTextOutline,
-  // CalculatorIcon as CalculatorOutline,
   CalendarDaysIcon as CalendarDaysOutline,
-    BookOpenIcon as BookOpenOutline,
-  // TvIcon as TvOutline,
+  BookOpenIcon as BookOpenOutline,
+  CheckCircleIcon as CheckCircleOutline,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -17,13 +16,10 @@ import {
   CurrencyDollarIcon as CurrencyDollarSolid,
   ReceiptPercentIcon as ReceiptPercentSolid,
   DocumentTextIcon as DocumentTextSolid,
-  // CalculatorIcon as CalculatorSolid,
   CalendarDaysIcon as CalendarDaysSolid,
-    BookOpenIcon as BookOpenSolid,
-  // TvIcon as TvSolid,
+  BookOpenIcon as BookOpenSolid,
+  CheckCircleIcon as CheckCircleSolid,
 } from "@heroicons/react/24/solid";
-
- 
 
 export default function BottomNavBar() {
   const navItems = [
@@ -69,62 +65,58 @@ export default function BottomNavBar() {
       icon: DocumentTextOutline,
       activeIcon: DocumentTextSolid,
     },
-    // {
-    //   name: "Watchlist",
-    //   path: "/watchlist",
-    //   icon: TvOutline,
-    //   activeIcon: TvSolid,
-    // },
     {
       name: "House",
       path: "/house-expenses",
       icon: CalendarDaysOutline,
       activeIcon: CalendarDaysSolid,
     },
-       {
+    {
       name: "Subscription",
       path: "/subscription",
       icon: CalendarDaysOutline,
       activeIcon: CalendarDaysSolid,
     },
-    // {
-    //   name: "Calculator",
-    //   path: "/calculator",
-    //   icon: CalculatorOutline,
-    //   activeIcon: CalculatorSolid,
-    // },
     {
-  name: "Notebook",
-  path: "/notebook",
-  icon: BookOpenOutline,
-  activeIcon: BookOpenSolid,
-},
+      name: "Notebook",
+      path: "/notebook",
+      icon: BookOpenOutline,
+      activeIcon: BookOpenSolid,
+    },
+    {
+      name: "Tracker",
+      path: "/tracker",
+      icon: CheckCircleOutline,
+      activeIcon: CheckCircleSolid,
+    },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full grid grid-cols-5 py-3 z-50 px-4 bg-[rgba(17,19,18,0.55)] backdrop-blur-xl border border-white/10">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.name}
-          to={item.path}
-          className={({ isActive }) =>
-            `flex flex-col items-center justify-center text-xs ${
-              isActive ? "text-[#dff966]" : "text-[#999794]"
-            }`
-          }
-        >
-          {({ isActive }) => {
-            const Icon = isActive ? item.activeIcon : item.icon;
+    <nav className="fixed bottom-0 left-0 w-full z-50 px-4 py-2 bg-[rgba(17,19,18,0.55)] backdrop-blur-xl border-t border-white/10">
+      <div className="grid grid-cols-6 gap-2">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center text-xs ${
+                isActive ? "text-[#dff966]" : "text-[#999794]"
+              }`
+            }
+          >
+            {({ isActive }) => {
+              const Icon = isActive ? item.activeIcon : item.icon;
 
-            return (
-              <>
-                <Icon className="w-6 h-6 mb-1" />
-                <span className="font-semibold">{item.name}</span>
-              </>
-            );
-          }}
-        </NavLink>
-      ))}
+              return (
+                <>
+                  <Icon className="w-6 h-6 mb-1" />
+                  <span className="font-semibold text-center">{item.name}</span>
+                </>
+              );
+            }}
+          </NavLink>
+        ))}
+      </div>
     </nav>
   );
 }

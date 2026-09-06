@@ -408,8 +408,8 @@ const graphData = Object.values(
       {/* MODAL */}
       {/* ========================= */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-          <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
+          <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm animate-scale">
 
             <input
               className="w-full mb-2 p-2 bg-black text-white"

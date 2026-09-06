@@ -7,7 +7,9 @@ import {
 } from "../api/expenses";
 
 import type { Expense } from "../types/expenses.type";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { PencilIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 const ExpensesPage: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -17,6 +19,9 @@ const ExpensesPage: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "info" | "error">("info");
 
   const [activeTab, setActiveTab] = useState<
     "pending" | "monthly" | "biggest" | "graph"
@@ -34,6 +39,14 @@ const ExpensesPage: React.FC = () => {
     loadExpenses();
   }, []);
 
+  const showSnackbar = (message: string, severity: "success" | "info" | "error" = "info") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = () => setSnackbarOpen(false);
+
   // =========================
   // SAVE
   // =========================
@@ -48,8 +61,10 @@ const ExpensesPage: React.FC = () => {
 
     if (editingId) {
       await updateExpense(editingId, payload);
+      showSnackbar("Expense updated!", "success");
     } else {
       await createExpense(payload);
+      showSnackbar("Expense added!", "success");
     }
 
     resetForm();
@@ -73,8 +88,10 @@ const ExpensesPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm("Delete this expense?")) return;
     await deleteExpense(id);
     loadExpenses();
+    showSnackbar("Expense deleted!", "success");
   };
 
   // =========================
@@ -408,8 +425,30 @@ const graphData = Object.values(
       {/* MODAL */}
       {/* ========================= */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-          <div className="bg-[#1C1C1E] p-4 rounded-xl w-[90%] max-w-sm">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
+          <div className="bg-[#1C1C1E] p-5 rounded-xl w-[90%] max-w-sm space-y-3 animate-scale">
+            <style>{`
+              @keyframes scale-in {
+                from {
+                  opacity: 0;
+                  transform: scale(0.95);
+                }
+                to {
+                  opacity: 1;
+                  transform: scale(1);
+                }
+              }
+              .animate-scale {
+                animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+              }
+            `}</style>
+
+            <div className="flex justify-between items-center">
+              <h2 className="text-white font-semibold">Add Expense</h2>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white">
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
 
             <input
               className="w-full mb-2 p-2 bg-black text-white"
@@ -442,6 +481,12 @@ const graphData = Object.values(
           </div>
         </div>
       )}
+
+      <Snackbar open={snackbarOpen} autoHideDuration={2000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: "100%", backgroundColor: "rgba(0,0,0,0.6)", color: "white", backdropFilter: "blur(8px)", borderRadius: "8px" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

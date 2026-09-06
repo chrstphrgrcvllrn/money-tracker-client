@@ -408,7 +408,7 @@ export default function SubscriptionPage() {
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
 
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 animate-scale">
 
             <h2 className="text-white text-lg font-semibold">
               {editingId ? "Edit Subscription" : "Add Subscription"}

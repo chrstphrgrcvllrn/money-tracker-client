@@ -16,6 +16,7 @@ import SubscriptionPage from "@/pages/SubscriptionPage";
 // import PatientDetails from "@/pages/Patients/PatientDetails";
 // import AppointmentsList from "@/pages/Appointments/AppointmentsList"
 import NotebookPage from "@/pages/NotebookPage";
+import TrackerPage from "@/pages/TrackerPage";
 
 
 export default function AppRoutes() {
@@ -37,6 +38,7 @@ export default function AppRoutes() {
         {/* <Route path="watchlist" element={<WatchlistPage/>} /> */}
         <Route path="subscription" element={<SubscriptionPage/>} />
         <Route path="notebook" element={<NotebookPage />} />
+        <Route path="tracker" element={<TrackerPage />} />
         
         {/* <Route path="patients/:id" element={<PatientDetails />} /> */}
         {/* <Route path="appointments" element={<AppointmentsList />} /> */}

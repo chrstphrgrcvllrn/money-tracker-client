@@ -3,10 +3,13 @@ import type { Loan } from "../types/loans.type";
 import { getLoans, createLoan, addTransaction } from "../api/loan";
 
 import {
-  BanknotesIcon,
+  PaperClipIcon,
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
+
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 export default function LoanPage() {
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -22,6 +25,11 @@ export default function LoanPage() {
   const [transactionTypes, setTransactionTypes] = useState<{ [key: number]: "+" | "-" }>({});
 
   const [showAmounts, setShowAmounts] = useState(true);
+  const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "info" | "error">("info");
 
   useEffect(() => {
     const fetchLoans = async () => {
@@ -31,6 +39,7 @@ export default function LoanPage() {
         const withTransactions = normalized.map((loan) => ({
           ...loan,
           transactions: Array.isArray(loan.transactions) ? loan.transactions : [],
+          archived: loan.archived || false,
         }));
         setLoans(withTransactions);
       } catch (err) {
@@ -42,6 +51,14 @@ export default function LoanPage() {
 
     fetchLoans();
   }, []);
+
+  const showSnackbar = (message: string, severity: "success" | "info" | "error" = "info") => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = () => setSnackbarOpen(false);
 
   const toggleExpand = (index: number) => {
     setExpanded(expanded === index ? null : index);
@@ -57,17 +74,38 @@ export default function LoanPage() {
       name: newLoanName,
       initialAmount: Number(newLoanAmount),
       transactions: [],
+      archived: false,
     };
 
     try {
       const saved = await createLoan(newLoan);
-      setLoans((prev) => [...prev, saved]);
+      setLoans((prev) => [...prev, { ...saved, archived: false }]);
       setNewLoanName("");
       setNewLoanAmount("");
       setShowForm(false);
+      showSnackbar("Loan added successfully!", "success");
     } catch (err) {
       console.error(err);
+      showSnackbar("Failed to add loan", "error");
     }
+  };
+
+  const handleArchiveLoan = (loanId: string) => {
+    setLoans((prev) =>
+      prev.map((loan) =>
+        loan._id === loanId ? { ...loan, archived: true } : loan
+      )
+    );
+    showSnackbar("Loan archived!", "success");
+  };
+
+  const handleUnarchiveLoan = (loanId: string) => {
+    setLoans((prev) =>
+      prev.map((loan) =>
+        loan._id === loanId ? { ...loan, archived: false } : loan
+      )
+    );
+    showSnackbar("Loan unarchived!", "success");
   };
 
   const handleAddPayment = async (loanId: string, index: number, amount: number) => {
@@ -87,6 +125,7 @@ export default function LoanPage() {
 
     try {
       await addTransaction(loanId, transaction);
+      showSnackbar("Payment added!", "success");
     } catch (err) {
       console.error(err);
       // Optionally: remove transaction if failed
@@ -102,6 +141,7 @@ export default function LoanPage() {
             : loan
         )
       );
+      showSnackbar("Failed to add payment", "error");
     }
 
     // Clear inputs
@@ -110,7 +150,13 @@ export default function LoanPage() {
     setTransactionTypes((prev) => ({ ...prev, [index]: "+" }));
   };
 
-  const totalRemaining = loans.reduce((sum, loan) => {
+  const filteredLoans = loans.filter((loan) => {
+    if (activeTab === "active") return !loan.archived;
+    if (activeTab === "archived") return loan.archived;
+    return true;
+  });
+
+  const totalRemaining = filteredLoans.reduce((sum, loan) => {
     const transactionsSum = (loan.transactions || []).reduce(
       (s, t) => s + Number(t.amount),
       0
@@ -124,12 +170,35 @@ export default function LoanPage() {
 
   return (
     <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans text-gray-800 bg-[#000000]">
+      <style>{`
+        @keyframes scale-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-scale { animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      `}</style>
       {/* HEADER */}
-      <div className="mb-4 flex justify-between items-start">
-        {/* <h1 className="text-lg font-semibold text-white">Loans</h1> */}
+      <div className="mb-4 flex justify-between items-center">
+        <div className="flex gap-2">
+          <button
+            className={`px-3 py-1 rounded text-sm ${
+              activeTab === "active" ? "bg-[#DFF966] text-black font-bold" : "bg-[#1C1C1E] text-white"
+            }`}
+            onClick={() => setActiveTab("active")}
+          >
+            Active
+          </button>
+          <button
+            className={`px-3 py-1 rounded text-sm ${
+              activeTab === "archived" ? "bg-[#1C1C1E] text-[#DFF966] font-bold" : "bg-[#1C1C1E] text-gray-400"
+            }`}
+            onClick={() => setActiveTab("archived")}
+          >
+            Archive
+          </button>
+        </div>
 
-       
-        <div className="flex w-full items-center justify-between gap-3">
+        <div className="flex w-full items-center justify-end gap-3">
           <button
             onClick={() => setShowAmounts((prev) => !prev)}
             className="text-gray-400"
@@ -153,7 +222,7 @@ export default function LoanPage() {
       {/* ADD LOAN MODAL */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg text-[1rem]">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg text-[1rem] animate-scale">
             <h2 className="text-white text-lg font-semibold">Add Loan</h2>
 
             <input
@@ -201,13 +270,8 @@ export default function LoanPage() {
 
       {/* LIST */}
      <div className="space-y-3">
-      {/*    {loans.map((loan, index) => {
-          const loanTransactions = loan.transactions || [];
-          const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
-          const remaining = Number(loan.initialAmount) + loanSum; */}
-
-  {loans
-    .slice() // make a copy so we don’t mutate state
+  {filteredLoans
+    .slice() // make a copy so we don't mutate state
     .sort((a, b) => {
       const aRemaining =
         Number(a.initialAmount) +
@@ -234,7 +298,7 @@ export default function LoanPage() {
               >
                 <div className="flex items-center gap-3 text-left">
                   <div className="w-10 h-10 rounded-lg bg-[#2C2C2E] flex items-center justify-center">
-                    <BanknotesIcon className="w-5 h-5 text-[#DFF966]" />
+                    <PaperClipIcon className="w-5 h-5 text-[#DFF966]" />
                   </div>
 
                   <div>
@@ -349,6 +413,24 @@ export default function LoanPage() {
                     >
                       Add Payment
                     </button>
+
+                    {activeTab === "active" && (
+                      <button
+                        onClick={() => handleArchiveLoan(loan._id)}
+                        className="w-full bg-[#EF6C54] text-white font-bold py-2 rounded-lg text-sm"
+                      >
+                        Archive Loan
+                      </button>
+                    )}
+
+                    {activeTab === "archived" && (
+                      <button
+                        onClick={() => handleUnarchiveLoan(loan._id)}
+                        className="w-full bg-[#85D989] text-black font-bold py-2 rounded-lg text-sm"
+                      >
+                        Unarchive Loan
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -356,6 +438,27 @@ export default function LoanPage() {
           );
         })}
       </div>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{
+            width: "100%",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            color: "white",
+            backdropFilter: "blur(8px)",
+            borderRadius: "8px",
+          }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

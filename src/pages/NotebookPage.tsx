@@ -19,6 +19,7 @@ import {
   TrashIcon,
   CheckIcon,
   XMarkIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 
 const NotebookPage: React.FC = () => {
@@ -358,6 +359,21 @@ const NotebookPage: React.FC = () => {
 
   return (
     <div className="min-h-[calc(100vh-80px)] text-xs bg-black text-white">
+      <style>{`
+        @keyframes zoom-in {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .modal-zoom-in {
+          animation: zoom-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+      `}</style>
 
       {/* HEADER */}
       <div className="px-5 pt-6 pb-4 flex items-center justify-between">
@@ -481,7 +497,7 @@ const NotebookPage: React.FC = () => {
           }}
         >
 
-          <div className="w-full max-w-5xl h-[90vh] bg-[#1C1C1E] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="w-full max-w-5xl h-[90vh] bg-[#1C1C1E] rounded-2xl shadow-2xl overflow-hidden flex flex-col modal-zoom-in">
 
             {/* MODAL HEADER */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
@@ -526,37 +542,42 @@ const NotebookPage: React.FC = () => {
             <div className="flex items-center justify-between px-5 py-4 border-t border-white/10">
 
               <button
-                onClick={deleteNote}
-                className="flex items-center gap-2 text-gray-500 hover:text-red-400"
+                onClick={toggleStatus}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#2A2A2C] text-gray-300 hover:bg-[#333335]"
               >
-                <TrashIcon className="w-5 h-5" />
+                <CheckIcon className="w-4 h-4" />
 
-                <span>
-                  Delete
-                </span>
+                {selectedNote.status === "open"
+                  ? "Close Note"
+                  : "Reopen Note"}
               </button>
 
               <div className="flex items-center gap-2">
 
                 <button
-                  onClick={toggleStatus}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#2A2A2C] text-gray-300 hover:bg-[#333335]"
+                  onClick={deleteNote}
+                  className="flex items-center gap-2 text-gray-500 hover:text-red-400"
                 >
-                  <CheckIcon className="w-4 h-4" />
+                  <TrashIcon className="w-5 h-5" />
 
-                  {selectedNote.status === "open"
-                    ? "Close Note"
-                    : "Reopen Note"}
+                  <span>
+                    Delete
+                  </span>
                 </button>
 
                 <button
                   onClick={saveNote}
                   disabled={saving}
-                  className="px-4 py-2 rounded-lg bg-[#DFF966] text-black font-semibold disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#DFF966] text-black font-semibold disabled:opacity-50"
                 >
-                  {saving
-                    ? "Saving..."
-                    : "Save"}
+                  {saving ? (
+                    <>
+                      <PencilIcon className="w-4 h-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save"
+                  )}
                 </button>
 
               </div>

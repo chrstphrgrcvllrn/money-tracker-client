@@ -210,6 +210,13 @@ export default function BillsPage() {
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
+      <style>{`
+        @keyframes scale-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-scale { animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      `}</style>
       {/* HEADER */}
     
 

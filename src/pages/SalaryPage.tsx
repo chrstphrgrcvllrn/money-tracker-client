@@ -34,7 +34,7 @@ export default function SalaryPage() {
   const [salaryToDelete, setSalaryToDelete] = useState<string | null>(null);
 
   // ✅ TAB STATE
-  const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
+  const [activeTab, setActiveTab] = useState<"active" | "completed" | "totals">("active");
 
   const format = (value: any) => Number(value || 0).toLocaleString();
 
@@ -77,6 +77,7 @@ export default function SalaryPage() {
     setNewSalaryDate("");
     setNewSalaryAmount("");
     setShowForm(false);
+    showSnackbar("Salary added successfully!", "success");
   };
 
   const handleDuplicateSalary = async (entry: SalaryEntry) => {
@@ -93,6 +94,7 @@ export default function SalaryPage() {
         expenses: Array.isArray(duplicateEntry.expenses) ? duplicateEntry.expenses : [],
       },
     ]);
+    showSnackbar("Salary duplicated!", "success");
   };
 
   const handleEditSalary = async (id: string) => {
@@ -110,6 +112,7 @@ export default function SalaryPage() {
             : s
         )
       );
+      showSnackbar("Salary updated!", "success");
     }
   };
 
@@ -126,8 +129,10 @@ export default function SalaryPage() {
       setSalaryData((prev) => prev.filter((s) => s._id !== salaryToDelete));
       setSalaryToDelete(null);
       setShowDeleteModal(false);
+      showSnackbar("Salary deleted!", "success");
     } catch (err) {
       console.error("Failed to delete salary:", err);
+      showSnackbar("Failed to delete salary", "error");
     }
   };
 
@@ -149,6 +154,7 @@ export default function SalaryPage() {
           : s
       )
     );
+    showSnackbar("Expense deleted!", "success");
   };
 
   const openAddExpenseModal = (salaryId: string) => {
@@ -181,6 +187,7 @@ export default function SalaryPage() {
 
     setShowExpenseForm(false);
     setCurrentSalaryId(null);
+    showSnackbar("Expense added!", "success");
   };
 
   const handleTogglePaid = async (salaryId: string, index: number) => {
@@ -239,11 +246,17 @@ export default function SalaryPage() {
     setEditedExpenses([]);
   };
 
+  const handleDeleteExpenseInEdit = (index: number) => {
+    const newExpenses = editedExpenses.filter((_, i) => i !== index);
+    setEditedExpenses(newExpenses);
+  };
+
   const displayedSalaries = salaryData.filter((entry) => {
     const allPaid = entry.expenses.length > 0 && entry.expenses.every((e) => e.paid);
 
     if (activeTab === "completed") return allPaid;
     if (activeTab === "active") return !allPaid;
+    if (activeTab === "totals") return false;
     return true;
   });
 
@@ -282,13 +295,41 @@ export default function SalaryPage() {
     }
   };
 
+  // Compute totals by expense name
+  const calculateTotals = () => {
+    const totalsMap: Record<string, number> = {};
+    
+    salaryData.forEach((entry) => {
+      const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
+      expenses.forEach((expense) => {
+        if (!totalsMap[expense.name]) {
+          totalsMap[expense.name] = 0;
+        }
+        totalsMap[expense.name] += Number(expense.amount || 0);
+      });
+    });
+
+    return Object.entries(totalsMap)
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+  };
+
+  const totals = calculateTotals();
+
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6  bg-black">
+      <style>{`
+        @keyframes scale-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-scale { animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      `}</style>
       
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg animate-scale">
             <h2 className="text-white text-lg font-semibold">Add Salary</h2>
             <input
               type="text"
@@ -324,7 +365,7 @@ export default function SalaryPage() {
 
       {showExpenseForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg animate-scale">
             <h2 className="text-white text-lg font-semibold">Add Expense</h2>
             <input
               type="text"
@@ -360,7 +401,7 @@ export default function SalaryPage() {
 
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-xl">
-          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg">
+          <div className="w-full max-w-sm p-5 bg-[#1C1C1E] rounded-xl space-y-3 shadow-lg animate-scale">
             <h2 className="text-white text-lg font-semibold">Confirm Delete</h2>
             <p className="text-gray-400">Are you sure you want to delete this salary?</p>
             <div className="flex justify-end space-x-2 pt-2">
@@ -381,10 +422,10 @@ export default function SalaryPage() {
         </div>
       )}
 
-  <div className="flex mb-4 gap-2 justify-between">
+  <div className="flex mb-4 gap-2 justify-between flex-wrap">
           <div className="flex mb-4 gap-2">
             <button
-              className={`px-3 py-1 rounded ${
+              className={`px-3 py-1 rounded text-sm ${
                 activeTab === "active" ? " bg-[#DFF966] text-black  font-bold" : "bg-[#1C1C1E] text-white"
               }`}
               onClick={() => setActiveTab("active")}
@@ -392,12 +433,20 @@ export default function SalaryPage() {
               Active
             </button>
             <button
-              className={`px-3 py-1 rounded ${
+              className={`px-3 py-1 rounded text-sm ${
                 activeTab === "completed" ? " bg-[#1C1C1E] text-[#EF6C54]  font-bold" : "bg-[#1C1C1E] text-gray-400"
               }`}
               onClick={() => setActiveTab("completed")}
             >
               Completed
+            </button>
+            <button
+              className={`px-3 py-1 rounded text-sm ${
+                activeTab === "totals" ? " bg-[#1C1C1E] text-[#85D989]  font-bold" : "bg-[#1C1C1E] text-gray-400"
+              }`}
+              onClick={() => setActiveTab("totals")}
+            >
+              Totals
             </button>
           </div>
 
@@ -407,9 +456,6 @@ export default function SalaryPage() {
                 onClick={() => setShowForm(true)}
                 title="Add Salary"
                 className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
-                // bg-[#EB5647]   text-white
-               
-                
               >
                 +
               </button>
@@ -417,177 +463,194 @@ export default function SalaryPage() {
           </div>
       </div>
 
-      {displayedSalaries.map((entry) => {
-        const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
-        const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
-        const remaining = Number(entry.salary || 0) - totalExpenses;
-        const isEditingAll = editingAllEntryId === entry._id;
+      {activeTab === "totals" ? (
+        <div className="space-y-2">
+          {totals.length === 0 ? (
+            <div className="text-gray-600 text-center py-8">No expenses to show</div>
+          ) : (
+            totals.map((item, idx) => (
+              <div key={idx} className="flex justify-between items-center p-3 bg-[#1C1C1E] rounded-lg">
+                <span className="text-white font-semibold">{item.name}</span>
+                <span className="text-[#DFF966] font-bold">{format(item.total)}</span>
+              </div>
+            ))
+          )}
+        </div>
+      ) : (
+        <>
+          {displayedSalaries.map((entry) => {
+            const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
+            const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+            const remaining = Number(entry.salary || 0) - totalExpenses;
+            const isEditingAll = editingAllEntryId === entry._id;
 
-        return (
-          <div key={entry._id} className="mb-6 bg-[#1C1C1E] shadow rounded-xl p-4">
-            <div className="flex justify-between items-center mb-2">
-              <button onClick={() => handleEditSalaryName(entry._id)}>
-                <h2 className="font-semibold text-[1.5rem] text-white">{entry.date}</h2>
-              </button>
+            return (
+              <div key={entry._id} className="mb-6 bg-[#1C1C1E] shadow rounded-xl p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <button onClick={() => handleEditSalaryName(entry._id)}>
+                    <h2 className="font-semibold text-[1.5rem] text-white">{entry.date}</h2>
+                  </button>
 
-              <div className="relative flex items-center">
-                <button
-                  onClick={() =>
-                    setOpenMenuId(openMenuId === entry._id ? null : entry._id)
-                  }
-                  className="text-[#9C9BA1] text-lg px-2 leading-none"
-                >
-                  •••
-                </button>
+                  <div className="relative flex items-center">
+                    <button
+                      onClick={() =>
+                        setOpenMenuId(openMenuId === entry._id ? null : entry._id)
+                      }
+                      className="text-[#9C9BA1] text-lg px-2 leading-none"
+                    >
+                      •••
+                    </button>
 
-                {openMenuId === entry._id && (
-                  <div className="absolute right-0 top-7 min-w-[130px] bg-[#1C1C1E] border border-gray-800 rounded-xl shadow-lg z-30 py-1">
-                    {!isEditingAll && expenses.length > 0 && (
-                      <button
-                        onClick={() => {
-                          handleEditAllExpenses(entry._id);
-                          setOpenMenuId(null);
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
-                      >
-                        Edit
-                      </button>
+                    {openMenuId === entry._id && (
+                      <div className="absolute right-0 top-7 min-w-[130px] bg-[#1C1C1E] border border-gray-800 rounded-xl shadow-lg z-30 py-1">
+                        {!isEditingAll && expenses.length > 0 && (
+                          <button
+                            onClick={() => {
+                              handleEditAllExpenses(entry._id);
+                              setOpenMenuId(null);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                          >
+                            Edit
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            openAddExpenseModal(entry._id);
+                            setOpenMenuId(null);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                        >
+                          Add
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            handleDuplicateSalary(entry);
+                            setOpenMenuId(null);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                        >
+                          Duplicate
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            openDeleteSalaryModal(entry._id);
+                            setOpenMenuId(null);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-[#EF6C54] hover:bg-[#2A2A2D]"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     )}
+                  </div>
+                </div>
 
+                <div className="flex justify-between text-white mb-2">
+                  <span>Salary</span>
+                  <button onClick={() => handleEditSalary(entry._id)}>
+                    <span className="font-semibold text-[#DFF966]">{format(entry.salary)}</span>
+                  </button>
+                </div>
+
+                <ul className="border border-gray-800 rounded divide-y divide-mist-900 text-xs">
+                  {expenses.map((expense, idx) => (
+                    <li key={idx} className="flex justify-between items-center gap-2 m-2">
+      {isEditingAll ? (
+        <input
+          type="text"
+          value={editedExpenses[idx]?.name || ""}
+          onChange={(e) => {
+            const newExpenses = [...editedExpenses];
+            if (newExpenses[idx]) {
+              newExpenses[idx].name = e.target.value;
+              setEditedExpenses(newExpenses);
+            }
+          }}
+          className="flex-1 border border-mist-900 px-2 py-1 rounded text-white"
+        />
+      ) : (
+        <span
+          onClick={() => handleTogglePaid(entry._id, idx)}
+          className={`flex-1 break-words cursor-pointer ${
+            expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
+          }`}
+        >
+          {expense.name}
+        </span>
+      )}
+
+      {isEditingAll ? (
+        <input
+          type="number"
+          value={editedExpenses[idx]?.amount || 0}
+          onChange={(e) => {
+            const newExpenses = [...editedExpenses];
+            if (newExpenses[idx]) {
+              newExpenses[idx].amount = Number(e.target.value);
+              setEditedExpenses(newExpenses);
+            }
+          }}
+          className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-white"
+        />
+      ) : (
+        <span
+          className={`w-24 text-right font-medium ${
+            expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
+          }`}
+        >
+          {format(expense.amount)}
+        </span>
+      )}
+
+      {isEditingAll && (
+        <button
+          onClick={() => handleDeleteExpenseInEdit(idx)}
+          className="px-2 py-1 text-white text-sm border border-red-500 rounded hover:bg-red-500/20"
+        >
+          <TrashIcon className="w-4 h-4 text-red-400" />
+        </button>
+      )}
+    </li>
+                  ))}
+                </ul>
+
+                {isEditingAll && (
+                  <div className="flex gap-2 mt-2">
                     <button
-                      onClick={() => {
-                        openAddExpenseModal(entry._id);
-                        setOpenMenuId(null);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                      onClick={() => handleSaveAllExpenses(entry._id)}
+                      className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
                     >
-                      Add
+                      Save All
                     </button>
-
                     <button
-                      onClick={() => {
-                        handleDuplicateSalary(entry);
-                        setOpenMenuId(null);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-[#9C9BA1] hover:bg-[#2A2A2D]"
+                      onClick={handleCancelEditAll}
+                      className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
                     >
-                      Duplicate
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        openDeleteSalaryModal(entry._id);
-                        setOpenMenuId(null);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-[#EF6C54] hover:bg-[#2A2A2D]"
-                    >
-                      Delete
+                      Cancel
                     </button>
                   </div>
                 )}
+
+                <div className="flex justify-between font-semibold pt-2 mb-2">
+                  <span className="text-white">Total</span>
+                  <span className="text-[#B2597C]">{format(totalExpenses)}</span>
+                </div>
+
+                <div className="flex justify-between font-semibold">
+                  <span></span>
+                  <span className={`${remaining < 0 ? "text-[#B2597C]" : "text-[#85D989]"}`}>
+                    {format(remaining)}
+                  </span>
+                </div>
               </div>
-            </div>
-
-            <div className="flex justify-between text-white mb-2">
-              <span>Salary</span>
-              <button onClick={() => handleEditSalary(entry._id)}>
-                <span className="font-semibold text-[#DFF966]">{format(entry.salary)}</span>
-              </button>
-            </div>
-
-            <ul className="border border-gray-800 rounded divide-y divide-mist-900 text-xs">
-              {expenses.map((expense, idx) => (
-                <li key={idx} className="flex justify-between items-center gap-2 m-2">
-  {isEditingAll ? (
-    <input
-      type="text"
-      value={editedExpenses[idx]?.name || ""}
-      onChange={(e) => {
-        const newExpenses = [...editedExpenses];
-        if (newExpenses[idx]) {
-          newExpenses[idx].name = e.target.value;
-          setEditedExpenses(newExpenses);
-        }
-      }}
-      className="flex-1 border border-mist-900 px-2 py-1 rounded text-white"
-    />
-  ) : (
-    <span
-      onClick={() => handleTogglePaid(entry._id, idx)}
-      className={`flex-1 break-words cursor-pointer ${
-        expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
-      }`}
-    >
-      {expense.name}
-    </span>
-  )}
-
-  {isEditingAll ? (
-    <input
-      type="number"
-      value={editedExpenses[idx]?.amount || 0}
-      onChange={(e) => {
-        const newExpenses = [...editedExpenses];
-        if (newExpenses[idx]) {
-          newExpenses[idx].amount = Number(e.target.value);
-          setEditedExpenses(newExpenses);
-        }
-      }}
-      className="w-24 text-right border border-mist-900 px-2 py-1 rounded text-white"
-    />
-  ) : (
-    <span
-      className={`w-24 text-right font-medium ${
-        expense.paid ? "line-through text-[#9C9BA1]" : "text-white"
-      }`}
-    >
-      {format(expense.amount)}
-    </span>
-  )}
-
-  {isEditingAll && (
-    <button
-      onClick={() => handleDeleteExpense(entry._id, idx)}
-      className="px-2 py-1 text-white text-sm border border-mist-900 rounded"
-    >
-      <TrashIcon className="w-4 h-4 text-[#9C9BA1]" />
-    </button>
-  )}
-</li>
-              ))}
-            </ul>
-
-            {isEditingAll && (
-              <div className="flex gap-2 mt-2">
-                <button
-                  onClick={() => handleSaveAllExpenses(entry._id)}
-                  className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
-                >
-                  Save All
-                </button>
-                <button
-                  onClick={handleCancelEditAll}
-                  className="px-3 py-1 bg-[#DFF966] text-black font-bold rounded text-sm"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-
-            <div className="flex justify-between font-semibold pt-2 mb-2">
-              <span className="text-white">Total</span>
-              <span className="text-[#B2597C]">{format(totalExpenses)}</span>
-            </div>
-
-            <div className="flex justify-between font-semibold">
-              <span></span>
-              <span className={`${remaining < 0 ? "text-[#B2597C]" : "text-[#85D989]"}`}>
-                {format(remaining)}
-              </span>
-            </div>
-          </div>
-        );
-      })}
+            );
+          })}
+        </>
+      )}
 
       <Snackbar
         open={snackbarOpen}
