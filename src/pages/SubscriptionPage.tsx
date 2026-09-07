@@ -1,64 +1,44 @@
 import { useEffect, useState } from "react";
-import type { Subscription, Payment } from "../types/subscription.type";
+import type { Subscription } from "../types/subscription.type";
 import {
   getSubscriptions,
   createSubscription,
   updateSubscription,
   deleteSubscription,
-  updatePayment,
-  createPayment,
 } from "../api/subscription";
 
-import {
-  EyeIcon,
-  EyeSlashIcon,
-  PencilIcon,
-} from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 
-type PaymentStatus = "pending" | "prepared" | "paid";
-
-const formatDate = (date?: string) => {
-  if (!date) return "";
-  return new Date(date).toISOString().slice(0, 10);
-};
-
-const isThisYear = (date?: string) => {
-  if (!date) return false;
-  return new Date(date).getFullYear() === new Date().getFullYear();
+const emptyForm = {
+  name: "",
+  amount: 0,
 };
 
 export default function SubscriptionPage() {
   const showToast = useToast();
 
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const [items, setItems] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAmounts, setShowAmounts] = useState(true);
 
   const [showForm, setShowForm] = useState(false);
-  const [showAmounts, setShowAmounts] = useState(true);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  // subscription form (NO amount/date inside subscription anymore)
-  const [form, setForm] = useState({
-    name: "",
-  });
-
-  // new payment input
-  const [newPayment, setNewPayment] = useState({
-    date: "",
-    amount: "",
-  });
+  // When null we're adding a new item; when set we're editing that item
+  const [editingItem, setEditingItem] = useState<Subscription | null>(null);
+  const [form, setForm] = useState(emptyForm);
 
   const load = async () => {
     try {
       const data = await getSubscriptions();
-      setSubscriptions(data);
+      setItems(data);
     } catch (err) {
       console.error(err);
-      showToast("Failed to load subscriptions", "error");
+      showToast("Failed to load buy list", "error");
     } finally {
       setLoading(false);
     }
@@ -69,175 +49,85 @@ export default function SubscriptionPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const toggleExpand = (index: number) => {
-    setExpanded((prev) => (prev === index ? null : index));
-  };
+  const mask = (value: number) => "*".repeat(value.toLocaleString().length);
 
-  const mask = (value: number) =>
-    "*".repeat(value.toLocaleString().length);
-
-  const resetForm = () => {
-    setForm({ name: "" });
-    setEditingId(null);
+  const closeModal = () => {
     setShowForm(false);
+    setEditingItem(null);
+    setForm(emptyForm);
   };
 
-  // =========================
-  // SUBSCRIPTION SAVE
-  // =========================
-  const handleSave = async () => {
-    if (!form.name.trim()) return;
-
-    try {
-      if (editingId) {
-        await updateSubscription(editingId, { name: form.name.trim() });
-      } else {
-        await createSubscription({ name: form.name.trim() });
-      }
-
-      await load();
-      resetForm();
-      showToast(editingId ? "Subscription updated!" : "Subscription added!", "success");
-    } catch (err) {
-      console.error("SAVE ERROR:", err);
-      showToast("Failed to save subscription", "error");
-    }
-  };
-
-  const handleEdit = (item: Subscription) => {
-    setEditingId(item._id);
-    setForm({ name: item.name ?? "" });
+  const openAddModal = () => {
+    setEditingItem(null);
+    setForm(emptyForm);
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this subscription?")) return;
+  const openEditModal = (item: Subscription) => {
+    setEditingItem(item);
+    setForm({ name: item.name ?? "", amount: item.amount ?? 0 });
+    setShowForm(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim()) {
+      showToast("Please enter an item name", "error");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      if (editingItem) {
+        const updated = await updateSubscription(editingItem._id, {
+          name: form.name.trim(),
+          amount: form.amount,
+        });
+
+        setItems((prev) =>
+          prev.map((item) => (item._id === updated._id ? updated : item))
+        );
+        showToast("Item updated!", "success");
+      } else {
+        const created = await createSubscription({
+          name: form.name.trim(),
+          amount: form.amount,
+        });
+
+        setItems((prev) => [created, ...prev]);
+        showToast("Item added!", "success");
+      }
+
+      closeModal();
+    } catch (err) {
+      console.error("SAVE ERROR:", err);
+      showToast("Failed to save item", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editingItem) return;
+    if (!confirm("Delete this item?")) return;
+
+    const id = editingItem._id;
+    setDeleting(true);
 
     try {
       await deleteSubscription(id);
-      await load();
-      showToast("Subscription deleted!", "success");
+      setItems((prev) => prev.filter((item) => item._id !== id));
+      showToast("Item deleted!", "success");
+      closeModal();
     } catch (err) {
       console.error("DELETE ERROR:", err);
-      showToast("Failed to delete subscription", "error");
+      showToast("Failed to delete item", "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
-  // =========================
-  // PAYMENT HELPERS
-  // =========================
-  const nextStatus = (status: PaymentStatus): PaymentStatus =>
-    status === "pending"
-      ? "prepared"
-      : status === "prepared"
-      ? "paid"
-      : "pending";
-
-  const handleCreatePayment = async (item: Subscription) => {
-    if (!item?._id || !newPayment.date || !newPayment.amount) return;
-
-    try {
-      await createPayment(item._id, {
-        date: newPayment.date,
-        amount: Number(newPayment.amount),
-        status: "pending",
-      });
-
-      setNewPayment({ date: "", amount: "" });
-      load();
-      showToast("Payment added!", "success");
-    } catch (err) {
-      console.error("createPayment error:", err);
-      showToast("Failed to add payment", "error");
-    }
-  };
-
-  const handleUpdatePayment = async (
-    item: Subscription,
-    p: Payment
-  ) => {
-    if (!item?._id || !p || !p._id) {
-  console.warn("Missing payment ID:", p);
-  return;
-}
-
-    try {
-      await updatePayment({
-        subId: item._id,
-        paymentId: p._id,
-        status: nextStatus(p.status as PaymentStatus),
-      });
-
-      load();
-    } catch (err) {
-      console.error("updatePayment error:", err);
-      showToast("Failed to update payment", "error");
-    }
-  };
-
-  const handleUpdateDate = async (
-    item: Subscription,
-    p: Payment,
-    date: string
-  ) => {
-    if (!item?._id || !p?._id) return;
-
-    try {
-      await updatePayment({
-        subId: item._id,
-        paymentId: p._id,
-        date,
-        status: p.status,
-      });
-
-      load();
-    } catch (err) {
-      console.error("updatePayment date error:", err);
-      showToast("Failed to update payment date", "error");
-    }
-  };
-
-  // =========================
-  // DASHBOARD TOTALS
-  // =========================
-  const totalPaidThisYear = subscriptions.reduce((sum, item) => {
-    return (
-      sum +
-      (item.payments ?? []).reduce((s, p) => {
-        if (p.status === "paid" && isThisYear(p.date)) {
-          return s + Number(p.amount);
-        }
-        return s;
-      }, 0)
-    );
-  }, 0);
-
-  const totalPreparedThisYear = subscriptions.reduce((sum, item) => {
-    return (
-      sum +
-      (item.payments ?? []).reduce((s, p) => {
-        if (p.status === "prepared" && isThisYear(p.date)) {
-          return s + Number(p.amount);
-        }
-        return s;
-      }, 0)
-    );
-  }, 0);
-
-  const pendingThisYear = subscriptions.reduce((sum, item) => {
-    return (
-      sum +
-      (item.payments ?? []).reduce((s, p) => {
-        if (p.status === "pending" && isThisYear(p.date)) {
-          return s + Number(p.amount);
-        }
-        return s;
-      }, 0)
-    );
-  }, 0);
-
-  const totalToPayThisYear =
-    totalPaidThisYear + totalPreparedThisYear + pendingThisYear;
+  const total = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
   if (loading) {
     return <div className="p-4 text-center text-white">Loading...</div>;
@@ -248,218 +138,112 @@ export default function SubscriptionPage() {
 
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <button onClick={() => setShowAmounts(p => !p)} className="text-gray-400">
-          {showAmounts ? (
-            <EyeSlashIcon className="w-5 h-5" />
-          ) : (
-            <EyeIcon className="w-5 h-5" />
-          )}
-        </button>
+        <h1 className="text-lg font-semibold text-white">Buy List</h1>
 
-        <button
-          onClick={() => {
-            resetForm();
-            setShowForm(true);
-          }}
-          className="px-[0.7rem] py-[0.3rem] bg-[#DFF966] text-black font-bold rounded-4xl text-sm"
-        >
-          +
-        </button>
-      </div>
-
-      {/* DASHBOARD */}
-      <div className="mb-6 grid grid-cols-2 gap-3">
-        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
-          <p className="text-gray-400 text-xs">Paid</p>
-          <p className="text-lg font-bold text-[#85D989] mt-2">
-            ₱{showAmounts ? totalPaidThisYear.toLocaleString() : mask(totalPaidThisYear)}
-          </p>
-        </div>
-
-        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
-          <p className="text-gray-400 text-xs">Prepared</p>
-          <p className="text-lg font-bold text-yellow-400 mt-2">
-            ₱{showAmounts ? totalPreparedThisYear.toLocaleString() : mask(totalPreparedThisYear)}
-          </p>
-        </div>
-
-        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
-          <p className="text-gray-400 text-xs">Pending</p>
-          <p className="text-lg font-bold text-[#EF6C54] mt-2">
-            ₱{showAmounts ? pendingThisYear.toLocaleString() : mask(pendingThisYear)}
-          </p>
-        </div>
-
-        <div className="p-4 bg-[#1C1C1E] rounded-xl text-center">
-          <p className="text-gray-400 text-xs">Total</p>
-          <p className="text-lg font-bold text-white mt-2">
-            ₱{showAmounts ? totalToPayThisYear.toLocaleString() : mask(totalToPayThisYear)}
-          </p>
-        </div>
-      </div>
-
-      {/* LIST */}
-      <div className="space-y-3">
-
-        {subscriptions.map((item, index) => {
-
-          const totalPerItem = (item.payments ?? []).reduce((sum, p) => {
-            if (isThisYear(p.date)) return sum + Number(p.amount);
-            return sum;
-          }, 0);
-
-          const paidPerItem = (item.payments ?? []).reduce((sum, p) => {
-            if (p.status === "paid" && isThisYear(p.date)) {
-              return sum + Number(p.amount);
-            }
-            return sum;
-          }, 0);
-
-          return (
-            <div key={item._id} className="bg-[#1C1C1E] rounded-xl overflow-hidden">
-
-              <button
-                className="w-full flex justify-between items-center px-4 py-3"
-                onClick={() => toggleExpand(index)}
-              >
-                <div className="text-left">
-                  <p className="font-medium text-[0.8rem] text-white">
-                    {item.name}
-                  </p>
-                </div>
-
-                <p className="font-bold text-[#85D989] text-[0.8rem]">
-                  {showAmounts
-                    ? `${paidPerItem.toLocaleString()} / ${totalPerItem.toLocaleString()}`
-                    : `${mask(paidPerItem)} / ${mask(totalPerItem)}`}
-                </p>
-              </button>
-
-              {expanded === index && (
-                <div className="border-t border-[#2c2c2e] px-4 py-3">
-
-                  {/* ADD PAYMENT */}
-                  <div className="flex gap-2 mb-3">
-                    <input
-                      type="date"
-                      value={newPayment.date}
-                      onChange={(e) =>
-                        setNewPayment(p => ({ ...p, date: e.target.value }))
-                      }
-                      className="bg-[#2C2C2E] text-white text-sm p-2 rounded w-full"
-                    />
-
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      value={newPayment.amount}
-                      onChange={(e) =>
-                        setNewPayment(p => ({ ...p, amount: e.target.value }))
-                      }
-                      className="bg-[#2C2C2E] text-white text-sm p-2 rounded w-full"
-                    />
-
-                    <button
-                      onClick={() => handleCreatePayment(item)}
-                      className="px-3 bg-[#DFF966] text-black rounded"
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  {/* PAYMENTS */}
-                  <div className="space-y-2">
-                    {item.payments?.map((p: Payment) => (
-                      <div key={p._id} className="flex justify-between items-center gap-2">
-
-                        <input
-                          type="date"
-                          value={formatDate(p.date)}
-                          onChange={(e) =>
-                            handleUpdateDate(item, p, e.target.value)
-                          }
-                          className="bg-transparent text-white text-sm"
-                        />
-
-                        <span className="text-white text-sm">
-                          ₱{p.amount}
-                        </span>
-
-                        <button
-                          onClick={() => handleUpdatePayment(item, p)}
-                          className={`text-sm font-medium ${
-                            p.status === "paid"
-                              ? "text-[#85D989]"
-                              : p.status === "prepared"
-                              ? "text-yellow-400"
-                              : "text-[#EF6C54]"
-                          }`}
-                        >
-                          {p.status}
-                        </button>
-
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* ACTIONS */}
-                  <div className="mt-4 flex gap-2">
-
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="flex-1 py-2 rounded-lg bg-[#2C2C2E] text-white text-sm flex items-center justify-center gap-2"
-                    >
-                      <PencilIcon className="w-4 h-4" />
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="flex-1 py-2 rounded-lg bg-red-500 text-white text-sm"
-                    >
-                      Delete
-                    </button>
-
-                  </div>
-
-                </div>
-              )}
-
-            </div>
-          );
-        })}
-
-      </div>
-
-      {/* MODAL */}
-      <Modal
-        open={showForm}
-        onClose={resetForm}
-        title={editingId ? "Edit Subscription" : "Add Subscription"}
-      >
-        <input
-          placeholder="Name"
-          value={form.name}
-          onChange={(e) =>
-            setForm(p => ({ ...p, name: e.target.value }))
-          }
-          className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600"
-        />
-
-        <div className="flex justify-end gap-2 pt-2">
-          <button onClick={resetForm} className="px-3 py-1 text-gray-400">
-            Cancel
+        <div className="flex items-center gap-3">
+          <button onClick={() => setShowAmounts((p) => !p)} className="text-gray-400">
+            {showAmounts ? (
+              <EyeSlashIcon className="w-5 h-5" />
+            ) : (
+              <EyeIcon className="w-5 h-5" />
+            )}
           </button>
 
           <button
-            onClick={handleSave}
-            className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg"
+            onClick={openAddModal}
+            className="px-[0.7rem] py-[0.3rem] bg-[#DFF966] text-black font-bold rounded-4xl text-sm"
           >
-            Save
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* TOTAL */}
+      <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
+        <p className="text-gray-400 text-sm">Total</p>
+        <p className="text-[2rem] font-bold text-[#85D989]">
+          ₱{showAmounts ? total.toLocaleString() : mask(total)}
+        </p>
+      </div>
+
+      {/* LIST */}
+      <div className="space-y-2">
+        {items.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            No items yet. Add one to get started!
+          </div>
+        ) : (
+          items.map((item) => (
+            <button
+              key={item._id}
+              onClick={() => openEditModal(item)}
+              className="w-full flex items-center gap-3 bg-[#1C1C1E] hover:bg-[#242426] rounded-xl px-4 py-3 text-left transition"
+            >
+              <span className="flex-1 min-w-0 truncate text-white font-medium text-sm">
+                {item.name}
+              </span>
+              <span className="shrink-0 text-sm font-bold text-[#85D989]">
+                ₱{showAmounts ? Number(item.amount || 0).toLocaleString() : mask(Number(item.amount || 0))}
+              </span>
+            </button>
+          ))
+        )}
+      </div>
+
+      {/* ADD / EDIT MODAL */}
+      <Modal
+        open={showForm}
+        onClose={closeModal}
+        title={editingItem ? "Edit Item" : "Add Item"}
+      >
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Item</label>
+          <input
+            placeholder="e.g. Netflix"
+            value={form.name}
+            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Price</label>
+          <input
+            type="number"
+            placeholder="0"
+            value={form.amount || ""}
+            onChange={(e) => setForm((p) => ({ ...p, amount: Number(e.target.value) }))}
+            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 pt-2">
+          {editingItem && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex items-center justify-center gap-2 px-4 py-2 text-red-400 hover:text-red-500 border border-red-500/30 hover:border-red-500/50 rounded-lg disabled:opacity-50"
+            >
+              <TrashIcon className="w-4 h-4" />
+              {deleting ? "Deleting..." : "Delete"}
+            </button>
+          )}
+
+          <button
+            onClick={closeModal}
+            className="flex-1 px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 px-4 py-2 bg-[#DFF966] text-black font-semibold rounded-lg disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </Modal>
-
     </div>
   );
 }

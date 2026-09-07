@@ -72,7 +72,7 @@ export default function BottomNavBar() {
       activeIcon: CalendarDaysSolid,
     },
     {
-      name: "Subscription",
+      name: "Buy List",
       path: "/subscription",
       icon: CalendarDaysOutline,
       activeIcon: CalendarDaysSolid,
