@@ -7,7 +7,7 @@ import {
 } from "../api/expenses";
 
 import type { Expense } from "../types/expenses.type";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { TrashIcon } from "@heroicons/react/24/solid";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 
@@ -21,6 +21,7 @@ const ExpensesPage: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
     "pending" | "monthly" | "biggest" | "graph"
@@ -89,16 +90,22 @@ const ExpensesPage: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async () => {
+    if (!editingId) return;
     if (!confirm("Delete this expense?")) return;
 
+    setDeleting(true);
+
     try {
-      await deleteExpense(id);
+      await deleteExpense(editingId);
       loadExpenses();
       showToast("Expense deleted!", "success");
+      resetForm();
     } catch (error) {
       console.error("Failed to delete expense:", error);
       showToast("Failed to delete expense", "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -402,29 +409,19 @@ const graphData = Object.values(
             </div>
 
             {grouped[date].map((exp) => (
-              <div
+              <button
                 key={exp._id}
-                className="flex justify-between bg-[#1C1C1E] p-2 rounded-xl mb-2 text-white"
+                onClick={() => handleEdit(exp)}
+                className="w-full flex justify-between items-center bg-[#1C1C1E] p-2 rounded-xl mb-2 text-white text-left"
               >
                 <div>
                   <div>{exp.text} •   <span className="text-gray-400 text-[10px]">{exp.category}</span></div>
-                 
-
 
                   <div className="text-[#B2597C] text-xs">
                     ₱{exp.amount.toLocaleString()}
                   </div>
                 </div>
-
-                <div className="flex gap-2">
-                  <button onClick={() => handleEdit(exp)}>
-                    <PencilIcon className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleDelete(exp._id)}>
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              </button>
             ))}
           </div>
         ))}
@@ -459,7 +456,18 @@ const graphData = Object.values(
           onChange={(e) => setCategory(e.target.value)}
         />
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex items-center gap-2 pt-2">
+          {editingId && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex items-center justify-center gap-2 px-4 py-2 text-red-400 hover:text-red-500 border border-red-500/30 hover:border-red-500/50 rounded-lg disabled:opacity-50"
+            >
+              <TrashIcon className="w-4 h-4" />
+              {deleting ? "Deleting..." : "Delete"}
+            </button>
+          )}
+
           <button
             onClick={resetForm}
             className="flex-1 p-2 bg-[#2C2C2E] text-gray-400 rounded-lg hover:text-white"
