@@ -76,7 +76,7 @@ const ThoughtsPage: React.FC = () => {
           return (
             <li
               key={t._id}
-              className="px-4 py-5 bg-[#1C1C1E] border border-gray-600 rounded text-white cursor-pointer"
+              className="px-4 py-5 bg-[#1C1C1E] rounded text-white cursor-pointer"
             >
               <button
                 onClick={() => toggleThought(t._id)}

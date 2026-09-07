@@ -367,7 +367,7 @@ const HouseExpensesPage: React.FC = () => {
               const monthLabel = getCycleLabel(month);
 
               return (
-                <div key={month} className="bg-[#1C1C1E] border border-gray-600 rounded-xl p-4">
+                <div key={month} className="bg-[#1C1C1E] rounded-xl p-4">
                   <h3 className="text-white font-semibold mb-3">{monthLabel}</h3>
 
                   {/* BUDGET & REMAINING */}
@@ -462,7 +462,7 @@ const HouseExpensesPage: React.FC = () => {
             {m.data.map((item) => (
               <div
                 key={item.name}
-                className="flex justify-between bg-[#1C1C1E] border border-gray-600 p-3 rounded-xl mb-2 text-white"
+                className="flex justify-between bg-[#1C1C1E] p-3 rounded-xl mb-2 text-white"
               >
                 <span>{item.name}</span>
                 <span>₱{item.total.toLocaleString()}</span>
@@ -544,7 +544,7 @@ const HouseExpensesPage: React.FC = () => {
             {grouped[date].map((exp) => (
               <div
                 key={exp._id}
-                className="flex justify-between bg-[#1C1C1E] border border-gray-600 p-2 rounded-xl mb-2 text-white"
+                className="flex justify-between bg-[#1C1C1E] p-2 rounded-xl mb-2 text-white"
               >
                 <div>
                   <div>{exp.text} •   <span className="text-gray-400 text-[10px]">{exp.category}</span></div>

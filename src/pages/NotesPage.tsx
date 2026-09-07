@@ -201,7 +201,7 @@ const highlightText = (text: string, done: boolean) => {
         {sortedNotes.map((note) => (
           <li
             key={note._id}
-            className={`flex justify-between items-center p-2 bg-[#1C1C1E] border border-gray-600 rounded-xl ${
+            className={`flex justify-between items-center p-2 bg-[#1C1C1E] rounded-xl ${
               note.done ? "text-gray-700 line-through" : ""
             }`}
           >

@@ -297,7 +297,7 @@ export default function LoanPage() {
           return (
             <div
               key={loan._id || index}
-              className="bg-[#1C1C1E] border border-gray-600 rounded-xl overflow-hidden "
+              className="bg-[#1C1C1E] rounded-xl overflow-hidden "
             >
               <button
                 className="w-full flex justify-between items-center px-4 py-3"

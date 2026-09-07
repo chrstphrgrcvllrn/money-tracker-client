@@ -261,7 +261,7 @@ export default function SavingsPage() {
           const paths = getIconPaths(item.name);
 
           return (
-            <div key={item._id} className="bg-[#1C1C1E] border border-gray-600 rounded-xl overflow-hidden">
+            <div key={item._id} className="bg-[#1C1C1E] rounded-xl overflow-hidden">
               <button
                 className="w-full flex justify-between items-center px-4 py-3"
                 onClick={() => toggleExpand(index)}

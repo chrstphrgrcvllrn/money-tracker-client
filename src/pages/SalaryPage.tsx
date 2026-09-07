@@ -448,7 +448,7 @@ export default function SalaryPage() {
             <div className="text-gray-600 text-center py-8">No expenses to show</div>
           ) : (
             totals.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center p-3 bg-[#1C1C1E] border border-gray-600 rounded-lg">
+              <div key={idx} className="flex justify-between items-center p-3 bg-[#1C1C1E] rounded-lg">
                 <span className="text-white font-semibold">{item.name}</span>
                 <span className="text-[#DFF966] font-bold">{format(item.total)}</span>
               </div>
@@ -463,7 +463,7 @@ export default function SalaryPage() {
           const isEditingAll = editingAllEntryId === entry._id;
 
           return (
-            <div key={entry._id} className="mb-6 bg-[#1C1C1E] border border-gray-600 shadow rounded-xl p-4">
+            <div key={entry._id} className="mb-6 bg-[#1C1C1E] shadow rounded-xl p-4">
               <div className="flex justify-between items-center mb-2">
                 <button onClick={() => handleEditSalaryName(entry._id)}>
                   <h2 className="font-semibold text-[1.5rem] text-white">{entry.date}</h2>
