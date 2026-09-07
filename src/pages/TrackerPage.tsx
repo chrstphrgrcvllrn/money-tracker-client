@@ -17,6 +17,7 @@ const emptyForm = {
   details: "",
   date: new Date().toISOString().split("T")[0],
   amount: 0,
+  price: 0,
   notes: "",
 };
 
@@ -41,7 +42,7 @@ const TrackerPage: React.FC = () => {
     motorcycle: "Motorcycle",
     crypto: "Crypto",
     digital: "Digital",
-    family: "Family",
+    amilyar: "Amilyar",
   };
 
   const categoryExamples: Record<TrackerCategory, string> = {
@@ -50,7 +51,7 @@ const TrackerPage: React.FC = () => {
     motorcycle: "e.g. Changed oil",
     crypto: "e.g. Bought XRP",
     digital: "e.g. Netflix subscription",
-    family: "e.g. Amilyar",
+    amilyar: "e.g. Amilyar payment",
   };
 
   const loadEntries = async () => {
@@ -91,6 +92,7 @@ const TrackerPage: React.FC = () => {
       details: entry.details || "",
       date: entry.date.split("T")[0],
       amount: entry.amount || 0,
+      price: entry.price || 0,
       notes: entry.notes || "",
     });
     setShowForm(true);
@@ -111,6 +113,7 @@ const TrackerPage: React.FC = () => {
           details: formData.details.trim(),
           date: formData.date,
           amount: formData.amount,
+          price: formData.price,
           notes: formData.notes.trim(),
         });
 
@@ -125,6 +128,7 @@ const TrackerPage: React.FC = () => {
           details: formData.details.trim(),
           date: formData.date,
           amount: formData.amount,
+          price: formData.price,
           notes: formData.notes.trim(),
         });
 
@@ -238,7 +242,7 @@ const TrackerPage: React.FC = () => {
             />
           </div>
 
-          {(activeTab === "crypto" || activeTab === "digital" || activeTab === "family") && (
+          {(activeTab === "crypto" || activeTab === "digital" || activeTab === "amilyar") && (
             <div>
               <label className="block text-sm text-gray-400 mb-2">Amount</label>
               <input
@@ -246,6 +250,20 @@ const TrackerPage: React.FC = () => {
                 placeholder="0"
                 value={formData.amount || ""}
                 onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+                className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+              />
+            </div>
+          )}
+
+          {activeTab === "crypto" && (
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Price</label>
+              <input
+                type="number"
+                step="any"
+                placeholder="e.g. 11.02"
+                value={formData.price || ""}
+                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
               />
             </div>
@@ -311,6 +329,11 @@ const TrackerPage: React.FC = () => {
                 <span className="shrink-0 text-xs text-gray-500">
                   {new Date(entry.date).toLocaleDateString()}
                 </span>
+                {!!entry.price && entry.price > 0 && (
+                  <span className="shrink-0 text-xs text-gray-400">
+                    {entry.price.toLocaleString()}
+                  </span>
+                )}
                 {!!entry.amount && entry.amount > 0 && (
                   <span className="shrink-0 text-xs text-[#DFF966] font-semibold">
                     {entry.amount.toLocaleString()}

@@ -4,7 +4,7 @@ export type TrackerCategory =
   | "motorcycle"
   | "crypto"
   | "digital"
-  | "family";
+  | "amilyar";
 
 export type TrackerEntry = {
   _id: string;
@@ -13,6 +13,7 @@ export type TrackerEntry = {
   details: string;
   date: string;
   amount?: number;
+  price?: number;
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
