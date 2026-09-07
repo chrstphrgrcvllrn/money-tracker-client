@@ -297,7 +297,7 @@ const graphData = Object.values(
             {m.data.map((item) => (
               <div
                 key={item.name}
-                className="flex justify-between bg-[#2C2C2E] border border-gray-600 p-3 rounded-xl mb-2 text-white"
+                className="flex justify-between bg-[#1C1C1E] border border-gray-600 p-3 rounded-xl mb-2 text-white"
               >
                 <span>{item.name}</span>
                 <span>₱{item.total.toLocaleString()}</span>
@@ -371,7 +371,7 @@ const graphData = Object.values(
           return (
             <div
               key={key}
-              className="flex justify-between bg-[#2C2C2E] border border-gray-600 p-3 rounded-xl mb-2 text-white"
+              className="flex justify-between bg-[#1C1C1E] border border-gray-600 p-3 rounded-xl mb-2 text-white"
             >
               <span>
                 {date.toLocaleDateString(undefined, {
@@ -404,7 +404,7 @@ const graphData = Object.values(
             {grouped[date].map((exp) => (
               <div
                 key={exp._id}
-                className="flex justify-between bg-[#2C2C2E] border border-gray-600 p-2 rounded-xl mb-2 text-white"
+                className="flex justify-between bg-[#1C1C1E] border border-gray-600 p-2 rounded-xl mb-2 text-white"
               >
                 <div>
                   <div>{exp.text} •   <span className="text-gray-400 text-[10px]">{exp.category}</span></div>

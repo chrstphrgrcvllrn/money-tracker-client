@@ -238,7 +238,7 @@ export default function SubscriptionPage() {
           filteredItems.map((item) => (
             <div
               key={item._id}
-              className="w-full flex items-center gap-3 bg-[#2C2C2E] border border-gray-600 rounded-xl px-4 py-3"
+              className="w-full flex items-center gap-3 bg-[#1C1C1E] border border-gray-600 rounded-xl px-4 py-3"
             >
               <button
                 onClick={() => handleToggleCompleted(item)}

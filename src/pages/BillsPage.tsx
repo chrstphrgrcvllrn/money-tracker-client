@@ -375,7 +375,7 @@ export default function BillsPage() {
         const pendingTotal = total - paidTotal;
 
         return (
-          <div key={entry._id} className="mb-6 bg-[#2C2C2E] border border-gray-600 p-4 rounded-xl">
+          <div key={entry._id} className="mb-6 bg-[#1C1C1E] border border-gray-600 p-4 rounded-xl">
             <div className="flex justify-between  pb-[13px] mb-2">
               <h2 className="text-white font-semibold text-[1.5rem]">
                 {entry.month}
