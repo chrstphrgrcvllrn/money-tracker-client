@@ -7,7 +7,7 @@ import {
   deleteSubscription,
 } from "../api/subscription";
 
-import { EyeIcon, EyeSlashIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon, TrashIcon, CheckIcon } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -15,7 +15,11 @@ import { useToast } from "../components/useToast";
 const emptyForm = {
   name: "",
   amount: 0,
+  quantity: 1,
 };
+
+const itemTotal = (item: Subscription) =>
+  Number(item.amount || 0) * Number(item.quantity || 1);
 
 export default function SubscriptionPage() {
   const showToast = useToast();
@@ -23,6 +27,7 @@ export default function SubscriptionPage() {
   const [items, setItems] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAmounts, setShowAmounts] = useState(true);
+  const [tab, setTab] = useState<"ongoing" | "completed">("ongoing");
 
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -65,7 +70,11 @@ export default function SubscriptionPage() {
 
   const openEditModal = (item: Subscription) => {
     setEditingItem(item);
-    setForm({ name: item.name ?? "", amount: item.amount ?? 0 });
+    setForm({
+      name: item.name ?? "",
+      amount: item.amount ?? 0,
+      quantity: item.quantity ?? 1,
+    });
     setShowForm(true);
   };
 
@@ -82,6 +91,7 @@ export default function SubscriptionPage() {
         const updated = await updateSubscription(editingItem._id, {
           name: form.name.trim(),
           amount: form.amount,
+          quantity: form.quantity || 1,
         });
 
         setItems((prev) =>
@@ -92,6 +102,7 @@ export default function SubscriptionPage() {
         const created = await createSubscription({
           name: form.name.trim(),
           amount: form.amount,
+          quantity: form.quantity || 1,
         });
 
         setItems((prev) => [created, ...prev]);
@@ -127,7 +138,29 @@ export default function SubscriptionPage() {
     }
   };
 
-  const total = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const handleToggleCompleted = async (item: Subscription) => {
+    // Optimistic update
+    setItems((prev) =>
+      prev.map((i) => (i._id === item._id ? { ...i, completed: !i.completed } : i))
+    );
+
+    try {
+      await updateSubscription(item._id, { completed: !item.completed });
+    } catch (err) {
+      console.error("TOGGLE COMPLETED ERROR:", err);
+      // Roll back on failure
+      setItems((prev) =>
+        prev.map((i) => (i._id === item._id ? { ...i, completed: item.completed } : i))
+      );
+      showToast("Failed to update item", "error");
+    }
+  };
+
+  const filteredItems = items.filter((item) =>
+    tab === "completed" ? item.completed : !item.completed
+  );
+
+  const total = filteredItems.reduce((sum, item) => sum + itemTotal(item), 0);
 
   if (loading) {
     return <div className="p-4 text-center text-white">Loading...</div>;
@@ -158,6 +191,31 @@ export default function SubscriptionPage() {
         </div>
       </div>
 
+      {/* TABS */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setTab("ongoing")}
+          className={`px-3 py-1 rounded-full text-xs ${
+            tab === "ongoing"
+              ? "bg-[#DFF966] text-black font-bold"
+              : "bg-[#1C1C1E] text-gray-400"
+          }`}
+        >
+          Ongoing
+        </button>
+
+        <button
+          onClick={() => setTab("completed")}
+          className={`px-3 py-1 rounded-full text-xs ${
+            tab === "completed"
+              ? "bg-[#DFF966] text-black font-bold"
+              : "bg-[#1C1C1E] text-gray-400"
+          }`}
+        >
+          Completed
+        </button>
+      </div>
+
       {/* TOTAL */}
       <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
         <p className="text-gray-400 text-sm">Total</p>
@@ -168,24 +226,54 @@ export default function SubscriptionPage() {
 
       {/* LIST */}
       <div className="space-y-2">
-        {items.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            No items yet. Add one to get started!
+            {tab === "completed" ? "No completed items yet." : "No items yet. Add one to get started!"}
           </div>
         ) : (
-          items.map((item) => (
-            <button
+          filteredItems.map((item) => (
+            <div
               key={item._id}
-              onClick={() => openEditModal(item)}
-              className="w-full flex items-center gap-3 bg-[#1C1C1E] hover:bg-[#242426] rounded-xl px-4 py-3 text-left transition"
+              className="w-full flex items-center gap-3 bg-[#1C1C1E] rounded-xl px-4 py-3"
             >
-              <span className="flex-1 min-w-0 truncate text-white font-medium text-sm">
-                {item.name}
-              </span>
-              <span className="shrink-0 text-sm font-bold text-[#85D989]">
-                ₱{showAmounts ? Number(item.amount || 0).toLocaleString() : mask(Number(item.amount || 0))}
-              </span>
-            </button>
+              <button
+                onClick={() => handleToggleCompleted(item)}
+                className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center border transition ${
+                  item.completed
+                    ? "bg-[#DFF966] border-[#DFF966]"
+                    : "border-gray-600 hover:border-gray-400"
+                }`}
+              >
+                {item.completed && <CheckIcon className="w-4 h-4 text-black" />}
+              </button>
+
+              <button
+                onClick={() => openEditModal(item)}
+                className="flex-1 min-w-0 flex items-center gap-2 text-left"
+              >
+                <span
+                  className={`truncate font-medium text-sm ${
+                    item.completed ? "text-gray-500 line-through" : "text-white"
+                  }`}
+                >
+                  {item.name}
+                </span>
+                {Number(item.quantity || 1) > 1 && (
+                  <span className="shrink-0 text-xs text-gray-500">
+                    x{item.quantity}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => openEditModal(item)}
+                className={`shrink-0 text-sm font-bold ${
+                  item.completed ? "text-gray-500" : "text-[#85D989]"
+                }`}
+              >
+                ₱{showAmounts ? itemTotal(item).toLocaleString() : mask(itemTotal(item))}
+              </button>
+            </div>
           ))
         )}
       </div>
@@ -206,16 +294,37 @@ export default function SubscriptionPage() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm text-gray-400 mb-2">Price</label>
-          <input
-            type="number"
-            placeholder="0"
-            value={form.amount || ""}
-            onChange={(e) => setForm((p) => ({ ...p, amount: Number(e.target.value) }))}
-            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
-          />
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="block text-sm text-gray-400 mb-2">Price</label>
+            <input
+              type="number"
+              placeholder="0"
+              value={form.amount || ""}
+              onChange={(e) => setForm((p) => ({ ...p, amount: Number(e.target.value) }))}
+              className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
+            />
+          </div>
+
+          <div className="w-24">
+            <label className="block text-sm text-gray-400 mb-2">Qty</label>
+            <input
+              type="number"
+              min={1}
+              placeholder="1"
+              value={form.quantity || ""}
+              onChange={(e) => setForm((p) => ({ ...p, quantity: Number(e.target.value) }))}
+              className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
+            />
+          </div>
         </div>
+
+        {form.amount > 0 && form.quantity > 1 && (
+          <p className="text-xs text-gray-500">
+            {form.amount.toLocaleString()} × {form.quantity} = ₱
+            {(form.amount * form.quantity).toLocaleString()}
+          </p>
+        )}
 
         <div className="flex items-center gap-2 pt-2">
           {editingItem && (

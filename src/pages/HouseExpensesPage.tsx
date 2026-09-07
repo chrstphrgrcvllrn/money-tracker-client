@@ -152,9 +152,54 @@ const HouseExpensesPage: React.FC = () => {
     return date >= start && date <= end;
   };
 
-  const isThisMonth = (d: string) =>
-    new Date(d).getMonth() === today.getMonth() &&
-    new Date(d).getFullYear() === today.getFullYear();
+  // Billing cycle runs the 20th of one month through the 19th of the next
+  // (e.g. September 20 - October 19), rather than a calendar month.
+  const getCycleKey = (dateInput: string | Date) => {
+    const d = new Date(dateInput);
+    let year = d.getFullYear();
+    let month = d.getMonth(); // 0-indexed
+
+    if (d.getDate() < 20) {
+      // belongs to the cycle that started the previous month
+      month -= 1;
+      if (month < 0) {
+        month = 11;
+        year -= 1;
+      }
+    }
+
+    return `${year}-${String(month + 1).padStart(2, "0")}`;
+  };
+
+  const getCycleLabel = (key: string) => {
+    const [yearStr, monthStr] = key.split("-");
+    const year = parseInt(yearStr, 10);
+    const month = parseInt(monthStr, 10) - 1;
+
+    const startDate = new Date(year, month, 20);
+
+    let endMonth = month + 1;
+    let endYear = year;
+    if (endMonth > 11) {
+      endMonth = 0;
+      endYear += 1;
+    }
+    const endDate = new Date(endYear, endMonth, 19);
+
+    const startLabel = startDate.toLocaleDateString(undefined, {
+      month: "long",
+      day: "numeric",
+    });
+    const endLabel = endDate.toLocaleDateString(undefined, {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    return `${startLabel} - ${endLabel}`;
+  };
+
+  const isThisMonth = (d: string) => getCycleKey(d) === getCycleKey(today);
 
   // =========================
   // TOTALS
@@ -188,13 +233,12 @@ const HouseExpensesPage: React.FC = () => {
   );
 
   // =========================
-  // MONTHLY GROUP (key = YYYY-MM so it matches budget storage keys)
+  // MONTHLY GROUP (key = cycle start YYYY-MM, e.g. "2026-09" for Sep 20 - Oct 19)
   // =========================
   const monthly: Record<string, HouseExpense[]> = {};
 
   expenses.forEach((e) => {
-    const d = new Date(e.createdAt);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const key = getCycleKey(e.createdAt);
 
     if (!monthly[key]) monthly[key] = [];
     monthly[key].push(e);
@@ -207,12 +251,12 @@ const HouseExpensesPage: React.FC = () => {
   // =========================
   // BIGGEST BY CATEGORY PER MONTH
   // =========================
-  const biggest = Object.values(monthly).map((monthGroup) => {
+  const biggest = Object.entries(monthly).map(([key, monthGroup]) => {
     const groupedByCategory = Object.values(
       monthGroup.reduce((acc: Record<string, HouseExpense[]>, e) => {
-        const key = e.category || "Uncategorized";
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(e);
+        const catKey = e.category || "Uncategorized";
+        if (!acc[catKey]) acc[catKey] = [];
+        acc[catKey].push(e);
         return acc;
       }, {})
     )
@@ -222,20 +266,14 @@ const HouseExpensesPage: React.FC = () => {
       }))
       .sort((a, b) => b.total - a.total);
 
-    const date = new Date(monthGroup[0].createdAt);
-
     return {
-      label: date.toLocaleDateString(undefined, {
-        month: "long",
-        year: "numeric",
-      }),
+      key,
+      label: getCycleLabel(key),
       data: groupedByCategory,
     };
   });
 
-  const sortedBiggest = [...biggest].sort(
-    (a, b) => new Date(b.label).getTime() - new Date(a.label).getTime()
-  );
+  const sortedBiggest = [...biggest].sort((a, b) => (a.key < b.key ? 1 : -1));
 
   // =========================
   // GRAPH DATA (CATEGORY PIE)
@@ -326,12 +364,7 @@ const HouseExpensesPage: React.FC = () => {
               const monthTotal = monthExpenses.reduce((s, e) => s + e.amount, 0);
               const budget = monthlyBudgets[month] || 0;
               const remaining = budget - monthTotal;
-              const [year, monthNum] = month.split("-");
-              const monthDate = new Date(parseInt(year), parseInt(monthNum) - 1);
-              const monthLabel = monthDate.toLocaleDateString(undefined, {
-                month: "long",
-                year: "numeric",
-              });
+              const monthLabel = getCycleLabel(month);
 
               return (
                 <div key={month} className="bg-[#1C1C1E] rounded-xl p-4">
@@ -392,7 +425,7 @@ const HouseExpensesPage: React.FC = () => {
                   </div>
 
                   {/* EXPENSES LIST */}
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                  <div className="space-y-2">
                     {monthExpenses.map((exp) => (
                       <div key={exp._id} className="flex justify-between text-sm bg-[#2C2C2E] p-2 rounded">
                         <div className="flex-1">
@@ -543,14 +576,14 @@ const HouseExpensesPage: React.FC = () => {
         title={editingId ? "Edit Expense" : "Add Expense"}
       >
         <input
-          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
           placeholder="Expense"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
         <input
-          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
           placeholder="Amount"
           type="number"
           value={amount}
@@ -558,7 +591,7 @@ const HouseExpensesPage: React.FC = () => {
         />
 
         <input
-          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
           placeholder="Category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}

@@ -208,7 +208,7 @@ export default function SavingsPage() {
           placeholder="Savings name"
           value={newSavingsName}
           onChange={(e) => setNewSavingsName(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
 
         <input
@@ -216,7 +216,7 @@ export default function SavingsPage() {
           placeholder="Initial amount"
           value={newSavingsAmount}
           onChange={(e) => setNewSavingsAmount(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg text-white border border-gray-600 focus:border-[#01E777]/30 focus:outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -343,7 +343,7 @@ export default function SavingsPage() {
                       onChange={(e) =>
                         setDateInputs((prev) => ({ ...prev, [index]: e.target.value }))
                       }
-                      className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600"
+                      className="w-full px-3 py-2 bg-[#2C2C2E] text-sm text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
                     />
 
                     <div className="flex gap-2">
@@ -355,7 +355,7 @@ export default function SavingsPage() {
                             [index]: e.target.value as "+" | "-",
                           }))
                         }
-                        className="w-20 px-2 py-2 rounded-lg text-sm text-white bg-[#1C1C1E] border border-gray-600"
+                        className="w-20 px-2 py-2 bg-[#2C2C2E] rounded-lg text-sm text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
                       >
                         <option value="+">+</option>
                         <option value="-">-</option>
@@ -368,7 +368,7 @@ export default function SavingsPage() {
                         onChange={(e) =>
                           setAmountInputs((prev) => ({ ...prev, [index]: e.target.value }))
                         }
-                        className="flex-1 px-3 py-2 rounded-lg text-sm text-white border border-gray-600"
+                        className="flex-1 px-3 py-2 bg-[#2C2C2E] rounded-lg text-sm text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
                       />
                     </div>
 

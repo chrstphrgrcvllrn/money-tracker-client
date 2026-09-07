@@ -325,14 +325,14 @@ export default function SalaryPage() {
           placeholder="Date (e.g., May 2026)"
           value={newSalaryDate}
           onChange={(e) => setNewSalaryDate(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-sm text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
         <input
           type="number"
           placeholder="Salary amount"
           value={newSalaryAmount}
           onChange={(e) => setNewSalaryAmount(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-sm text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
         <div className="flex justify-end space-x-2 pt-2">
           <button
@@ -357,14 +357,14 @@ export default function SalaryPage() {
           placeholder="Expense name"
           value={expenseName}
           onChange={(e) => setExpenseName(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-sm text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
         <input
           type="number"
           placeholder="Expense amount"
           value={expenseAmount}
           onChange={(e) => setExpenseAmount(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg text-sm text-white border border-gray-600 focus:border-[#01E777]/40 focus:outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-sm text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
         <div className="flex justify-end space-x-2 pt-2">
           <button

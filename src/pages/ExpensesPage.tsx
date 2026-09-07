@@ -438,14 +438,14 @@ const graphData = Object.values(
         title={editingId ? "Edit Expense" : "Add Expense"}
       >
         <input
-          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
           placeholder="Expense"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
         <input
-          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
           placeholder="Amount"
           type="number"
           value={amount}
@@ -453,7 +453,7 @@ const graphData = Object.values(
         />
 
         <input
-          className="w-full p-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
           placeholder="Category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}

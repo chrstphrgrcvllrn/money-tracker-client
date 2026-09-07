@@ -9,6 +9,8 @@ export type Subscription = {
   _id: string;
   name: string;
   amount: number;
+  quantity?: number;
+  completed?: boolean;
   billing: "monthly" | "yearly";
   type: "auto" | "manual";
   startDate?: string; // ✅ ADD THIS

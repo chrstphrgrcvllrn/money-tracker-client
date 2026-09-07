@@ -284,7 +284,7 @@ export default function BillsPage() {
           value={newMonth}
           onChange={(e) => setNewMonth(e.target.value)}
           placeholder="May 2026"
-          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -306,14 +306,14 @@ export default function BillsPage() {
           value={billName}
           onChange={(e) => setBillName(e.target.value)}
           placeholder="Bill name"
-          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
 
         <input
           value={billDueDate}
           onChange={(e) => setBillDueDate(e.target.value)}
           placeholder="Due date"
-          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
 
         <input
@@ -321,7 +321,7 @@ export default function BillsPage() {
           value={billAmount}
           onChange={(e) => setBillAmount(e.target.value)}
           placeholder="Amount"
-          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -343,7 +343,7 @@ export default function BillsPage() {
           value={duplicateMonthName}
           onChange={(e) => setDuplicateMonthName(e.target.value)}
           placeholder="New month"
-          className="w-full px-3 py-2 rounded bg-[#2C2C2E] border border-gray-600 text-white"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
