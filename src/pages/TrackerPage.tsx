@@ -5,11 +5,20 @@ import type { TrackerCategory, TrackerEntry } from "../types/tracker.type";
 import {
   fetchTrackerEntries,
   createTrackerEntry,
+  updateTrackerEntry,
   deleteTrackerEntry,
 } from "../api/tracker";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+
+const emptyForm = {
+  name: "",
+  details: "",
+  date: new Date().toISOString().split("T")[0],
+  amount: 0,
+  notes: "",
+};
 
 const TrackerPage: React.FC = () => {
   const showToast = useToast();
@@ -19,14 +28,12 @@ const TrackerPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    details: "",
-    date: new Date().toISOString().split("T")[0],
-    amount: 0,
-    notes: "",
-  });
+  // When null we're adding a new entry; when set we're editing that entry
+  const [editingEntry, setEditingEntry] = useState<TrackerEntry | null>(null);
+
+  const [formData, setFormData] = useState(emptyForm);
 
   const categories: Record<TrackerCategory, string> = {
     medical: "Medical",
@@ -65,17 +72,31 @@ const TrackerPage: React.FC = () => {
 
   const filteredEntries = entries.filter((entry) => entry.category === activeTab);
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      details: "",
-      date: new Date().toISOString().split("T")[0],
-      amount: 0,
-      notes: "",
-    });
+  const closeModal = () => {
+    setShowForm(false);
+    setEditingEntry(null);
+    setFormData(emptyForm);
   };
 
-  const handleAddEntry = async () => {
+  const openAddModal = () => {
+    setEditingEntry(null);
+    setFormData(emptyForm);
+    setShowForm(true);
+  };
+
+  const openEditModal = (entry: TrackerEntry) => {
+    setEditingEntry(entry);
+    setFormData({
+      name: entry.name,
+      details: entry.details || "",
+      date: entry.date.split("T")[0],
+      amount: entry.amount || 0,
+      notes: entry.notes || "",
+    });
+    setShowForm(true);
+  };
+
+  const handleSaveEntry = async () => {
     if (!formData.name.trim() || !formData.date) {
       showToast("Please fill in the name and date", "error");
       return;
@@ -84,41 +105,59 @@ const TrackerPage: React.FC = () => {
     setSaving(true);
 
     try {
-      const newEntry = await createTrackerEntry({
-        category: activeTab,
-        name: formData.name.trim(),
-        details: formData.details.trim(),
-        date: formData.date,
-        amount: formData.amount,
-        notes: formData.notes.trim(),
-      });
+      if (editingEntry) {
+        const updated = await updateTrackerEntry(editingEntry._id, {
+          name: formData.name.trim(),
+          details: formData.details.trim(),
+          date: formData.date,
+          amount: formData.amount,
+          notes: formData.notes.trim(),
+        });
 
-      setEntries((prev) => [newEntry, ...prev]);
-      resetForm();
-      setShowForm(false);
-      showToast("Entry added successfully!", "success");
+        setEntries((prev) =>
+          prev.map((entry) => (entry._id === updated._id ? updated : entry))
+        );
+        showToast("Entry updated!", "success");
+      } else {
+        const newEntry = await createTrackerEntry({
+          category: activeTab,
+          name: formData.name.trim(),
+          details: formData.details.trim(),
+          date: formData.date,
+          amount: formData.amount,
+          notes: formData.notes.trim(),
+        });
+
+        setEntries((prev) => [newEntry, ...prev]);
+        showToast("Entry added successfully!", "success");
+      }
+
+      closeModal();
     } catch (error) {
-      console.error("Failed to add tracker entry:", error);
-      showToast("Failed to add entry", "error");
+      console.error("Failed to save tracker entry:", error);
+      showToast("Failed to save entry", "error");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteEntry = async (id: string) => {
+  const handleDeleteEntry = async () => {
+    if (!editingEntry) return;
     if (!confirm("Delete this entry?")) return;
 
-    // Optimistic update
-    const previousEntries = entries;
-    setEntries((prev) => prev.filter((entry) => entry._id !== id));
+    const id = editingEntry._id;
+    setDeleting(true);
 
     try {
       await deleteTrackerEntry(id);
+      setEntries((prev) => prev.filter((entry) => entry._id !== id));
       showToast("Entry deleted!", "success");
+      closeModal();
     } catch (error) {
       console.error("Failed to delete tracker entry:", error);
-      setEntries(previousEntries);
       showToast("Failed to delete entry", "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -150,21 +189,22 @@ const TrackerPage: React.FC = () => {
 
         {/* ADD BUTTON */}
         <button
-          onClick={() => setShowForm(true)}
+          onClick={openAddModal}
           className="w-full flex items-center gap-2 justify-center bg-[#DFF966] text-black font-semibold px-4 py-2 rounded-lg mb-6"
         >
           <PlusIcon className="w-4 h-4" />
           Add Entry
         </button>
 
-        {/* ADD FORM MODAL */}
+        {/* ADD / EDIT MODAL */}
         <Modal
           open={showForm}
-          onClose={() => {
-            setShowForm(false);
-            resetForm();
-          }}
-          title={`Add ${categories[activeTab]} Entry`}
+          onClose={closeModal}
+          title={
+            editingEntry
+              ? `Edit ${categories[activeTab]} Entry`
+              : `Add ${categories[activeTab]} Entry`
+          }
         >
           <div>
             <label className="block text-sm text-gray-400 mb-2">Name/Title *</label>
@@ -222,18 +262,26 @@ const TrackerPage: React.FC = () => {
             />
           </div>
 
-          <div className="flex gap-2 pt-2">
+          <div className="flex items-center gap-2 pt-2">
+            {editingEntry && (
+              <button
+                onClick={handleDeleteEntry}
+                disabled={deleting}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-red-400 hover:text-red-500 border border-red-500/30 hover:border-red-500/50 rounded-lg disabled:opacity-50"
+              >
+                <TrashIcon className="w-4 h-4" />
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            )}
+
             <button
-              onClick={() => {
-                setShowForm(false);
-                resetForm();
-              }}
+              onClick={closeModal}
               className="flex-1 px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg"
             >
               Cancel
             </button>
             <button
-              onClick={handleAddEntry}
+              onClick={handleSaveEntry}
               disabled={saving}
               className="flex-1 px-4 py-2 bg-[#DFF966] text-black font-semibold rounded-lg disabled:opacity-50"
             >
@@ -243,7 +291,7 @@ const TrackerPage: React.FC = () => {
         </Modal>
 
         {/* ENTRIES LIST */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {loading ? (
             <div className="text-center py-12 text-gray-500">Loading...</div>
           ) : filteredEntries.length === 0 ? (
@@ -252,33 +300,23 @@ const TrackerPage: React.FC = () => {
             </div>
           ) : (
             filteredEntries.map((entry) => (
-              <div key={entry._id} className="bg-[#1C1C1E] rounded-xl p-4 space-y-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-white">{entry.name}</h3>
-                    {entry.details && (
-                      <p className="text-sm text-gray-400">{entry.details}</p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => handleDeleteEntry(entry._id)}
-                    className="text-red-400 hover:text-red-500 p-2"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="flex justify-between items-center text-xs text-gray-500">
-                  <span>{new Date(entry.date).toLocaleDateString()}</span>
-                  {!!entry.amount && entry.amount > 0 && (
-                    <span className="text-[#DFF966]">{entry.amount.toLocaleString()}</span>
-                  )}
-                </div>
-
-                {entry.notes && (
-                  <p className="text-xs text-gray-400 italic">&quot;{entry.notes}&quot;</p>
+              <button
+                key={entry._id}
+                onClick={() => openEditModal(entry)}
+                className="w-full flex items-center gap-3 bg-[#1C1C1E] hover:bg-[#242426] rounded-xl px-4 py-3 text-left transition"
+              >
+                <span className="flex-1 min-w-0 truncate text-white font-medium text-sm">
+                  {entry.name}
+                </span>
+                <span className="shrink-0 text-xs text-gray-500">
+                  {new Date(entry.date).toLocaleDateString()}
+                </span>
+                {!!entry.amount && entry.amount > 0 && (
+                  <span className="shrink-0 text-xs text-[#DFF966] font-semibold">
+                    {entry.amount.toLocaleString()}
+                  </span>
                 )}
-              </div>
+              </button>
             ))
           )}
         </div>
