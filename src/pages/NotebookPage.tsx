@@ -405,7 +405,7 @@ const NotebookPage: React.FC = () => {
               <button
                 key={note._id}
                 onClick={() => openNote(note)}
-                className="text-left p-4 bg-[#1C1C1E] hover:bg-[#242426] rounded-xl transition"
+                className="text-left p-4 bg-[#2C2C2E] border border-gray-600 hover:bg-[#333333] rounded-xl transition"
               >
 
                 <div className="flex items-start justify-between gap-3">

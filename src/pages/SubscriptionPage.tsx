@@ -7,7 +7,7 @@ import {
   deleteSubscription,
 } from "../api/subscription";
 
-import { EyeIcon, EyeSlashIcon, TrashIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon, TrashIcon, CheckIcon, LinkIcon } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -16,6 +16,7 @@ const emptyForm = {
   name: "",
   amount: 0,
   quantity: 1,
+  notes: "",
 };
 
 const itemTotal = (item: Subscription) =>
@@ -74,6 +75,7 @@ export default function SubscriptionPage() {
       name: item.name ?? "",
       amount: item.amount ?? 0,
       quantity: item.quantity ?? 1,
+      notes: item.notes ?? "",
     });
     setShowForm(true);
   };
@@ -92,6 +94,7 @@ export default function SubscriptionPage() {
           name: form.name.trim(),
           amount: form.amount,
           quantity: form.quantity || 1,
+          notes: form.notes.trim(),
         });
 
         setItems((prev) =>
@@ -103,6 +106,7 @@ export default function SubscriptionPage() {
           name: form.name.trim(),
           amount: form.amount,
           quantity: form.quantity || 1,
+          notes: form.notes.trim(),
         });
 
         setItems((prev) => [created, ...prev]);
@@ -234,7 +238,7 @@ export default function SubscriptionPage() {
           filteredItems.map((item) => (
             <div
               key={item._id}
-              className="w-full flex items-center gap-3 bg-[#1C1C1E] rounded-xl px-4 py-3"
+              className="w-full flex items-center gap-3 bg-[#2C2C2E] border border-gray-600 rounded-xl px-4 py-3"
             >
               <button
                 onClick={() => handleToggleCompleted(item)}
@@ -262,6 +266,9 @@ export default function SubscriptionPage() {
                   <span className="shrink-0 text-xs text-gray-500">
                     x{item.quantity}
                   </span>
+                )}
+                {!!item.notes && (
+                  <LinkIcon className="shrink-0 w-3 h-3 text-gray-500" />
                 )}
               </button>
 
@@ -325,6 +332,17 @@ export default function SubscriptionPage() {
             {(form.amount * form.quantity).toLocaleString()}
           </p>
         )}
+
+        <div>
+          <label className="block text-sm text-gray-400 mb-2">Notes</label>
+          <textarea
+            placeholder="Where to buy, links, etc."
+            value={form.notes}
+            onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none resize-none"
+            rows={2}
+          />
+        </div>
 
         <div className="flex items-center gap-2 pt-2">
           {editingItem && (

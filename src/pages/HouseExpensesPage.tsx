@@ -367,12 +367,12 @@ const HouseExpensesPage: React.FC = () => {
               const monthLabel = getCycleLabel(month);
 
               return (
-                <div key={month} className="bg-[#1C1C1E] rounded-xl p-4">
+                <div key={month} className="bg-[#2C2C2E] border border-gray-600 rounded-xl p-4">
                   <h3 className="text-white font-semibold mb-3">{monthLabel}</h3>
 
                   {/* BUDGET & REMAINING */}
                   <div className="space-y-2 mb-3">
-                    <div className="bg-[#2C2C2E] rounded-lg p-2">
+                    <div className="bg-[#1C1C1E] rounded-lg p-2">
                       <p className="text-gray-400 text-[10px]">Budget</p>
                       {editingBudgetMonth === month ? (
                         <div className="flex gap-1 mt-2">
@@ -381,7 +381,7 @@ const HouseExpensesPage: React.FC = () => {
                             value={budgetInput}
                             onChange={(e) => setBudgetInput(e.target.value)}
                             placeholder="0"
-                            className="flex-1 px-2 py-2 bg-[#1C1C1E] text-white rounded text-sm"
+                            className="flex-1 px-2 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded focus:border-[#DFF966]/50 outline-none text-sm"
                             autoFocus
                           />
                           <button
@@ -427,7 +427,7 @@ const HouseExpensesPage: React.FC = () => {
                   {/* EXPENSES LIST */}
                   <div className="space-y-2">
                     {monthExpenses.map((exp) => (
-                      <div key={exp._id} className="flex justify-between text-sm bg-[#2C2C2E] p-2 rounded">
+                      <div key={exp._id} className="flex justify-between text-sm bg-[#1C1C1E] p-2 rounded">
                         <div className="flex-1">
                           <p className="text-white">{exp.text}</p>
                           <p className="text-gray-500 text-[10px]">{exp.category}</p>
@@ -462,7 +462,7 @@ const HouseExpensesPage: React.FC = () => {
             {m.data.map((item) => (
               <div
                 key={item.name}
-                className="flex justify-between bg-[#1C1C1E] p-3 rounded-xl mb-2 text-white"
+                className="flex justify-between bg-[#2C2C2E] border border-gray-600 p-3 rounded-xl mb-2 text-white"
               >
                 <span>{item.name}</span>
                 <span>₱{item.total.toLocaleString()}</span>
@@ -544,7 +544,7 @@ const HouseExpensesPage: React.FC = () => {
             {grouped[date].map((exp) => (
               <div
                 key={exp._id}
-                className="flex justify-between bg-[#1C1C1E] p-2 rounded-xl mb-2 text-white"
+                className="flex justify-between bg-[#2C2C2E] border border-gray-600 p-2 rounded-xl mb-2 text-white"
               >
                 <div>
                   <div>{exp.text} •   <span className="text-gray-400 text-[10px]">{exp.category}</span></div>

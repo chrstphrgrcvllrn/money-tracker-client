@@ -11,6 +11,7 @@ export type Subscription = {
   amount: number;
   quantity?: number;
   completed?: boolean;
+  notes?: string;
   billing: "monthly" | "yearly";
   type: "auto" | "manual";
   startDate?: string; // ✅ ADD THIS
