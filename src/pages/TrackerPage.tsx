@@ -221,8 +221,8 @@ const TrackerPage: React.FC = () => {
                   <div
                     className={`shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border transition ${
                       isActive
-                        ? "border-[#C9A374] bg-[var(--btn-bg)]/15 text-[#C9A374]"
-                        : "border-[#C9A374]/40 text-[#C9A374]/80"
+                        ? "border-[#2DE0E6] bg-[var(--btn-bg)]/15 text-[var(--text-primary)]"
+                        : "border-[#2DE0E6]/40 text-[var(--text-secondary)]"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -268,7 +268,7 @@ const TrackerPage: React.FC = () => {
               placeholder={categoryExamples[activeTab]}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
             />
           </div>
 
@@ -278,7 +278,7 @@ const TrackerPage: React.FC = () => {
               placeholder="e.g., who, what, procedure, result"
               value={formData.details}
               onChange={(e) => setFormData({ ...formData, details: e.target.value })}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none resize-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none resize-none"
               rows={3}
             />
           </div>
@@ -289,7 +289,7 @@ const TrackerPage: React.FC = () => {
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
             />
           </div>
 
@@ -301,7 +301,7 @@ const TrackerPage: React.FC = () => {
                 placeholder="0"
                 value={formData.amount || ""}
                 onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+                className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
               />
             </div>
           )}
@@ -315,7 +315,7 @@ const TrackerPage: React.FC = () => {
                 placeholder="e.g. 11.02"
                 value={formData.price || ""}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+                className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
               />
             </div>
           )}
@@ -326,7 +326,7 @@ const TrackerPage: React.FC = () => {
               placeholder="Additional notes..."
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none resize-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none resize-none"
               rows={2}
             />
           </div>
@@ -388,7 +388,7 @@ const TrackerPage: React.FC = () => {
                   </span>
                 )}
                 {!!entry.amount && entry.amount > 0 && (
-                  <span className="shrink-0 text-xs text-[#C9A374] font-semibold">
+                  <span className="shrink-0 text-xs text-[#2DE0E6] font-semibold">
                     {entry.amount.toLocaleString()}
                   </span>
                 )}

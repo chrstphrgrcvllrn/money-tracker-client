@@ -150,7 +150,7 @@ const highlightText = (text: string, done: boolean) => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter note"
-          className="flex-1 bg-[var(--bg-input)] px-2 py-1 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+          className="flex-1 bg-[var(--bg-input)] px-2 py-1 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
         />
 
         <select
@@ -158,7 +158,7 @@ const highlightText = (text: string, done: boolean) => {
           onChange={(e) =>
             setCategory(e.target.value as Note["category"])
           }
-          className="bg-[var(--bg-input)] px-2 py-1 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+          className="bg-[var(--bg-input)] px-2 py-1 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
         >
           <option value="work">Work</option>
           <option value="personal">Personal</option>
@@ -200,8 +200,8 @@ const highlightText = (text: string, done: boolean) => {
               idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
             }`}
           >
-            <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
-              <DocumentTextIcon className="w-4 h-4 text-[#C9A374]" />
+            <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+              <DocumentTextIcon className="w-4 h-4 text-[var(--text-primary)]" />
             </div>
 
             <div className="flex-1 min-w-0">

@@ -285,7 +285,7 @@ export default function BillsPage() {
           value={newMonth}
           onChange={(e) => setNewMonth(e.target.value)}
           placeholder="May 2026"
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -307,14 +307,14 @@ export default function BillsPage() {
           value={billName}
           onChange={(e) => setBillName(e.target.value)}
           placeholder="Bill name"
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
 
         <input
           value={billDueDate}
           onChange={(e) => setBillDueDate(e.target.value)}
           placeholder="Due date"
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
 
         <input
@@ -322,7 +322,7 @@ export default function BillsPage() {
           value={billAmount}
           onChange={(e) => setBillAmount(e.target.value)}
           placeholder="Amount"
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -344,7 +344,7 @@ export default function BillsPage() {
           value={duplicateMonthName}
           onChange={(e) => setDuplicateMonthName(e.target.value)}
           placeholder="New month"
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -382,8 +382,8 @@ export default function BillsPage() {
           >
             <div className="flex justify-between items-center pb-3 mb-2">
               <div className="flex items-center gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
-                  <CalendarDaysIcon className="w-5 h-5 text-[#C9A374]" />
+                <div className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                  <CalendarDaysIcon className="w-5 h-5 text-[var(--text-primary)]" />
                 </div>
                 <h2 className="text-[var(--text-primary)] font-semibold text-[1.5rem]">
                   {entry.month}
@@ -493,7 +493,7 @@ export default function BillsPage() {
                 <span>{format(paidTotal)}</span>
               </div>
 
-              <div className="flex justify-between text-[#B2597C]">
+              <div className="flex justify-between text-[#C93B8C]">
                 <span>Pending</span>
                 <span>{format(pendingTotal)}</span>
               </div>

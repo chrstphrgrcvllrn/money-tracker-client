@@ -58,7 +58,7 @@ const ThoughtsPage: React.FC = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Write a thought..."
-          className="flex-1 bg-[var(--bg-input)] px-2 py-7 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+          className="flex-1 bg-[var(--bg-input)] px-2 py-7 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
         />
 
         <button
@@ -83,8 +83,8 @@ const ThoughtsPage: React.FC = () => {
                 onClick={() => toggleThought(t._id)}
                 className="w-full flex items-start gap-3 py-4 text-left text-[var(--text-primary)] cursor-pointer"
               >
-                <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
-                  <ChatBubbleLeftIcon className="w-4 h-4 text-[#C9A374]" />
+                <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                  <ChatBubbleLeftIcon className="w-4 h-4 text-[var(--text-primary)]" />
                 </div>
 
                 {isOpen ? (

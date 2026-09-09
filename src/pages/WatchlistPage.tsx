@@ -404,14 +404,14 @@ const handleDelete = async (id: string) => {
             <>
               <button onClick={startEdit} 
               // className="bg-[#1C1C1E] p-2 rounded"
-               className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1C1C1E] text-[#EF6C54] font-bold rounded-4xl text-sm"
+               className="mb-0 px-[0.7rem] py-[0.3rem]   bg-[#1C1C1E] text-[#E23A55] font-bold rounded-4xl text-sm"
               >
                 <PencilIcon className="w-4 h-4 text-white" />
               </button>
 
               <button
                 onClick={() => setShowAddModal(true)}
-                // className=" bg-[#1C1C1E] text-[#EF6C54] px-2 py-1 rounded "
+                // className=" bg-[#1C1C1E] text-[#E23A55] px-2 py-1 rounded "
                   className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
               >
                 +
@@ -547,7 +547,7 @@ const handleDelete = async (id: string) => {
                       />
                       <button
                         onClick={() => handleDelete(item._id)}
-                        className="text-[#B2597C] text-xs"
+                        className="text-[#C93B8C] text-xs"
                       >
                         Delete
                       </button>

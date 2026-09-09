@@ -102,8 +102,8 @@ export default function BottomNavBar() {
     <nav
       className={`fixed bottom-0 left-0 w-full z-50 px-4 py-2 backdrop-blur-xl border-t ${
         isLight
-          ? "bg-[rgba(247,243,236,0.75)] border-black/10"
-          : "bg-[rgba(17,19,18,0.55)] border-white/10"
+          ? "bg-[rgba(241,243,247,0.75)] border-black/10"
+          : "bg-[rgba(19,21,28,0.55)] border-white/10"
       }`}
     >
       <style>{`
@@ -124,7 +124,7 @@ export default function BottomNavBar() {
             to={item.path}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center text-xs ${
-                isActive ? "text-[#C9A374]" : "text-[var(--text-secondary)]"
+                isActive ? "text-[#2DE0E6]" : "text-[var(--text-secondary)]"
               }`
             }
           >

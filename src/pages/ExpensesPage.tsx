@@ -239,9 +239,9 @@ const graphData = Object.values(
   ).sort((a, b) => a.localeCompare(b));
 
   const colors = [
-    "#C9A374",
+    "#2DE0E6",
     "#FFFFFF",
-    "#B2597C",
+    "#C93B8C",
     "#60A5FA",
     "#F97316",
     "#A78BFA",
@@ -424,8 +424,8 @@ const graphData = Object.values(
                   idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
                 }`}
               >
-                <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
-                  <ReceiptPercentIcon className="w-4 h-4 text-[#C9A374]" />
+                <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                  <ReceiptPercentIcon className="w-4 h-4 text-[var(--text-primary)]" />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -434,7 +434,7 @@ const graphData = Object.values(
                     <span className="text-[var(--text-secondary)] text-[10px]">{exp.category}</span>
                   </div>
 
-                  <div className="text-[#B2597C] text-xs">
+                  <div className="text-[#C93B8C] text-xs">
                     ₱{exp.amount.toLocaleString()}
                   </div>
                 </div>
@@ -452,14 +452,14 @@ const graphData = Object.values(
         title={editingId ? "Edit Expense" : "Add Expense"}
       >
         <input
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
           placeholder="Expense"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
         <input
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
           placeholder="Amount"
           type="number"
           value={amount}
@@ -467,7 +467,7 @@ const graphData = Object.values(
         />
 
         <input
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
           placeholder="Category"
           list="expense-categories"
           value={category}

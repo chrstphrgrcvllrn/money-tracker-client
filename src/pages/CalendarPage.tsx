@@ -187,9 +187,9 @@ const CalendarPage: React.FC = () => {
   const typeDotColorMap: Record<string, string> = {
   birthday: "bg-[#A1B4F2]",
   event: "bg-[#555BCA]",
-  ooo: "bg-[#EF6C54]",
+  ooo: "bg-[#E23A55]",
   holiday: "bg-[#85D989]",
-  exercise: "bg-[#B2597C]",
+  exercise: "bg-[#C93B8C]",
   leave: "bg-[#DFF966]",
 };
 
@@ -199,9 +199,9 @@ const CalendarPage: React.FC = () => {
 const typeColorMap: Record<string, string> = {
   birthday: "border-[#A1B4F2]",
   event: "border-[#555BCA]",
-  ooo: "border-[#EF6C54]",
+  ooo: "border-[#E23A55]",
   holiday: "border-[#DFF966]",
-  exercise: "border-[#B2597C]",
+  exercise: "border-[#C93B8C]",
   leave: "border-[#DFF966]",
 };
 

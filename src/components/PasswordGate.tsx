@@ -56,7 +56,7 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
               setError("");
             }}
             placeholder="Password"
-            className="w-full px-3 py-3 text-center tracking-[0.3em] border rounded-lg focus:border-[#C9A374]/50 outline-none bg-[var(--bg-input)] text-[var(--text-primary)] border-gray-600"
+            className="w-full px-3 py-3 text-center tracking-[0.3em] border rounded-lg focus:border-[#2DE0E6]/50 outline-none bg-[var(--bg-input)] text-[var(--text-primary)] border-gray-600"
           />
 
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}

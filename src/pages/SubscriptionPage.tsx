@@ -246,15 +246,15 @@ export default function SubscriptionPage() {
                 onClick={() => handleToggleCompleted(item)}
                 className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center border transition ${
                   item.completed
-                    ? "bg-[var(--btn-bg)] border-[#C9A374]"
-                    : "border-[#C9A374]/40 hover:border-[#C9A374]"
+                    ? "bg-[var(--btn-bg)] border-[#2DE0E6]"
+                    : "border-[#2DE0E6]/40 hover:border-[#2DE0E6]"
                 }`}
               >
                 {item.completed && <CheckIcon className="w-4 h-4 text-[var(--btn-text)]" />}
               </button>
 
-              <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
-                <ShoppingBagIcon className="w-4 h-4 text-[#C9A374]" />
+              <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                <ShoppingBagIcon className="w-4 h-4 text-[var(--text-primary)]" />
               </div>
 
               <button
@@ -303,7 +303,7 @@ export default function SubscriptionPage() {
             placeholder="e.g. Netflix"
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
           />
         </div>
 
@@ -315,7 +315,7 @@ export default function SubscriptionPage() {
               placeholder="0"
               value={form.amount || ""}
               onChange={(e) => setForm((p) => ({ ...p, amount: Number(e.target.value) }))}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
             />
           </div>
 
@@ -327,7 +327,7 @@ export default function SubscriptionPage() {
               placeholder="1"
               value={form.quantity || ""}
               onChange={(e) => setForm((p) => ({ ...p, quantity: Number(e.target.value) }))}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
             />
           </div>
         </div>
@@ -345,7 +345,7 @@ export default function SubscriptionPage() {
             placeholder="Where to buy, links, etc."
             value={form.notes}
             onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none resize-none"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none resize-none"
             rows={2}
           />
         </div>

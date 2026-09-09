@@ -307,9 +307,9 @@ const HouseExpensesPage: React.FC = () => {
   ).sort((a, b) => a.localeCompare(b));
 
   const colors = [
-    "#C9A374",
+    "#2DE0E6",
     "#FFFFFF",
-    "#B2597C",
+    "#C93B8C",
     "#60A5FA",
     "#F97316",
     "#A78BFA",
@@ -381,8 +381,8 @@ const HouseExpensesPage: React.FC = () => {
               return (
                 <div key={month} className="bg-[var(--bg-surface)] rounded-xl p-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
-                      <HomeIcon className="w-4 h-4 text-[#C9A374]" />
+                    <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                      <HomeIcon className="w-4 h-4 text-[var(--text-primary)]" />
                     </div>
                     <h3 className="text-[var(--text-primary)] font-semibold">{monthLabel}</h3>
                   </div>
@@ -398,7 +398,7 @@ const HouseExpensesPage: React.FC = () => {
                             value={budgetInput}
                             onChange={(e) => setBudgetInput(e.target.value)}
                             placeholder="0"
-                            className="flex-1 px-2 py-2 bg-[var(--bg-surface)] text-[var(--text-primary)] border border-gray-600 rounded focus:border-[#C9A374]/50 outline-none text-sm"
+                            className="flex-1 px-2 py-2 bg-[var(--bg-surface)] text-[var(--text-primary)] border border-gray-600 rounded focus:border-[#2DE0E6]/50 outline-none text-sm"
                             autoFocus
                           />
                           <button
@@ -420,7 +420,7 @@ const HouseExpensesPage: React.FC = () => {
                             setEditingBudgetMonth(month);
                             setBudgetInput(String(budget));
                           }}
-                          className="text-[#C9A374] font-bold mt-2 hover:underline text-sm"
+                          className="text-[#2DE0E6] font-bold mt-2 hover:underline text-sm"
                         >
                           {budget > 0 ? `₱${budget.toLocaleString()}` : "Set Budget"}
                         </button>
@@ -429,7 +429,7 @@ const HouseExpensesPage: React.FC = () => {
 
                     <div className={`rounded-lg p-2 ${remaining >= 0 ? "bg-green-900/30" : "bg-red-900/30"}`}>
                       <p className="text-[var(--text-secondary)] text-[10px]">Remaining</p>
-                      <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[var(--text-primary)]" : "text-[#EF6C54]"}`}>
+                      <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[var(--text-primary)]" : "text-[#E23A55]"}`}>
                         {remaining < 0 ? "-" : ""}₱{Math.abs(remaining).toLocaleString()}
                       </p>
                     </div>
@@ -438,7 +438,7 @@ const HouseExpensesPage: React.FC = () => {
                   {/* TOTAL SPENT */}
                   <div className="mb-3 pb-3 border-b border-[var(--border-subtle)] flex justify-between text-[var(--text-primary)]">
                     <span>Total Spent</span>
-                    <span className="font-bold text-[#C9A374]">₱{monthTotal.toLocaleString()}</span>
+                    <span className="font-bold text-[#2DE0E6]">₱{monthTotal.toLocaleString()}</span>
                   </div>
 
                   {/* EXPENSES LIST */}
@@ -565,14 +565,14 @@ const HouseExpensesPage: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
-                    <HomeIcon className="w-4 h-4 text-[#C9A374]" />
+                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                    <HomeIcon className="w-4 h-4 text-[#2DE0E6]" />
                   </div>
 
                   <div className="min-w-0">
                     <div className="truncate">{exp.text} •   <span className="text-[var(--text-secondary)] text-[10px]">{exp.category}</span></div>
 
-                    <div className="text-[#B2597C] text-xs">
+                    <div className="text-[#C93B8C] text-xs">
                       ₱{exp.amount.toLocaleString()}
                     </div>
                   </div>
@@ -591,14 +591,14 @@ const HouseExpensesPage: React.FC = () => {
         title={editingId ? "Edit Expense" : "Add Expense"}
       >
         <input
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
           placeholder="Expense"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
         <input
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
           placeholder="Amount"
           type="number"
           value={amount}
@@ -606,7 +606,7 @@ const HouseExpensesPage: React.FC = () => {
         />
 
         <input
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
           placeholder="Category"
           list="house-expense-categories"
           value={category}

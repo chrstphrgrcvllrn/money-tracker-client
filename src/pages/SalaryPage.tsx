@@ -326,14 +326,14 @@ export default function SalaryPage() {
           placeholder="Date (e.g., May 2026)"
           value={newSalaryDate}
           onChange={(e) => setNewSalaryDate(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
         <input
           type="number"
           placeholder="Salary amount"
           value={newSalaryAmount}
           onChange={(e) => setNewSalaryAmount(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
         <div className="flex justify-end space-x-2 pt-2">
           <button
@@ -358,14 +358,14 @@ export default function SalaryPage() {
           placeholder="Expense name"
           value={expenseName}
           onChange={(e) => setExpenseName(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
         <input
           type="number"
           placeholder="Expense amount"
           value={expenseAmount}
           onChange={(e) => setExpenseAmount(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
         <div className="flex justify-end space-x-2 pt-2">
           <button
@@ -414,7 +414,7 @@ export default function SalaryPage() {
           </button>
           <button
             className={`px-3 py-1 rounded text-sm ${
-              activeTab === "completed" ? " bg-[var(--bg-surface)] text-[#EF6C54]  font-bold" : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
+              activeTab === "completed" ? " bg-[var(--bg-surface)] text-[#E23A55]  font-bold" : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
             }`}
             onClick={() => setActiveTab("completed")}
           >
@@ -472,8 +472,8 @@ export default function SalaryPage() {
             <div key={entry._id} className="mb-6 bg-[var(--bg-surface)] shadow rounded-xl p-4">
               <div className="flex justify-between items-center mb-2">
                 <button onClick={() => handleEditSalaryName(entry._id)} className="flex items-center gap-3">
-                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
-                    <CurrencyDollarIcon className="w-4 h-4 text-[#C9A374]" />
+                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                    <CurrencyDollarIcon className="w-4 h-4 text-[var(--text-primary)]" />
                   </div>
                   <h2 className="font-semibold text-[1.5rem] text-[var(--text-primary)]">{entry.date}</h2>
                 </button>
@@ -527,7 +527,7 @@ export default function SalaryPage() {
                           openDeleteSalaryModal(entry._id);
                           setOpenMenuId(null);
                         }}
-                        className="w-full text-left px-4 py-2 text-sm text-[#EF6C54] hover:bg-[#2A2A2D]"
+                        className="w-full text-left px-4 py-2 text-sm text-[#E23A55] hover:bg-[#2A2A2D]"
                       >
                         Delete
                       </button>
@@ -539,7 +539,7 @@ export default function SalaryPage() {
               <div className="flex justify-between text-[var(--text-primary)] mb-2">
                 <span>Salary</span>
                 <button onClick={() => handleEditSalary(entry._id)}>
-                  <span className="font-semibold text-[#C9A374]">{format(entry.salary)}</span>
+                  <span className="font-semibold text-[#2DE0E6]">{format(entry.salary)}</span>
                 </button>
               </div>
 
@@ -624,12 +624,12 @@ export default function SalaryPage() {
 
               <div className="flex justify-between font-semibold pt-2 mb-2">
                 <span className="text-[var(--text-primary)]">Total</span>
-                <span className="text-[#B2597C]">{format(totalExpenses)}</span>
+                <span className="text-[#C93B8C]">{format(totalExpenses)}</span>
               </div>
 
               <div className="flex justify-between font-semibold">
                 <span></span>
-                <span className={`${remaining < 0 ? "text-[#B2597C]" : "text-[var(--text-primary)]"}`}>
+                <span className={`${remaining < 0 ? "text-[#C93B8C]" : "text-[var(--text-primary)]"}`}>
                   {format(remaining)}
                 </span>
               </div>

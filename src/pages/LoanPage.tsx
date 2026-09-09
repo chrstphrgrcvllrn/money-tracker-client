@@ -215,7 +215,7 @@ export default function LoanPage() {
           </button>
           <button
             className={`px-3 py-1 rounded text-sm ${
-              activeTab === "archived" ? "bg-[var(--bg-surface)] text-[#C9A374] font-bold" : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
+              activeTab === "archived" ? "bg-[var(--bg-surface)] text-[#2DE0E6] font-bold" : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
             }`}
             onClick={() => setActiveTab("archived")}
           >
@@ -251,7 +251,7 @@ export default function LoanPage() {
           placeholder="Loan name"
           value={newLoanName}
           onChange={(e) => setNewLoanName(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
 
         <input
@@ -259,7 +259,7 @@ export default function LoanPage() {
           placeholder="Initial amount"
           value={newLoanAmount}
           onChange={(e) => setNewLoanAmount(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -304,8 +304,8 @@ export default function LoanPage() {
                 onClick={() => toggleExpand(index)}
               >
                 <div className="flex items-center gap-3 text-left">
-                  <div className="shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
-                    <PaperClipIcon className="w-5 h-5 text-[#C9A374]" />
+                  <div className="shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                    <PaperClipIcon className="w-5 h-5 text-[var(--text-primary)]" />
                   </div>
 
                   <div>
@@ -328,7 +328,7 @@ export default function LoanPage() {
                   </div>
                 </div>
 
-                <p className="font-bold text-[#EF6C54]">
+                <p className="font-bold text-[#E23A55]">
                   {showAmounts ? remaining.toLocaleString() : mask(remaining)}
                 </p>
               </button>
@@ -354,7 +354,7 @@ export default function LoanPage() {
 
                       <span
                         className={`${
-                          Number(t.amount) < 0 ? "text-[#B2597C]" : "text-[var(--text-primary)]"
+                          Number(t.amount) < 0 ? "text-[#C93B8C]" : "text-[var(--text-primary)]"
                         }`}
                       >
                         {Number(t.amount).toLocaleString("en-PH")}
@@ -374,7 +374,7 @@ export default function LoanPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+                      className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
                     />
 
                     <div className="flex gap-2">
@@ -386,7 +386,7 @@ export default function LoanPage() {
                             [index]: e.target.value as "+" | "-",
                           }))
                         }
-                        className="px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+                        className="px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
                       >
                         <option value="+">+</option>
                         <option value="-">-</option>
@@ -402,7 +402,7 @@ export default function LoanPage() {
                             [index]: e.target.value,
                           }))
                         }
-                        className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+                        className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
                       />
                     </div>
 
@@ -424,7 +424,7 @@ export default function LoanPage() {
                     {activeTab === "active" && (
                       <button
                         onClick={() => handleArchiveLoan(loan._id)}
-                        className="w-full bg-[#EF6C54] text-[var(--text-primary)] font-bold py-2 rounded-lg text-sm"
+                        className="w-full bg-[#E23A55] text-[var(--text-primary)] font-bold py-2 rounded-lg text-sm"
                       >
                         Archive Loan
                       </button>
