@@ -33,14 +33,14 @@ export default function Modal({
       `}</style>
 
       <div
-        className={`w-full ${maxWidth} bg-[#1C1C1E] rounded-2xl shadow-2xl p-5 space-y-4 modal-animate max-h-[85vh] overflow-y-auto`}
+        className={`w-full ${maxWidth} bg-[var(--bg-surface)] rounded-2xl shadow-2xl p-5 space-y-4 modal-animate max-h-[85vh] overflow-y-auto`}
       >
         {title && (
           <div className="flex items-center justify-between">
-            <h2 className="text-white text-lg font-semibold">{title}</h2>
+            <h2 className="text-[var(--text-primary)] text-lg font-semibold">{title}</h2>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2A2A2C] transition"
+              className="p-1.5 rounded-lg text-gray-400 hover:text-[var(--text-primary)] hover:bg-[#2A2A2C] transition"
             >
               <XMarkIcon className="w-5 h-5" />
             </button>

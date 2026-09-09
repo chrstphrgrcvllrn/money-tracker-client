@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeContext, type Theme } from "./ThemeContext";
 
 const STORAGE_KEY = "moneyTrackerTheme";
@@ -15,6 +15,12 @@ const getInitialTheme = (): Theme => {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+
+  // Sync the theme onto <html> so global CSS variables (index.css) cascade
+  // to every page, regardless of where in the tree they're read from.
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   const toggleTheme = () => {
     setTheme((prev) => {

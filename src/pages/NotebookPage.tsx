@@ -334,7 +334,7 @@ const NotebookPage: React.FC = () => {
   // --------------------------------
 
   return (
-    <div className="min-h-[calc(100vh-80px)] text-xs bg-[#262624] text-[#EFE6D8]">
+    <div className="min-h-[calc(100vh-80px)] text-xs bg-[var(--bg-page)] text-[var(--text-primary)]">
       <style>{`
         @keyframes modal-scale-in {
           from { opacity: 0; transform: scale(0.95); }
@@ -360,7 +360,7 @@ const NotebookPage: React.FC = () => {
 
         <button
           onClick={createNote}
-          className="flex items-center gap-1 bg-[#B5651D] text-white font-semibold px-3 py-2 rounded-lg"
+          className="flex items-center gap-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold px-3 py-2 rounded-lg"
         >
           <PlusIcon className="w-4 h-4" />
           New
@@ -381,8 +381,8 @@ const NotebookPage: React.FC = () => {
             }
             className={`px-3 py-1.5 rounded-xl capitalize ${
               activeTab === tab
-                ? "bg-[#B5651D] text-white font-semibold"
-                : "bg-[#1C1C1E] text-gray-400"
+                ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold"
+                : "bg-[var(--bg-surface)] text-gray-400"
             }`}
           >
             {tab}
@@ -405,7 +405,7 @@ const NotebookPage: React.FC = () => {
               <button
                 key={note._id}
                 onClick={() => openNote(note)}
-                className="text-left p-4 bg-[#1C1C1E] hover:bg-[#242426] rounded-xl transition"
+                className="text-left p-4 bg-[var(--bg-surface)] hover:bg-[#242426] rounded-xl transition"
               >
 
                 <div className="flex items-start justify-between gap-3">
@@ -414,7 +414,7 @@ const NotebookPage: React.FC = () => {
                     className={`font-semibold text-sm truncate ${
                       note.status === "closed"
                         ? "text-gray-500"
-                        : "text-white"
+                        : "text-[var(--text-primary)]"
                     }`}
                   >
                     {note.title}
@@ -423,7 +423,7 @@ const NotebookPage: React.FC = () => {
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${
                       note.status === "open"
-                        ? "bg-[#B5651D] text-white"
+                        ? "bg-[var(--btn-bg)] text-[var(--btn-text)]"
                         : "bg-[#2A2A2C] text-gray-500"
                     }`}
                   >
@@ -467,7 +467,7 @@ const NotebookPage: React.FC = () => {
           }}
         >
 
-          <div className="w-full max-w-5xl h-[90vh] bg-[#1C1C1E] rounded-2xl shadow-2xl overflow-hidden flex flex-col modal-animate">
+          <div className="w-full max-w-5xl h-[90vh] bg-[var(--bg-surface)] rounded-2xl shadow-2xl overflow-hidden flex flex-col modal-animate">
 
             {/* MODAL HEADER */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
@@ -479,7 +479,7 @@ const NotebookPage: React.FC = () => {
                   onChange={(e) =>
                     setTitle(e.target.value)
                   }
-                  className="w-full bg-transparent text-lg font-semibold text-white outline-none"
+                  className="w-full bg-transparent text-lg font-semibold text-[var(--text-primary)] outline-none"
                   placeholder="Note title"
                 />
 
@@ -493,7 +493,7 @@ const NotebookPage: React.FC = () => {
 
               <button
                 onClick={closeNote}
-                className="ml-4 p-2 rounded-lg text-gray-500 hover:text-white hover:bg-[#2A2A2C]"
+                className="ml-4 p-2 rounded-lg text-gray-500 hover:text-[var(--text-primary)] hover:bg-[#2A2A2C]"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -538,7 +538,7 @@ const NotebookPage: React.FC = () => {
                 <button
                   onClick={saveNote}
                   disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#B5651D] text-white font-semibold disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold disabled:opacity-50"
                 >
                   {saving ? (
                     <>

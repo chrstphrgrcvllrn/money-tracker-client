@@ -124,7 +124,7 @@ export default function BottomNavBar() {
             to={item.path}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center text-xs ${
-                isActive ? "text-[#C9A374]" : isLight ? "text-[#6B5E4F]" : "text-[#999794]"
+                isActive ? "text-[#C9A374]" : "text-[var(--text-secondary)]"
               }`
             }
           >
@@ -147,9 +147,7 @@ export default function BottomNavBar() {
         {/* THEME TOGGLE — fills the empty 12th grid slot */}
         <button
           onClick={toggleTheme}
-          className={`flex flex-col items-center justify-center text-xs ${
-            isLight ? "text-[#6B5E4F]" : "text-[#999794]"
-          }`}
+          className="flex flex-col items-center justify-center text-xs text-[var(--text-secondary)]"
         >
           {isLight ? (
             <MoonIcon key="theme-dark" className="w-6 h-6 mb-1 nav-icon-active" />

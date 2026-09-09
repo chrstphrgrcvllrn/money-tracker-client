@@ -167,18 +167,18 @@ export default function SubscriptionPage() {
   const total = filteredItems.reduce((sum, item) => sum + itemTotal(item), 0);
 
   if (loading) {
-    return <div className="p-4 text-center text-white">Loading...</div>;
+    return <div className="p-4 text-center text-[var(--text-primary)]">Loading...</div>;
   }
 
   return (
-    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[#262624]">
+    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[var(--bg-page)]">
 
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-[#EFE6D8]">Buy List</h1>
+        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Buy List</h1>
 
         <div className="flex items-center gap-3">
-          <button onClick={() => setShowAmounts((p) => !p)} className="text-[#9C8F80]">
+          <button onClick={() => setShowAmounts((p) => !p)} className="text-[var(--text-secondary)]">
             {showAmounts ? (
               <EyeSlashIcon className="w-5 h-5" />
             ) : (
@@ -188,7 +188,7 @@ export default function SubscriptionPage() {
 
           <button
             onClick={openAddModal}
-            className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-white font-bold rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem] bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold rounded-4xl text-sm"
           >
             +
           </button>
@@ -201,8 +201,8 @@ export default function SubscriptionPage() {
           onClick={() => setTab("ongoing")}
           className={`px-3 py-1 rounded-full text-xs ${
             tab === "ongoing"
-              ? "bg-[#B5651D] text-white font-bold"
-              : "bg-[#1C1C1E] text-[#9C8F80]"
+              ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
+              : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
           }`}
         >
           Ongoing
@@ -212,8 +212,8 @@ export default function SubscriptionPage() {
           onClick={() => setTab("completed")}
           className={`px-3 py-1 rounded-full text-xs ${
             tab === "completed"
-              ? "bg-[#B5651D] text-white font-bold"
-              : "bg-[#1C1C1E] text-[#9C8F80]"
+              ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
+              : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
           }`}
         >
           Completed
@@ -221,9 +221,9 @@ export default function SubscriptionPage() {
       </div>
 
       {/* TOTAL */}
-      <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
-        <p className="text-[#9C8F80] text-sm">Total</p>
-        <p className="text-[2rem] font-bold text-[#FFFFFF]">
+      <div className="mb-6 p-4 bg-[var(--bg-surface)] rounded-xl text-center">
+        <p className="text-[var(--text-secondary)] text-sm">Total</p>
+        <p className="text-[2rem] font-bold text-[var(--text-primary)]">
           ₱{showAmounts ? total.toLocaleString() : mask(total)}
         </p>
       </div>
@@ -231,7 +231,7 @@ export default function SubscriptionPage() {
       {/* LIST */}
       <div>
         {filteredItems.length === 0 ? (
-          <div className="text-center py-12 text-[#9C8F80]">
+          <div className="text-center py-12 text-[var(--text-secondary)]">
             {tab === "completed" ? "No completed items yet." : "No items yet. Add one to get started!"}
           </div>
         ) : (
@@ -239,18 +239,18 @@ export default function SubscriptionPage() {
             <div
               key={item._id}
               className={`w-full flex items-center gap-3 py-3 ${
-                idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
+                idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
               }`}
             >
               <button
                 onClick={() => handleToggleCompleted(item)}
                 className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center border transition ${
                   item.completed
-                    ? "bg-[#B5651D] border-[#C9A374]"
+                    ? "bg-[var(--btn-bg)] border-[#C9A374]"
                     : "border-[#C9A374]/40 hover:border-[#C9A374]"
                 }`}
               >
-                {item.completed && <CheckIcon className="w-4 h-4 text-white" />}
+                {item.completed && <CheckIcon className="w-4 h-4 text-[var(--btn-text)]" />}
               </button>
 
               <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
@@ -263,25 +263,25 @@ export default function SubscriptionPage() {
               >
                 <span
                   className={`truncate font-medium text-sm ${
-                    item.completed ? "text-[#9C8F80] line-through" : "text-[#EFE6D8]"
+                    item.completed ? "text-[var(--text-secondary)] line-through" : "text-[var(--text-primary)]"
                   }`}
                 >
                   {item.name}
                 </span>
                 {Number(item.quantity || 1) > 1 && (
-                  <span className="shrink-0 text-xs text-[#9C8F80]">
+                  <span className="shrink-0 text-xs text-[var(--text-secondary)]">
                     x{item.quantity}
                   </span>
                 )}
                 {!!item.notes && (
-                  <LinkIcon className="shrink-0 w-3 h-3 text-[#9C8F80]" />
+                  <LinkIcon className="shrink-0 w-3 h-3 text-[var(--text-secondary)]" />
                 )}
               </button>
 
               <button
                 onClick={() => openEditModal(item)}
                 className={`shrink-0 text-sm font-bold ${
-                  item.completed ? "text-[#9C8F80]" : "text-[#FFFFFF]"
+                  item.completed ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)]"
                 }`}
               >
                 ₱{showAmounts ? itemTotal(item).toLocaleString() : mask(itemTotal(item))}
@@ -303,7 +303,7 @@ export default function SubscriptionPage() {
             placeholder="e.g. Netflix"
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
           />
         </div>
 
@@ -315,7 +315,7 @@ export default function SubscriptionPage() {
               placeholder="0"
               value={form.amount || ""}
               onChange={(e) => setForm((p) => ({ ...p, amount: Number(e.target.value) }))}
-              className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
             />
           </div>
 
@@ -327,7 +327,7 @@ export default function SubscriptionPage() {
               placeholder="1"
               value={form.quantity || ""}
               onChange={(e) => setForm((p) => ({ ...p, quantity: Number(e.target.value) }))}
-              className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
             />
           </div>
         </div>
@@ -345,7 +345,7 @@ export default function SubscriptionPage() {
             placeholder="Where to buy, links, etc."
             value={form.notes}
             onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none resize-none"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none resize-none"
             rows={2}
           />
         </div>
@@ -364,14 +364,14 @@ export default function SubscriptionPage() {
 
           <button
             onClick={closeModal}
-            className="flex-1 px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg"
+            className="flex-1 px-4 py-2 text-gray-400 hover:text-[var(--text-primary)] border border-gray-600 rounded-lg"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-2 bg-[#B5651D] text-white font-semibold rounded-lg disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold rounded-lg disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save"}
           </button>

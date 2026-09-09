@@ -85,7 +85,7 @@ const filteredNotes = notes.filter((note) => {
 //   const parts = text.split(/(\[.*?\])/g);
 //   return parts.map((part, idx) =>
 //     part.startsWith("[") && part.endsWith("]") && !done ? (
-//       <span key={idx} className="text-white">
+//       <span key={idx} className="text-[var(--text-primary)]">
 //         {part}
 //       </span>
 //     ) : (
@@ -104,7 +104,7 @@ const highlightText = (text: string, done: boolean) => {
   return parts.map((part, idx) => {
     if (part === "Watch:") {
       return (
-        <span key={idx} className="text-white font-medium">
+        <span key={idx} className="text-[var(--text-primary)] font-medium">
           {part}
         </span>
       );
@@ -130,7 +130,7 @@ const highlightText = (text: string, done: boolean) => {
     const bracketParts = part.split(/(\[.*?\])/g);
     return bracketParts.map((bp, i) =>
       bp.startsWith("[") && bp.endsWith("]") ? (
-        <span key={`${idx}-${i}`} className="text-white">
+        <span key={`${idx}-${i}`} className="text-[var(--text-primary)]">
           {bp}
         </span>
       ) : (
@@ -142,7 +142,7 @@ const highlightText = (text: string, done: boolean) => {
 
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#262624]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
       {/* INPUT */}
       <div className="flex gap-2 mb-4 h-[7vh]">
         <input
@@ -150,7 +150,7 @@ const highlightText = (text: string, done: boolean) => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter note"
-          className="flex-1 bg-[#2C2C2E] px-2 py-1 rounded text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+          className="flex-1 bg-[var(--bg-input)] px-2 py-1 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
         />
 
         <select
@@ -158,7 +158,7 @@ const highlightText = (text: string, done: boolean) => {
           onChange={(e) =>
             setCategory(e.target.value as Note["category"])
           }
-          className="bg-[#2C2C2E] px-2 py-1 rounded text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+          className="bg-[var(--bg-input)] px-2 py-1 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
         >
           <option value="work">Work</option>
           <option value="personal">Personal</option>
@@ -168,7 +168,7 @@ const highlightText = (text: string, done: boolean) => {
 
         <button
           onClick={addNote}
-          className="bg-[#B5651D] text-white font-bold px-2 py-1 rounded"
+          className="bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold px-2 py-1 rounded"
         >
           Add
         </button>
@@ -182,8 +182,8 @@ const highlightText = (text: string, done: boolean) => {
             onClick={() => setActiveTab(tab as "all" | "done" | "pending" | "work" | "personal" | "others" | "to buy")}
             className={`px-2 py-1 rounded-xl text-xs capitalize ${
               activeTab === tab
-                ? "bg-[#B5651D] text-white font-bold"
-                : "bg-[#1C1C1E] text-[#9C8F80]"
+                ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
+                : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
             }`}
           >
             {tab}
@@ -197,7 +197,7 @@ const highlightText = (text: string, done: boolean) => {
           <li
             key={note._id}
             className={`flex items-center gap-3 py-3 ${
-              idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
+              idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
             }`}
           >
             <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
@@ -207,7 +207,7 @@ const highlightText = (text: string, done: boolean) => {
             <div className="flex-1 min-w-0">
               <span
                 className={`font-medium ${
-                  note.done ? "text-[#9C8F80] line-through" : "text-[#EFE6D8]"
+                  note.done ? "text-[var(--text-secondary)] line-through" : "text-[var(--text-primary)]"
                 }`}
               >
                   {highlightText(note.text, note.done)}
@@ -216,11 +216,11 @@ const highlightText = (text: string, done: boolean) => {
 
             <button
               onClick={() => handleToggle(note._id)}
-              className="shrink-0 flex items-center justify-center px-2 py-1 rounded text-[#9C8F80] hover:text-[#EFE6D8]"
+              className="shrink-0 flex items-center justify-center px-2 py-1 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             >
               <CheckIcon
                 className={`w-5 h-5 ${
-                  note.done ? "text-[#EFE6D8]" : "text-[#9C8F80]"
+                  note.done ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
                 }`}
               />
             </button>

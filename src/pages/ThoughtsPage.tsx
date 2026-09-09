@@ -51,19 +51,19 @@ const ThoughtsPage: React.FC = () => {
   };
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#262624]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
       {/* INPUT */}
       <div className="flex gap-2 mb-4">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Write a thought..."
-          className="flex-1 bg-[#2C2C2E] px-2 py-7 rounded text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
+          className="flex-1 bg-[var(--bg-input)] px-2 py-7 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#C9A374]/50 outline-none"
         />
 
         <button
           onClick={addThought}
-          className="bg-[#B5651D] text-white font-bold px-2 py-1 rounded"
+          className="bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold px-2 py-1 rounded"
         >
           Add
         </button>
@@ -77,11 +77,11 @@ const ThoughtsPage: React.FC = () => {
           return (
             <li
               key={t._id}
-              className={idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""}
+              className={idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""}
             >
               <button
                 onClick={() => toggleThought(t._id)}
-                className="w-full flex items-start gap-3 py-4 text-left text-[#EFE6D8] cursor-pointer"
+                className="w-full flex items-start gap-3 py-4 text-left text-[var(--text-primary)] cursor-pointer"
               >
                 <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
                   <ChatBubbleLeftIcon className="w-4 h-4 text-[#C9A374]" />

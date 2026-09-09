@@ -242,7 +242,7 @@ export default function BillsPage() {
     );
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#262624]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
       {/* TABS */}
        <div className="flex gap-2 mb-4 justify-between">
           <div className="flex gap-2 mb-4">
@@ -250,8 +250,8 @@ export default function BillsPage() {
               onClick={() => setTab("ongoing")}
               className={`px-3 py-1 rounded-full text-xs ${
                 tab === "ongoing"
-                  ? " bg-[#B5651D] text-white font-bold"
-                  : "bg-[#1C1C1E] text-[#9C8F80]"
+                  ? " bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
+                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
               }`}
             >
               Ongoing
@@ -261,8 +261,8 @@ export default function BillsPage() {
               onClick={() => setTab("done")}
               className={`px-3 py-1 rounded-full text-xs ${
                 tab === "done"
-                  ? " bg-[#B5651D] text-white "
-                  : "bg-[#1C1C1E] text-[#9C8F80]"
+                  ? " bg-[var(--btn-bg)] text-[var(--btn-text)] "
+                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
               }`}
             >
               Done
@@ -272,7 +272,7 @@ export default function BillsPage() {
             <div className="mb-4 flex justify-between items-start">
             <button
               onClick={() => setShowForm(true)}
-              className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-white font-bold rounded-4xl text-sm"
+              className="px-[0.7rem] py-[0.3rem]  bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold rounded-4xl text-sm"
             >
               +
             </button>
@@ -285,7 +285,7 @@ export default function BillsPage() {
           value={newMonth}
           onChange={(e) => setNewMonth(e.target.value)}
           placeholder="May 2026"
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -294,7 +294,7 @@ export default function BillsPage() {
           </button>
           <button
             onClick={handleAddMonth}
-            className="bg-[#B5651D] text-white font-semibold px-3 py-1 rounded"
+            className="bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold px-3 py-1 rounded"
           >
             Save
           </button>
@@ -307,14 +307,14 @@ export default function BillsPage() {
           value={billName}
           onChange={(e) => setBillName(e.target.value)}
           placeholder="Bill name"
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
         />
 
         <input
           value={billDueDate}
           onChange={(e) => setBillDueDate(e.target.value)}
           placeholder="Due date"
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
         />
 
         <input
@@ -322,7 +322,7 @@ export default function BillsPage() {
           value={billAmount}
           onChange={(e) => setBillAmount(e.target.value)}
           placeholder="Amount"
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -331,7 +331,7 @@ export default function BillsPage() {
           </button>
           <button
             onClick={handleSaveBill}
-            className="bg-[#B5651D] text-white font-semibold px-3 py-1 rounded"
+            className="bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold px-3 py-1 rounded"
           >
             Save
           </button>
@@ -344,7 +344,7 @@ export default function BillsPage() {
           value={duplicateMonthName}
           onChange={(e) => setDuplicateMonthName(e.target.value)}
           placeholder="New month"
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -353,7 +353,7 @@ export default function BillsPage() {
           </button>
           <button
             onClick={handleSaveDuplicate}
-            className="bg-[#B5651D] text-white font-semibold px-3 py-1 rounded"
+            className="bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold px-3 py-1 rounded"
           >
             Save
           </button>
@@ -378,19 +378,19 @@ export default function BillsPage() {
         return (
           <div
             key={entry._id}
-            className={`py-4 ${entryIdx !== entryArr.length - 1 ? "border-b border-[#2A2420]" : ""}`}
+            className={`py-4 ${entryIdx !== entryArr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""}`}
           >
             <div className="flex justify-between items-center pb-3 mb-2">
               <div className="flex items-center gap-3">
                 <div className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
                   <CalendarDaysIcon className="w-5 h-5 text-[#C9A374]" />
                 </div>
-                <h2 className="text-[#EFE6D8] font-semibold text-[1.5rem]">
+                <h2 className="text-[var(--text-primary)] font-semibold text-[1.5rem]">
                   {entry.month}
                 </h2>
               </div>
 
-              <div className="flex gap-3 text-sm text-[#9C8F80] ">
+              <div className="flex gap-3 text-sm text-[var(--text-secondary)] ">
                 <button onClick={() => handleEditAll(entry._id)}>
                   Edit
                 </button>
@@ -415,7 +415,7 @@ export default function BillsPage() {
                           copy[i].name = e.target.value;
                           setEditedBills(copy);
                         }}
-                        className="flex-1 bg-transparent border px-2 text-white"
+                        className="flex-1 bg-transparent border px-2 text-[var(--text-primary)]"
                       />
 
                       <input
@@ -425,7 +425,7 @@ export default function BillsPage() {
                           copy[i].dueDate = e.target.value;
                           setEditedBills(copy);
                         }}
-                        className="w-28 bg-transparent border px-2 text-white"
+                        className="w-28 bg-transparent border px-2 text-[var(--text-primary)]"
                       />
 
                       <input
@@ -436,7 +436,7 @@ export default function BillsPage() {
                           copy[i].amount = Number(e.target.value);
                           setEditedBills(copy);
                         }}
-                        className="w-24 bg-transparent border px-2 text-white text-right"
+                        className="w-24 bg-transparent border px-2 text-[var(--text-primary)] text-right"
                       />
                     </>
                   ) : (
@@ -444,8 +444,8 @@ export default function BillsPage() {
                       onClick={() => handleToggle(entry._id, i)}
                       className={`flex-1 cursor-pointer ${
                         bill.paid
-                          ? "line-through text-[#9C8F80]"
-                          : "text-[#EFE6D8]"
+                          ? "line-through text-[var(--text-secondary)]"
+                          : "text-[var(--text-primary)]"
                       }`}
                     >
                       {bill.name} • {bill.dueDate}
@@ -456,8 +456,8 @@ export default function BillsPage() {
                     <span
                       className={`w-24 text-right ${
                         bill.paid
-                          ? "line-through text-[#9C8F80]"
-                          : "text-[#EFE6D8]"
+                          ? "line-through text-[var(--text-secondary)]"
+                          : "text-[var(--text-primary)]"
                       }`}
                     >
                       {format(bill.amount)}
@@ -476,19 +476,19 @@ export default function BillsPage() {
             {isEditing && (
               <button
                 onClick={() => handleSaveAll(entry._id)}
-                className="mt-2 bg-[#B5651D] text-white px-3 py-1 rounded text-sm"
+                className="mt-2 bg-[var(--btn-bg)] text-[var(--btn-text)] px-3 py-1 rounded text-sm"
               >
                 Save
               </button>
             )}
 
             <div className="mt-3 text-xs space-y-1 mb-3 pt-2 ">
-              <div className="flex justify-between text-[#9C8F80]">
+              <div className="flex justify-between text-[var(--text-secondary)]">
                 <span>Total</span>
                 <span>{format(total)}</span>
               </div>
 
-              <div className="flex justify-between text-[#FFFFFF]">
+              <div className="flex justify-between text-[var(--text-primary)]">
                 <span>Paid</span>
                 <span>{format(paidTotal)}</span>
               </div>

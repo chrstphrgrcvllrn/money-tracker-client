@@ -5,6 +5,28 @@ body{
   background: #111111;
 }
 
+:root {
+  --bg-page: #171614;
+  --bg-surface: #1C1C1E;
+  --bg-input: #2C2C2E;
+  --text-primary: #EFE6D8;
+  --text-secondary: #9C8F80;
+  --border-subtle: #2A2420;
+  --btn-bg: #FFFFFF;
+  --btn-text: #000000;
+}
+
+[data-theme="light"] {
+  --bg-page: #FAF7F1;
+  --bg-surface: #FFFFFF;
+  --bg-input: #F0EAE0;
+  --text-primary: #2A2420;
+  --text-secondary: #7A6F62;
+  --border-subtle: #E4D9C8;
+  --btn-bg: #2A2420;
+  --btn-text: #FFFFFF;
+}
+
 /* :root {
   --text: #6b6375;
   --text-h: #08060d;
