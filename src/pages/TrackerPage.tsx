@@ -193,7 +193,7 @@ const TrackerPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-[#000000] text-white px-5 pt-6 pb-10">
+    <div className="min-h-[calc(100vh-80px)] bg-[#262624] text-white px-5 pt-6 pb-10">
       <TrackerIconStyles />
 
       <div className="max-w-md mx-auto">
@@ -245,7 +245,7 @@ const TrackerPage: React.FC = () => {
         {/* ADD BUTTON */}
         <button
           onClick={openAddModal}
-          className="w-full flex items-center gap-2 justify-center bg-[#B5651D] text-black font-semibold px-4 py-2 rounded-lg mb-6"
+          className="w-full flex items-center gap-2 justify-center bg-[#B5651D] text-white font-semibold px-4 py-2 rounded-lg mb-6"
         >
           <PlusIcon className="w-4 h-4" />
           Add Entry
@@ -352,7 +352,7 @@ const TrackerPage: React.FC = () => {
             <button
               onClick={handleSaveEntry}
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-[#B5651D] text-black font-semibold rounded-lg disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-[#B5651D] text-white font-semibold rounded-lg disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save"}
             </button>

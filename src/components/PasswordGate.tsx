@@ -41,7 +41,7 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
     return (
       <div
         className={`min-h-screen flex items-center justify-center px-6 ${
-          isLight ? "bg-[#FAF7F1]" : "bg-[#000000]"
+          isLight ? "bg-[#FAF7F1]" : "bg-[#262624]"
         }`}
       >
         <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
@@ -75,7 +75,7 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
 
           <button
             type="submit"
-            className="w-full bg-[#B5651D] text-black font-semibold py-3 rounded-lg"
+            className="w-full bg-[#B5651D] text-white font-semibold py-3 rounded-lg"
           >
             Unlock
           </button>

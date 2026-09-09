@@ -317,7 +317,7 @@ export default function SalaryPage() {
   const totals = calculateTotals();
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#262624]">
 
       {/* ADD SALARY MODAL */}
       <Modal open={showForm} onClose={() => setShowForm(false)} title="Add Salary">
@@ -344,7 +344,7 @@ export default function SalaryPage() {
           </button>
           <button
             onClick={handleAddSalary}
-            className="px-3 py-1 bg-[#B5651D] text-black font-semibold rounded-lg text-sm"
+            className="px-3 py-1 bg-[#B5651D] text-white font-semibold rounded-lg text-sm"
           >
             Save
           </button>
@@ -376,7 +376,7 @@ export default function SalaryPage() {
           </button>
           <button
             onClick={handleSaveExpense}
-            className="px-3 py-1 bg-[#B5651D] text-black font-semibold rounded-lg text-sm"
+            className="px-3 py-1 bg-[#B5651D] text-white font-semibold rounded-lg text-sm"
           >
             Save
           </button>
@@ -406,7 +406,7 @@ export default function SalaryPage() {
         <div className="flex mb-4 gap-2">
           <button
             className={`px-3 py-1 rounded text-sm ${
-              activeTab === "active" ? " bg-[#B5651D] text-black  font-bold" : "bg-[#1C1C1E] text-[#EFE6D8]"
+              activeTab === "active" ? " bg-[#B5651D] text-white  font-bold" : "bg-[#1C1C1E] text-[#EFE6D8]"
             }`}
             onClick={() => setActiveTab("active")}
           >
@@ -435,7 +435,7 @@ export default function SalaryPage() {
             <button
               onClick={() => setShowForm(true)}
               title="Add Salary"
-              className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-black font-bold   rounded-4xl text-sm"
+              className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-white font-bold   rounded-4xl text-sm"
             >
               +
             </button>
@@ -609,13 +609,13 @@ export default function SalaryPage() {
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={() => handleSaveAllExpenses(entry._id)}
-                    className="px-3 py-1 bg-[#B5651D] text-black font-bold rounded text-sm"
+                    className="px-3 py-1 bg-[#B5651D] text-white font-bold rounded text-sm"
                   >
                     Save All
                   </button>
                   <button
                     onClick={handleCancelEditAll}
-                    className="px-3 py-1 bg-[#B5651D] text-black font-bold rounded text-sm"
+                    className="px-3 py-1 bg-[#B5651D] text-white font-bold rounded text-sm"
                   >
                     Cancel
                   </button>

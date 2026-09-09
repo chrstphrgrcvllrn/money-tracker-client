@@ -142,7 +142,7 @@ const highlightText = (text: string, done: boolean) => {
 
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#262624]">
       {/* INPUT */}
       <div className="flex gap-2 mb-4 h-[7vh]">
         <input
@@ -168,7 +168,7 @@ const highlightText = (text: string, done: boolean) => {
 
         <button
           onClick={addNote}
-          className="bg-[#B5651D] text-black font-bold px-2 py-1 rounded"
+          className="bg-[#B5651D] text-white font-bold px-2 py-1 rounded"
         >
           Add
         </button>
@@ -182,7 +182,7 @@ const highlightText = (text: string, done: boolean) => {
             onClick={() => setActiveTab(tab as "all" | "done" | "pending" | "work" | "personal" | "others" | "to buy")}
             className={`px-2 py-1 rounded-xl text-xs capitalize ${
               activeTab === tab
-                ? "bg-[#B5651D] text-black font-bold"
+                ? "bg-[#B5651D] text-white font-bold"
                 : "bg-[#1C1C1E] text-[#9C8F80]"
             }`}
           >

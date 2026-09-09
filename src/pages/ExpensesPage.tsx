@@ -280,7 +280,7 @@ const graphData = Object.values(
               onClick={() => setActiveTab(tab as "pending" | "monthly" | "biggest" | "graph")}
               className={`px-2 py-1 rounded-xl text-xs capitalize ${
                 activeTab === tab
-                  ? "bg-[#B5651D] text-black font-bold"
+                  ? "bg-[#B5651D] text-white font-bold"
                   : "bg-[#1C1C1E] text-[#9C8F80]"
               }`}
             >
@@ -291,7 +291,7 @@ const graphData = Object.values(
 
         <button
           onClick={() => setShowModal(true)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-black font-bold rounded-4xl text-sm"
+          className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-white font-bold rounded-4xl text-sm"
         >
           +
         </button>
@@ -499,7 +499,7 @@ const graphData = Object.values(
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 bg-[#B5651D] text-black font-bold p-2 rounded-lg"
+            className="flex-1 bg-[#B5651D] text-white font-bold p-2 rounded-lg"
           >
             Save
           </button>

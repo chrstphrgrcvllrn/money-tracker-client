@@ -51,7 +51,7 @@ const ThoughtsPage: React.FC = () => {
   };
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#262624]">
       {/* INPUT */}
       <div className="flex gap-2 mb-4">
         <input
@@ -63,7 +63,7 @@ const ThoughtsPage: React.FC = () => {
 
         <button
           onClick={addThought}
-          className="bg-[#B5651D] text-black font-bold px-2 py-1 rounded"
+          className="bg-[#B5651D] text-white font-bold px-2 py-1 rounded"
         >
           Add
         </button>

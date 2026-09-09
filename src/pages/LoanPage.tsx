@@ -201,13 +201,13 @@ export default function LoanPage() {
   }
 
   return (
-    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[#000000]">
+    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[#262624]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
         <div className="flex gap-2">
           <button
             className={`px-3 py-1 rounded text-sm ${
-              activeTab === "active" ? "bg-[#B5651D] text-black font-bold" : "bg-[#1C1C1E] text-[#EFE6D8]"
+              activeTab === "active" ? "bg-[#B5651D] text-white font-bold" : "bg-[#1C1C1E] text-[#EFE6D8]"
             }`}
             onClick={() => setActiveTab("active")}
           >
@@ -237,7 +237,7 @@ export default function LoanPage() {
 
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-black font-bold   rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-white font-bold   rounded-4xl text-sm"
           >
             +
           </button>
@@ -272,7 +272,7 @@ export default function LoanPage() {
 
           <button
             onClick={handleAddLoan}
-            className="px-3 py-1 bg-[#B5651D] text-black font-semibold rounded-lg"
+            className="px-3 py-1 bg-[#B5651D] text-white font-semibold rounded-lg"
           >
             Save
           </button>
@@ -416,7 +416,7 @@ export default function LoanPage() {
 
                         handleAddPayment(loan._id, index, value);
                       }}
-                      className="w-full bg-[#B5651D] text-black font-bold py-2 rounded-lg text-sm"
+                      className="w-full bg-[#B5651D] text-white font-bold py-2 rounded-lg text-sm"
                     >
                       Add Payment
                     </button>

@@ -174,7 +174,7 @@ export default function SavingsPage() {
   }
 
   return (
-    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[#000000]">
+    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[#262624]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-start">
         <div className="flex w-full items-center justify-between gap-3">
@@ -191,7 +191,7 @@ export default function SavingsPage() {
 
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-black  font-bold rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-white  font-bold rounded-4xl text-sm"
           >
             +
           </button>
@@ -227,7 +227,7 @@ export default function SavingsPage() {
 
           <button
             onClick={handleAddSavings}
-            className="px-3 py-1 bg-[#B5651D] text-black font-semibold rounded-lg"
+            className="px-3 py-1 bg-[#B5651D] text-white font-semibold rounded-lg"
           >
             Save
           </button>
@@ -370,7 +370,7 @@ export default function SavingsPage() {
                       onClick={() =>
                         handleAddTransaction(item._id, index, transactionType[index] || "+")
                       }
-                      className="w-full bg-[#B5651D] text-black font-bold py-2 rounded-lg text-sm"
+                      className="w-full bg-[#B5651D] text-white font-bold py-2 rounded-lg text-sm"
                     >
                       Add Transaction
                     </button>

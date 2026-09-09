@@ -242,7 +242,7 @@ export default function BillsPage() {
     );
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#262624]">
       {/* TABS */}
        <div className="flex gap-2 mb-4 justify-between">
           <div className="flex gap-2 mb-4">
@@ -250,7 +250,7 @@ export default function BillsPage() {
               onClick={() => setTab("ongoing")}
               className={`px-3 py-1 rounded-full text-xs ${
                 tab === "ongoing"
-                  ? " bg-[#B5651D] text-black font-bold"
+                  ? " bg-[#B5651D] text-white font-bold"
                   : "bg-[#1C1C1E] text-[#9C8F80]"
               }`}
             >
@@ -261,7 +261,7 @@ export default function BillsPage() {
               onClick={() => setTab("done")}
               className={`px-3 py-1 rounded-full text-xs ${
                 tab === "done"
-                  ? " bg-[#B5651D] text-black "
+                  ? " bg-[#B5651D] text-white "
                   : "bg-[#1C1C1E] text-[#9C8F80]"
               }`}
             >
@@ -272,7 +272,7 @@ export default function BillsPage() {
             <div className="mb-4 flex justify-between items-start">
             <button
               onClick={() => setShowForm(true)}
-              className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-black font-bold rounded-4xl text-sm"
+              className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-white font-bold rounded-4xl text-sm"
             >
               +
             </button>
@@ -294,7 +294,7 @@ export default function BillsPage() {
           </button>
           <button
             onClick={handleAddMonth}
-            className="bg-[#B5651D] text-black font-semibold px-3 py-1 rounded"
+            className="bg-[#B5651D] text-white font-semibold px-3 py-1 rounded"
           >
             Save
           </button>
@@ -331,7 +331,7 @@ export default function BillsPage() {
           </button>
           <button
             onClick={handleSaveBill}
-            className="bg-[#B5651D] text-black font-semibold px-3 py-1 rounded"
+            className="bg-[#B5651D] text-white font-semibold px-3 py-1 rounded"
           >
             Save
           </button>
@@ -353,7 +353,7 @@ export default function BillsPage() {
           </button>
           <button
             onClick={handleSaveDuplicate}
-            className="bg-[#B5651D] text-black font-semibold px-3 py-1 rounded"
+            className="bg-[#B5651D] text-white font-semibold px-3 py-1 rounded"
           >
             Save
           </button>
@@ -476,7 +476,7 @@ export default function BillsPage() {
             {isEditing && (
               <button
                 onClick={() => handleSaveAll(entry._id)}
-                className="mt-2 bg-[#B5651D] text-black px-3 py-1 rounded text-sm"
+                className="mt-2 bg-[#B5651D] text-white px-3 py-1 rounded text-sm"
               >
                 Save
               </button>

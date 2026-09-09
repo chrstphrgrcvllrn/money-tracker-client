@@ -171,7 +171,7 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[#000000]">
+    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[#262624]">
 
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
@@ -188,7 +188,7 @@ export default function SubscriptionPage() {
 
           <button
             onClick={openAddModal}
-            className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-black font-bold rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-white font-bold rounded-4xl text-sm"
           >
             +
           </button>
@@ -201,7 +201,7 @@ export default function SubscriptionPage() {
           onClick={() => setTab("ongoing")}
           className={`px-3 py-1 rounded-full text-xs ${
             tab === "ongoing"
-              ? "bg-[#B5651D] text-black font-bold"
+              ? "bg-[#B5651D] text-white font-bold"
               : "bg-[#1C1C1E] text-[#9C8F80]"
           }`}
         >
@@ -212,7 +212,7 @@ export default function SubscriptionPage() {
           onClick={() => setTab("completed")}
           className={`px-3 py-1 rounded-full text-xs ${
             tab === "completed"
-              ? "bg-[#B5651D] text-black font-bold"
+              ? "bg-[#B5651D] text-white font-bold"
               : "bg-[#1C1C1E] text-[#9C8F80]"
           }`}
         >
@@ -250,7 +250,7 @@ export default function SubscriptionPage() {
                     : "border-[#C9A374]/40 hover:border-[#C9A374]"
                 }`}
               >
-                {item.completed && <CheckIcon className="w-4 h-4 text-black" />}
+                {item.completed && <CheckIcon className="w-4 h-4 text-white" />}
               </button>
 
               <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
@@ -371,7 +371,7 @@ export default function SubscriptionPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-2 bg-[#B5651D] text-black font-semibold rounded-lg disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-[#B5651D] text-white font-semibold rounded-lg disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save"}
           </button>

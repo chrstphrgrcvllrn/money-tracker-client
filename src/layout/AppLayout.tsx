@@ -10,7 +10,7 @@ export default function AppLayout() {
       <BottomNavBar />
       <main
         className={`flex-1 p-0 h-[90svh] overflow-y-auto ${
-          theme === "light" ? "bg-[#FAF7F1]" : "bg-[#000000]"
+          theme === "light" ? "bg-[#FAF7F1]" : "bg-[#262624]"
         }`}
       >
            <Outlet />

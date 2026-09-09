@@ -319,7 +319,7 @@ const HouseExpensesPage: React.FC = () => {
   // RENDER
   // =========================
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000] text-[#EFE6D8]">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#262624] text-[#EFE6D8]">
 
       {/* TOTALS */}
       <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
@@ -346,7 +346,7 @@ const HouseExpensesPage: React.FC = () => {
               onClick={() => setActiveTab(tab as "monthly" | "pending" | "biggest" | "graph")}
               className={`px-2 py-1 rounded-xl text-xs capitalize ${
                 activeTab === tab
-                  ? "bg-[#B5651D] text-black font-bold"
+                  ? "bg-[#B5651D] text-white font-bold"
                   : "bg-[#1C1C1E] text-[#9C8F80]"
               }`}
             >
@@ -357,7 +357,7 @@ const HouseExpensesPage: React.FC = () => {
 
         <button
           onClick={() => setShowModal(true)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-black font-bold rounded-4xl text-sm"
+          className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-white font-bold rounded-4xl text-sm"
         >
           +
         </button>
@@ -403,7 +403,7 @@ const HouseExpensesPage: React.FC = () => {
                           />
                           <button
                             onClick={() => handleSaveBudget(month)}
-                            className="px-3 py-2 bg-[#B5651D] text-black text-xs font-bold rounded"
+                            className="px-3 py-2 bg-[#B5651D] text-white text-xs font-bold rounded"
                           >
                             ✓
                           </button>
@@ -638,7 +638,7 @@ const HouseExpensesPage: React.FC = () => {
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 bg-[#B5651D] text-black font-bold p-2 rounded-lg"
+            className="flex-1 bg-[#B5651D] text-white font-bold p-2 rounded-lg"
           >
             Save
           </button>
