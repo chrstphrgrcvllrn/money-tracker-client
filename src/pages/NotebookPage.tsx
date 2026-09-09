@@ -343,6 +343,57 @@ const NotebookPage: React.FC = () => {
         .modal-animate {
           animation: modal-scale-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+        .notebook-editor .ql-toolbar.ql-snow,
+        .notebook-editor .ql-container.ql-snow {
+          border: none;
+        }
+        .notebook-editor .ql-snow .ql-stroke {
+          stroke: var(--text-primary);
+        }
+        .notebook-editor .ql-snow .ql-fill,
+        .notebook-editor .ql-snow .ql-stroke.ql-fill {
+          fill: var(--text-primary);
+        }
+        .notebook-editor .ql-snow .ql-picker {
+          color: var(--text-primary);
+        }
+        .notebook-editor .ql-snow .ql-picker-options {
+          background-color: var(--bg-surface);
+          border-color: var(--border-subtle);
+        }
+        .notebook-editor .ql-snow .ql-picker-item {
+          color: var(--text-primary);
+        }
+        .notebook-editor .ql-snow .ql-picker.ql-expanded .ql-picker-label {
+          border-color: var(--border-subtle);
+        }
+        .notebook-editor .ql-editor.ql-blank::before {
+          color: var(--text-secondary);
+        }
+        .notebook-editor .ql-snow.ql-toolbar button:hover,
+        .notebook-editor .ql-snow .ql-toolbar button:hover,
+        .notebook-editor .ql-snow.ql-toolbar button.ql-active,
+        .notebook-editor .ql-snow .ql-toolbar button.ql-active,
+        .notebook-editor .ql-snow .ql-picker-label:hover,
+        .notebook-editor .ql-snow .ql-picker-label.ql-active,
+        .notebook-editor .ql-snow .ql-picker-item:hover,
+        .notebook-editor .ql-snow .ql-picker-item.ql-selected {
+          color: #2DE0E6;
+        }
+        .notebook-editor .ql-snow.ql-toolbar button:hover .ql-stroke,
+        .notebook-editor .ql-snow .ql-toolbar button:hover .ql-stroke,
+        .notebook-editor .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+        .notebook-editor .ql-snow .ql-toolbar button.ql-active .ql-stroke,
+        .notebook-editor .ql-snow .ql-picker-label:hover .ql-stroke,
+        .notebook-editor .ql-snow .ql-picker-label.ql-active .ql-stroke {
+          stroke: #2DE0E6;
+        }
+        .notebook-editor .ql-snow.ql-toolbar button:hover .ql-fill,
+        .notebook-editor .ql-snow .ql-toolbar button:hover .ql-fill,
+        .notebook-editor .ql-snow.ql-toolbar button.ql-active .ql-fill,
+        .notebook-editor .ql-snow .ql-toolbar button.ql-active .ql-fill {
+          fill: #2DE0E6;
+        }
       `}</style>
 
       {/* HEADER */}
@@ -423,7 +474,7 @@ const NotebookPage: React.FC = () => {
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${
                       note.status === "open"
-                        ? "bg-[var(--btn-bg)] text-[var(--btn-text)]"
+                        ? "border border-[#2DE0E6] text-[#2DE0E6]"
                         : "bg-[#2A2A2C] text-gray-500"
                     }`}
                   >
@@ -511,28 +562,35 @@ const NotebookPage: React.FC = () => {
             {/* MODAL FOOTER */}
             <div className="flex items-center justify-between px-5 py-4 border-t border-white/10">
 
-              <button
-                onClick={toggleStatus}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#2A2A2C] text-gray-300 hover:bg-[#333335]"
-              >
-                <CheckIcon className="w-4 h-4" />
+              <div className="flex items-center gap-2">
 
-                {selectedNote.status === "open"
-                  ? "Close Note"
-                  : "Reopen Note"}
-              </button>
+                <button
+                  onClick={toggleStatus}
+                  title={selectedNote.status === "open" ? "Close Note" : "Reopen Note"}
+                  aria-label={selectedNote.status === "open" ? "Close Note" : "Reopen Note"}
+                  className="flex items-center justify-center p-2.5 rounded-lg bg-[#2A2A2C] text-gray-300 hover:bg-[#333335]"
+                >
+                  <CheckIcon className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={deleteNote}
+                  title="Delete"
+                  aria-label="Delete"
+                  className="flex items-center justify-center p-2.5 rounded-lg text-gray-500 hover:text-red-400"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
+
+              </div>
 
               <div className="flex items-center gap-2">
 
                 <button
-                  onClick={deleteNote}
-                  className="flex items-center gap-2 text-gray-500 hover:text-red-400"
+                  onClick={closeNote}
+                  className="px-4 py-2 rounded-lg text-gray-400 hover:text-[var(--text-primary)] border border-gray-600"
                 >
-                  <TrashIcon className="w-5 h-5" />
-
-                  <span>
-                    Delete
-                  </span>
+                  Cancel
                 </button>
 
                 <button

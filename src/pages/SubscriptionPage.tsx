@@ -166,6 +166,12 @@ export default function SubscriptionPage() {
 
   const total = filteredItems.reduce((sum, item) => sum + itemTotal(item), 0);
 
+  // Keep the modal's view of the item in sync with optimistic updates
+  // (e.g. toggling completed) made to the `items` list while it's open.
+  const editingItemLive = editingItem
+    ? items.find((i) => i._id === editingItem._id) ?? editingItem
+    : null;
+
   if (loading) {
     return <div className="p-4 text-center text-[var(--text-primary)]">Loading...</div>;
   }
@@ -242,17 +248,6 @@ export default function SubscriptionPage() {
                 idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
               }`}
             >
-              <button
-                onClick={() => handleToggleCompleted(item)}
-                className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center border transition ${
-                  item.completed
-                    ? "bg-[var(--btn-bg)] border-[#2DE0E6]"
-                    : "border-[#2DE0E6]/40 hover:border-[#2DE0E6]"
-                }`}
-              >
-                {item.completed && <CheckIcon className="w-4 h-4 text-[var(--btn-text)]" />}
-              </button>
-
               <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
                 <ShoppingBagIcon className="w-4 h-4 text-[var(--text-primary)]" />
               </div>
@@ -351,15 +346,33 @@ export default function SubscriptionPage() {
         </div>
 
         <div className="flex items-center gap-2 pt-2">
-          {editingItem && (
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="flex items-center justify-center gap-2 px-4 py-2 text-red-400 hover:text-red-500 border border-red-500/30 hover:border-red-500/50 rounded-lg disabled:opacity-50"
-            >
-              <TrashIcon className="w-4 h-4" />
-              {deleting ? "Deleting..." : "Delete"}
-            </button>
+          {editingItemLive && (
+            <>
+              <button
+                onClick={() => handleToggleCompleted(editingItemLive)}
+                title={editingItemLive.completed ? "Mark as ongoing" : "Mark as completed"}
+                className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-lg border transition ${
+                  editingItemLive.completed
+                    ? "bg-[var(--btn-bg)] border-[#2DE0E6]"
+                    : "border-[#2DE0E6]/40 hover:border-[#2DE0E6]"
+                }`}
+              >
+                <CheckIcon
+                  className={`w-4 h-4 ${
+                    editingItemLive.completed ? "text-[var(--btn-text)]" : "text-[var(--text-secondary)]"
+                  }`}
+                />
+              </button>
+
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex items-center justify-center gap-2 px-4 py-2 text-red-400 hover:text-red-500 border border-red-500/30 hover:border-red-500/50 rounded-lg disabled:opacity-50"
+              >
+                <TrashIcon className="w-4 h-4" />
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </>
           )}
 
           <button
