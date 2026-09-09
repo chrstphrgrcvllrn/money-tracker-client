@@ -63,15 +63,6 @@ const TrackerPage: React.FC = () => {
     amilyar: "e.g. Amilyar payment",
   };
 
-  const categoryDescriptions: Record<TrackerCategory, string> = {
-    medical: "Checkups, visits, and health notes",
-    dental: "Cleanings, treatments, and dental visits",
-    motorcycle: "Oil changes, maintenance, and repairs",
-    crypto: "Purchases, trades, and coin holdings",
-    digital: "Subscriptions and recurring payments",
-    amilyar: "Property tax and amilyar payments",
-  };
-
   const categoryIcons: Record<TrackerCategory, (props: { className?: string }) => React.ReactElement> = {
     medical: MedicalIcon,
     dental: DentalIcon,
@@ -195,6 +186,10 @@ const TrackerPage: React.FC = () => {
   return (
     <div className="min-h-[calc(100vh-80px)] bg-[var(--bg-page)] text-[var(--text-primary)] px-5 pt-6 pb-10">
       <TrackerIconStyles />
+      <style>{`
+        .tracker-cat-scroll::-webkit-scrollbar { display: none; }
+        .tracker-cat-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+      `}</style>
 
       <div className="max-w-md mx-auto">
         {/* HEADER */}
@@ -203,10 +198,10 @@ const TrackerPage: React.FC = () => {
           <p className="text-[var(--text-secondary)] text-sm mt-1">Track your activities and events</p>
         </div>
 
-        {/* CATEGORY LIST */}
-        <div className="mb-6">
+        {/* CATEGORY SELECTOR — compact horizontal strip */}
+        <div className="tracker-cat-scroll flex gap-3 overflow-x-auto pb-1 mb-5 -mx-5 px-5">
           {(Object.entries(categories) as [TrackerCategory, string][]).map(
-            ([key, label], idx, arr) => {
+            ([key, label]) => {
               const Icon = categoryIcons[key];
               const isActive = activeTab === key;
 
@@ -214,28 +209,24 @@ const TrackerPage: React.FC = () => {
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`w-full flex items-center gap-4 py-4 text-left transition ${
-                    idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
-                  }`}
+                  className="shrink-0 w-16 flex flex-col items-center gap-1.5 text-center"
                 >
                   <div
-                    className={`shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border transition ${
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center border transition ${
                       isActive
                         ? "border-[#2DE0E6] bg-[var(--btn-bg)]/15 text-[var(--text-primary)]"
                         : "border-[#2DE0E6]/40 text-[var(--text-secondary)]"
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-6 h-6" />
                   </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-[var(--text-primary)] ${isActive ? "font-semibold" : "font-medium"}`}>
-                      {label}
-                    </p>
-                    <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                      {categoryDescriptions[key]}
-                    </p>
-                  </div>
+                  <span
+                    className={`text-[11px] leading-tight ${
+                      isActive ? "text-[var(--text-primary)] font-semibold" : "text-[var(--text-secondary)]"
+                    }`}
+                  >
+                    {label}
+                  </span>
                 </button>
               );
             }
@@ -293,18 +284,16 @@ const TrackerPage: React.FC = () => {
             />
           </div>
 
-          {(activeTab === "crypto" || activeTab === "digital" || activeTab === "amilyar") && (
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Amount</label>
-              <input
-                type="number"
-                placeholder="0"
-                value={formData.amount || ""}
-                onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
-              />
-            </div>
-          )}
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Amount</label>
+            <input
+              type="number"
+              placeholder="0"
+              value={formData.amount || ""}
+              onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+            />
+          </div>
 
           {activeTab === "crypto" && (
             <div>

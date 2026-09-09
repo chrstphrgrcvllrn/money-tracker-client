@@ -178,13 +178,13 @@ export default function SavingsPage() {
   }
 
   return (
-    <div className="pb-6 mt-8 font-sans bg-[var(--bg-page)]">
+    <div className="pb-6 pt-8 font-sans bg-[var(--bg-page)] h-full flex flex-col">
       <style>{`
         .savings-scroll::-webkit-scrollbar { display: none; }
         .savings-scroll { scrollbar-width: none; -ms-overflow-style: none; }
       `}</style>
 
-      <div className="px-6 max-w-md mx-auto">
+      <div className="px-6 max-w-md mx-auto w-full shrink-0">
         {/* HEADER */}
         <div className="mb-4 flex justify-between items-start">
           <div className="flex w-full items-center justify-between gap-3">
@@ -259,11 +259,11 @@ export default function SavingsPage() {
 
       {/* SWIPEABLE CARD CAROUSEL */}
       {savings.length === 0 ? (
-        <p className="px-6 max-w-md mx-auto text-[var(--text-secondary)] text-sm text-center py-8">
+        <p className="px-6 max-w-md mx-auto text-[var(--text-secondary)] text-sm text-center py-8 shrink-0">
           No savings yet. Add one to get started!
         </p>
       ) : (
-        <div className="savings-scroll flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 px-6">
+        <div className="savings-scroll flex-1 min-h-0 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 px-6">
           {savings.map((item) => {
             const balance = getBalance(item);
             const paths = getIconPaths(item.name);
@@ -272,9 +272,9 @@ export default function SavingsPage() {
               <button
                 key={item._id}
                 onClick={() => openDetails(item._id)}
-                className="shrink-0 w-32 snap-start text-left"
+                className="shrink-0 h-full aspect-[3/5] snap-start text-left flex flex-col"
               >
-                <div className="w-32 h-[221px] rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 relative flex items-center justify-center">
+                <div className="w-full flex-1 min-h-0 rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 relative flex items-center justify-center">
                   <img
                     src={paths[0]}
                     alt={item.name}
@@ -301,10 +301,10 @@ export default function SavingsPage() {
                   </span>
                 </div>
 
-                <p className="mt-2 text-sm font-semibold text-[var(--text-primary)] truncate">
+                <p className="mt-2 text-sm font-semibold text-[var(--text-primary)] truncate shrink-0">
                   {item.name}
                 </p>
-                <p className="text-sm font-bold text-[var(--text-primary)]">
+                <p className="text-sm font-bold text-[var(--text-primary)] shrink-0">
                   {showAmounts ? balance.toLocaleString() : mask(balance)}
                 </p>
               </button>
