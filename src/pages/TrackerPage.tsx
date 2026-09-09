@@ -11,6 +11,15 @@ import {
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+import {
+  TrackerIconStyles,
+  MedicalIcon,
+  DentalIcon,
+  MotorcycleIcon,
+  CryptoIcon,
+  DigitalIcon,
+  AmilyarIcon,
+} from "../components/icons/TrackerIcons";
 
 const emptyForm = {
   name: "",
@@ -52,6 +61,24 @@ const TrackerPage: React.FC = () => {
     crypto: "e.g. Bought XRP",
     digital: "e.g. Netflix subscription",
     amilyar: "e.g. Amilyar payment",
+  };
+
+  const categoryDescriptions: Record<TrackerCategory, string> = {
+    medical: "Checkups, visits, and health notes",
+    dental: "Cleanings, treatments, and dental visits",
+    motorcycle: "Oil changes, maintenance, and repairs",
+    crypto: "Purchases, trades, and coin holdings",
+    digital: "Subscriptions and recurring payments",
+    amilyar: "Property tax and amilyar payments",
+  };
+
+  const categoryIcons: Record<TrackerCategory, (props: { className?: string }) => React.ReactElement> = {
+    medical: MedicalIcon,
+    dental: DentalIcon,
+    motorcycle: MotorcycleIcon,
+    crypto: CryptoIcon,
+    digital: DigitalIcon,
+    amilyar: AmilyarIcon,
   };
 
   const loadEntries = async () => {
@@ -166,35 +193,59 @@ const TrackerPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-black text-white px-5 pt-6 pb-10">
+    <div className="min-h-[calc(100vh-80px)] bg-[#141210] text-white px-5 pt-6 pb-10">
+      <TrackerIconStyles />
+
       <div className="max-w-md mx-auto">
         {/* HEADER */}
-        <div className="mb-6">
-          <h1 className="text-lg font-semibold">Tracker</h1>
-          <p className="text-gray-500 text-sm mt-1">Track your activities and events</p>
+        <div className="mb-4">
+          <h1 className="text-lg font-semibold text-[#EFE6D8]">Tracker</h1>
+          <p className="text-[#9C8F80] text-sm mt-1">Track your activities and events</p>
         </div>
 
-        {/* TABS */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {(Object.entries(categories) as [TrackerCategory, string][]).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={`px-3 py-1.5 rounded-xl whitespace-nowrap text-sm transition ${
-                activeTab === key
-                  ? "bg-[#DFF966] text-black font-semibold"
-                  : "bg-[#1C1C1E] text-gray-400 hover:text-white"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        {/* CATEGORY LIST */}
+        <div className="mb-6">
+          {(Object.entries(categories) as [TrackerCategory, string][]).map(
+            ([key, label], idx, arr) => {
+              const Icon = categoryIcons[key];
+              const isActive = activeTab === key;
+
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`w-full flex items-center gap-4 py-4 text-left transition ${
+                    idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
+                  }`}
+                >
+                  <div
+                    className={`shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border transition ${
+                      isActive
+                        ? "border-[#B98953] bg-[#B98953]/15 text-[#B98953]"
+                        : "border-[#B98953]/40 text-[#B98953]/80"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-[#EFE6D8] ${isActive ? "font-semibold" : "font-medium"}`}>
+                      {label}
+                    </p>
+                    <p className="text-xs text-[#9C8F80] mt-0.5">
+                      {categoryDescriptions[key]}
+                    </p>
+                  </div>
+                </button>
+              );
+            }
+          )}
         </div>
 
         {/* ADD BUTTON */}
         <button
           onClick={openAddModal}
-          className="w-full flex items-center gap-2 justify-center bg-[#DFF966] text-black font-semibold px-4 py-2 rounded-lg mb-6"
+          className="w-full flex items-center gap-2 justify-center bg-[#B98953] text-black font-semibold px-4 py-2 rounded-lg mb-6"
         >
           <PlusIcon className="w-4 h-4" />
           Add Entry
@@ -217,7 +268,7 @@ const TrackerPage: React.FC = () => {
               placeholder={categoryExamples[activeTab]}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none"
             />
           </div>
 
@@ -227,7 +278,7 @@ const TrackerPage: React.FC = () => {
               placeholder="e.g., who, what, procedure, result"
               value={formData.details}
               onChange={(e) => setFormData({ ...formData, details: e.target.value })}
-              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none resize-none"
+              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none resize-none"
               rows={3}
             />
           </div>
@@ -238,7 +289,7 @@ const TrackerPage: React.FC = () => {
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none"
             />
           </div>
 
@@ -250,7 +301,7 @@ const TrackerPage: React.FC = () => {
                 placeholder="0"
                 value={formData.amount || ""}
                 onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+                className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none"
               />
             </div>
           )}
@@ -264,7 +315,7 @@ const TrackerPage: React.FC = () => {
                 placeholder="e.g. 11.02"
                 value={formData.price || ""}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+                className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none"
               />
             </div>
           )}
@@ -275,7 +326,7 @@ const TrackerPage: React.FC = () => {
               placeholder="Additional notes..."
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none resize-none"
+              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none resize-none"
               rows={2}
             />
           </div>
@@ -301,7 +352,7 @@ const TrackerPage: React.FC = () => {
             <button
               onClick={handleSaveEntry}
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-[#DFF966] text-black font-semibold rounded-lg disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-[#B98953] text-black font-semibold rounded-lg disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save"}
             </button>
@@ -317,25 +368,27 @@ const TrackerPage: React.FC = () => {
               No entries yet. Add one to get started!
             </div>
           ) : (
-            filteredEntries.map((entry) => (
+            filteredEntries.map((entry, idx) => (
               <button
                 key={entry._id}
                 onClick={() => openEditModal(entry)}
-                className="w-full flex items-center gap-3 bg-[#1C1C1E] hover:bg-[#242426] rounded-xl px-4 py-3 text-left transition"
+                className={`w-full flex items-center gap-3 py-3 text-left transition hover:bg-white/[0.03] ${
+                  idx !== filteredEntries.length - 1 ? "border-b border-[#2A2420]" : ""
+                }`}
               >
-                <span className="flex-1 min-w-0 truncate text-white font-medium text-sm">
+                <span className="flex-1 min-w-0 truncate text-[#EFE6D8] font-medium text-sm">
                   {entry.name}
                 </span>
-                <span className="shrink-0 text-xs text-gray-500">
+                <span className="shrink-0 text-xs text-[#9C8F80]">
                   {new Date(entry.date).toLocaleDateString()}
                 </span>
                 {!!entry.price && entry.price > 0 && (
-                  <span className="shrink-0 text-xs text-gray-400">
+                  <span className="shrink-0 text-xs text-[#9C8F80]">
                     {entry.price.toLocaleString()}
                   </span>
                 )}
                 {!!entry.amount && entry.amount > 0 && (
-                  <span className="shrink-0 text-xs text-[#DFF966] font-semibold">
+                  <span className="shrink-0 text-xs text-[#B98953] font-semibold">
                     {entry.amount.toLocaleString()}
                   </span>
                 )}
