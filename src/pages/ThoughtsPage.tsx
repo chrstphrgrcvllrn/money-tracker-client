@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Thought } from "../types/thoughts.type";
 import { getThoughts, createThought } from "../api/thought";
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 import { useToast } from "../components/useToast";
 
 const ThoughtsPage: React.FC = () => {
@@ -57,40 +58,39 @@ const ThoughtsPage: React.FC = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Write a thought..."
-          className="flex-1 bg-[#1C1C1E] px-2 py-7 rounded text-white"
+          className="flex-1 bg-[#2C2C2E] px-2 py-7 rounded text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
         />
 
         <button
           onClick={addThought}
-          className="bg-[#DFF966] text-black font-bold px-2 py-1 rounded"
+          className="bg-[#B5651D] text-black font-bold px-2 py-1 rounded"
         >
           Add
         </button>
       </div>
 
       {/* LIST */}
-      <ul className="space-y-2">
-        {thoughts.map((t) => {
+      <ul>
+        {thoughts.map((t, idx, arr) => {
           const isOpen = expanded.has(t._id);
 
           return (
             <li
               key={t._id}
-              className="px-4 py-5 bg-[#1C1C1E] rounded text-white cursor-pointer"
+              className={idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""}
             >
               <button
                 onClick={() => toggleThought(t._id)}
-                className="w-full text-left"
+                className="w-full flex items-start gap-3 py-4 text-left text-[#EFE6D8] cursor-pointer"
               >
+                <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
+                  <ChatBubbleLeftIcon className="w-4 h-4 text-[#C9A374]" />
+                </div>
+
                 {isOpen ? (
-                  <div>
-                    {/* <div className="text-[10px] text-gray-400"> */}
-                      {/* Click to collapse */}
-                    {/* </div> */}
-                    "{t.text}"
-                  </div>
+                  <div className="flex-1 min-w-0">"{t.text}"</div>
                 ) : (
-                   <div className="line-clamp-2">"{t.text}"</div>
+                   <div className="flex-1 min-w-0 line-clamp-2">"{t.text}"</div>
                 )}
               </button>
             </li>

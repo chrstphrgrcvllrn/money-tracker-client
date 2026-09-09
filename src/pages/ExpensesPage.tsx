@@ -7,7 +7,7 @@ import {
 } from "../api/expenses";
 
 import type { Expense } from "../types/expenses.type";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, ReceiptPercentIcon } from "@heroicons/react/24/solid";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 
@@ -234,9 +234,13 @@ const graphData = Object.values(
 
   const totalGraph = graphData.reduce((s, i) => s + i.total, 0);
 
+  const existingCategories = Array.from(
+    new Set(expenses.map((e) => e.category).filter((c): c is string => !!c))
+  ).sort((a, b) => a.localeCompare(b));
+
   const colors = [
-    "#DFF966",
-    "#85D989",
+    "#C9A374",
+    "#FFFFFF",
     "#B2597C",
     "#60A5FA",
     "#F97316",
@@ -254,16 +258,16 @@ const graphData = Object.values(
       {/* TOTALS */}
       <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
-          <p className="text-white font-bold">Today</p>
-          <p className="text-[#85D989] font-bold">₱{totalToday.toLocaleString()}</p>
+          <p className="text-[#EFE6D8] font-bold">Today</p>
+          <p className="text-[#FFFFFF] font-bold">₱{totalToday.toLocaleString()}</p>
         </div>
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
-          <p className="text-white font-bold">Week</p>
-          <p className="text-[#85D989] font-bold">₱{totalWeek.toLocaleString()}</p>
+          <p className="text-[#EFE6D8] font-bold">Week</p>
+          <p className="text-[#FFFFFF] font-bold">₱{totalWeek.toLocaleString()}</p>
         </div>
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
-          <p className="text-white font-bold">Month</p>
-          <p className="text-[#85D989] font-bold">₱{totalMonth.toLocaleString()}</p>
+          <p className="text-[#EFE6D8] font-bold">Month</p>
+          <p className="text-[#FFFFFF] font-bold">₱{totalMonth.toLocaleString()}</p>
         </div>
       </div>
 
@@ -276,8 +280,8 @@ const graphData = Object.values(
               onClick={() => setActiveTab(tab as "pending" | "monthly" | "biggest" | "graph")}
               className={`px-2 py-1 rounded-xl text-xs capitalize ${
                 activeTab === tab
-                  ? "bg-[#DFF966] text-black font-bold"
-                  : "bg-[#1C1C1E] text-gray-400"
+                  ? "bg-[#B5651D] text-black font-bold"
+                  : "bg-[#1C1C1E] text-[#9C8F80]"
               }`}
             >
               {tab}
@@ -287,7 +291,7 @@ const graphData = Object.values(
 
         <button
           onClick={() => setShowModal(true)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#DFF966] text-black font-bold rounded-4xl text-sm"
+          className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-black font-bold rounded-4xl text-sm"
         >
           +
         </button>
@@ -298,13 +302,15 @@ const graphData = Object.values(
       {/* ========================= */}
       {activeTab === "biggest" &&
         sortedBiggest.map((m) => (
-          <div key={m.label} className="mb-3">
-            <div className="text-gray-400 text-[10px] mb-2">{m.label}</div>
+          <div key={m.label} className="mb-4">
+            <div className="text-[#9C8F80] text-[10px] mb-2">{m.label}</div>
 
-            {m.data.map((item) => (
+            {m.data.map((item, idx, arr) => (
               <div
                 key={item.name}
-                className="flex justify-between bg-[#1C1C1E] p-3 rounded-xl mb-2 text-white"
+                className={`flex justify-between py-2.5 text-[#EFE6D8] ${
+                  idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
+                }`}
               >
                 <span>{item.name}</span>
                 <span>₱{item.total.toLocaleString()}</span>
@@ -339,7 +345,7 @@ const graphData = Object.values(
                   .join(", ")})`,
               }}
             >
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-[#EFE6D8]">
                 <div className="text-lg font-bold">
                   ₱{totalGraph.toLocaleString()}
                 </div>
@@ -350,7 +356,7 @@ const graphData = Object.values(
          {graphData.map((g, i) => (
             <div
               key={g.name}
-              className="flex justify-between items-centerp-2 rounded-xl text-white"
+              className="flex justify-between items-center p-2 rounded-xl text-[#EFE6D8]"
             >
               <div className="flex items-center gap-2">
                 <span
@@ -370,7 +376,7 @@ const graphData = Object.values(
       {/* MONTHLY */}
       {/* ========================= */}
       {activeTab === "monthly" &&
-        sortedMonths.map((key) => {
+        sortedMonths.map((key, idx, arr) => {
           const list = monthly[key];
           const total = list.reduce((s, e) => s + e.amount, 0);
           const date = new Date(list[0].createdAt);
@@ -378,7 +384,9 @@ const graphData = Object.values(
           return (
             <div
               key={key}
-              className="flex justify-between bg-[#1C1C1E] p-3 rounded-xl mb-2 text-white"
+              className={`flex justify-between py-3 text-[#EFE6D8] ${
+                idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
+              }`}
             >
               <span>
                 {date.toLocaleDateString(undefined, {
@@ -396,8 +404,8 @@ const graphData = Object.values(
       {/* ========================= */}
       {activeTab === "pending" &&
         sortedDates.map((date) => (
-          <div key={date} className="mb-3">
-            <div className="text-gray-400 text-[10px] mb-1">
+          <div key={date} className="mb-4">
+            <div className="text-[#9C8F80] text-[10px] mb-1">
               {date === today.toDateString()
                 ? "Today"
                 : date === yesterday.toDateString()
@@ -408,14 +416,23 @@ const graphData = Object.values(
                   })}
             </div>
 
-            {grouped[date].map((exp) => (
+            {grouped[date].map((exp, idx, arr) => (
               <button
                 key={exp._id}
                 onClick={() => handleEdit(exp)}
-                className="w-full flex justify-between items-center bg-[#1C1C1E] p-2 rounded-xl mb-2 text-white text-left"
+                className={`w-full flex items-center gap-3 py-3 text-left ${
+                  idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
+                }`}
               >
-                <div>
-                  <div>{exp.text} •   <span className="text-gray-400 text-[10px]">{exp.category}</span></div>
+                <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
+                  <ReceiptPercentIcon className="w-4 h-4 text-[#C9A374]" />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="text-[#EFE6D8] truncate">
+                    {exp.text} •{" "}
+                    <span className="text-[#9C8F80] text-[10px]">{exp.category}</span>
+                  </div>
 
                   <div className="text-[#B2597C] text-xs">
                     ₱{exp.amount.toLocaleString()}
@@ -435,14 +452,14 @@ const graphData = Object.values(
         title={editingId ? "Edit Expense" : "Add Expense"}
       >
         <input
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
           placeholder="Expense"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
         <input
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
           placeholder="Amount"
           type="number"
           value={amount}
@@ -450,11 +467,17 @@ const graphData = Object.values(
         />
 
         <input
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
           placeholder="Category"
+          list="expense-categories"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         />
+        <datalist id="expense-categories">
+          {existingCategories.map((cat) => (
+            <option key={cat} value={cat} />
+          ))}
+        </datalist>
 
         <div className="flex items-center gap-2 pt-2">
           {editingId && (
@@ -476,7 +499,7 @@ const graphData = Object.values(
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 bg-[#DFF966] text-black font-bold p-2 rounded-lg"
+            className="flex-1 bg-[#B5651D] text-black font-bold p-2 rounded-lg"
           >
             Save
           </button>

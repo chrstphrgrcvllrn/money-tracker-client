@@ -334,7 +334,7 @@ const NotebookPage: React.FC = () => {
   // --------------------------------
 
   return (
-    <div className="min-h-[calc(100vh-80px)] text-xs bg-black text-white">
+    <div className="min-h-[calc(100vh-80px)] text-xs bg-[#000000] text-[#EFE6D8]">
       <style>{`
         @keyframes modal-scale-in {
           from { opacity: 0; transform: scale(0.95); }
@@ -360,7 +360,7 @@ const NotebookPage: React.FC = () => {
 
         <button
           onClick={createNote}
-          className="flex items-center gap-1 bg-[#DFF966] text-black font-semibold px-3 py-2 rounded-lg"
+          className="flex items-center gap-1 bg-[#B5651D] text-black font-semibold px-3 py-2 rounded-lg"
         >
           <PlusIcon className="w-4 h-4" />
           New
@@ -381,7 +381,7 @@ const NotebookPage: React.FC = () => {
             }
             className={`px-3 py-1.5 rounded-xl capitalize ${
               activeTab === tab
-                ? "bg-[#DFF966] text-black font-semibold"
+                ? "bg-[#B5651D] text-black font-semibold"
                 : "bg-[#1C1C1E] text-gray-400"
             }`}
           >
@@ -423,7 +423,7 @@ const NotebookPage: React.FC = () => {
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${
                       note.status === "open"
-                        ? "bg-[#DFF966] text-black"
+                        ? "bg-[#B5651D] text-black"
                         : "bg-[#2A2A2C] text-gray-500"
                     }`}
                   >
@@ -538,7 +538,7 @@ const NotebookPage: React.FC = () => {
                 <button
                   onClick={saveNote}
                   disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#DFF966] text-black font-semibold disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#B5651D] text-black font-semibold disabled:opacity-50"
                 >
                   {saving ? (
                     <>

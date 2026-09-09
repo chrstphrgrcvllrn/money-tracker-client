@@ -7,7 +7,7 @@ import {
   deleteSubscription,
 } from "../api/subscription";
 
-import { EyeIcon, EyeSlashIcon, TrashIcon, CheckIcon, LinkIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon, TrashIcon, CheckIcon, LinkIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -175,10 +175,10 @@ export default function SubscriptionPage() {
 
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-lg font-semibold text-white">Buy List</h1>
+        <h1 className="text-lg font-semibold text-[#EFE6D8]">Buy List</h1>
 
         <div className="flex items-center gap-3">
-          <button onClick={() => setShowAmounts((p) => !p)} className="text-gray-400">
+          <button onClick={() => setShowAmounts((p) => !p)} className="text-[#9C8F80]">
             {showAmounts ? (
               <EyeSlashIcon className="w-5 h-5" />
             ) : (
@@ -188,7 +188,7 @@ export default function SubscriptionPage() {
 
           <button
             onClick={openAddModal}
-            className="px-[0.7rem] py-[0.3rem] bg-[#DFF966] text-black font-bold rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-black font-bold rounded-4xl text-sm"
           >
             +
           </button>
@@ -201,8 +201,8 @@ export default function SubscriptionPage() {
           onClick={() => setTab("ongoing")}
           className={`px-3 py-1 rounded-full text-xs ${
             tab === "ongoing"
-              ? "bg-[#DFF966] text-black font-bold"
-              : "bg-[#1C1C1E] text-gray-400"
+              ? "bg-[#B5651D] text-black font-bold"
+              : "bg-[#1C1C1E] text-[#9C8F80]"
           }`}
         >
           Ongoing
@@ -212,8 +212,8 @@ export default function SubscriptionPage() {
           onClick={() => setTab("completed")}
           className={`px-3 py-1 rounded-full text-xs ${
             tab === "completed"
-              ? "bg-[#DFF966] text-black font-bold"
-              : "bg-[#1C1C1E] text-gray-400"
+              ? "bg-[#B5651D] text-black font-bold"
+              : "bg-[#1C1C1E] text-[#9C8F80]"
           }`}
         >
           Completed
@@ -222,34 +222,40 @@ export default function SubscriptionPage() {
 
       {/* TOTAL */}
       <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
-        <p className="text-gray-400 text-sm">Total</p>
-        <p className="text-[2rem] font-bold text-[#85D989]">
+        <p className="text-[#9C8F80] text-sm">Total</p>
+        <p className="text-[2rem] font-bold text-[#FFFFFF]">
           ₱{showAmounts ? total.toLocaleString() : mask(total)}
         </p>
       </div>
 
       {/* LIST */}
-      <div className="space-y-2">
+      <div>
         {filteredItems.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-[#9C8F80]">
             {tab === "completed" ? "No completed items yet." : "No items yet. Add one to get started!"}
           </div>
         ) : (
-          filteredItems.map((item) => (
+          filteredItems.map((item, idx, arr) => (
             <div
               key={item._id}
-              className="w-full flex items-center gap-3 bg-[#1C1C1E] rounded-xl px-4 py-3"
+              className={`w-full flex items-center gap-3 py-3 ${
+                idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
+              }`}
             >
               <button
                 onClick={() => handleToggleCompleted(item)}
                 className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center border transition ${
                   item.completed
-                    ? "bg-[#DFF966] border-[#DFF966]"
-                    : "border-gray-600 hover:border-gray-400"
+                    ? "bg-[#B5651D] border-[#C9A374]"
+                    : "border-[#C9A374]/40 hover:border-[#C9A374]"
                 }`}
               >
                 {item.completed && <CheckIcon className="w-4 h-4 text-black" />}
               </button>
+
+              <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
+                <ShoppingBagIcon className="w-4 h-4 text-[#C9A374]" />
+              </div>
 
               <button
                 onClick={() => openEditModal(item)}
@@ -257,25 +263,25 @@ export default function SubscriptionPage() {
               >
                 <span
                   className={`truncate font-medium text-sm ${
-                    item.completed ? "text-gray-500 line-through" : "text-white"
+                    item.completed ? "text-[#9C8F80] line-through" : "text-[#EFE6D8]"
                   }`}
                 >
                   {item.name}
                 </span>
                 {Number(item.quantity || 1) > 1 && (
-                  <span className="shrink-0 text-xs text-gray-500">
+                  <span className="shrink-0 text-xs text-[#9C8F80]">
                     x{item.quantity}
                   </span>
                 )}
                 {!!item.notes && (
-                  <LinkIcon className="shrink-0 w-3 h-3 text-gray-500" />
+                  <LinkIcon className="shrink-0 w-3 h-3 text-[#9C8F80]" />
                 )}
               </button>
 
               <button
                 onClick={() => openEditModal(item)}
                 className={`shrink-0 text-sm font-bold ${
-                  item.completed ? "text-gray-500" : "text-[#85D989]"
+                  item.completed ? "text-[#9C8F80]" : "text-[#FFFFFF]"
                 }`}
               >
                 ₱{showAmounts ? itemTotal(item).toLocaleString() : mask(itemTotal(item))}
@@ -297,7 +303,7 @@ export default function SubscriptionPage() {
             placeholder="e.g. Netflix"
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
+            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
           />
         </div>
 
@@ -309,7 +315,7 @@ export default function SubscriptionPage() {
               placeholder="0"
               value={form.amount || ""}
               onChange={(e) => setForm((p) => ({ ...p, amount: Number(e.target.value) }))}
-              className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
             />
           </div>
 
@@ -321,7 +327,7 @@ export default function SubscriptionPage() {
               placeholder="1"
               value={form.quantity || ""}
               onChange={(e) => setForm((p) => ({ ...p, quantity: Number(e.target.value) }))}
-              className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
             />
           </div>
         </div>
@@ -339,7 +345,7 @@ export default function SubscriptionPage() {
             placeholder="Where to buy, links, etc."
             value={form.notes}
             onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none resize-none"
+            className="w-full px-3 py-2 rounded-lg bg-[#2C2C2E] text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none resize-none"
             rows={2}
           />
         </div>
@@ -365,7 +371,7 @@ export default function SubscriptionPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-2 bg-[#DFF966] text-black font-semibold rounded-lg disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-[#B5651D] text-black font-semibold rounded-lg disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save"}
           </button>

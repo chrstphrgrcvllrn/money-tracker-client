@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTheme } from "./useTheme";
 
 const STORAGE_KEY = "moneyTrackerAccessGranted";
 const SITE_PASSWORD = "000000";
@@ -12,6 +13,9 @@ const hasStoredAccess = () => {
 };
 
 export function PasswordGate({ children }: { children: React.ReactNode }) {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+
   const [authorized, setAuthorized] = useState(hasStoredAccess);
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
@@ -35,11 +39,19 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
 
   if (!authorized) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-6">
+      <div
+        className={`min-h-screen flex items-center justify-center px-6 ${
+          isLight ? "bg-[#FAF7F1]" : "bg-[#000000]"
+        }`}
+      >
         <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
           <div className="text-center mb-2">
-            <h1 className="text-white text-lg font-semibold">Money Tracker</h1>
-            <p className="text-gray-500 text-sm mt-1">Enter password to continue</p>
+            <h1 className={`text-lg font-semibold ${isLight ? "text-[#2A2420]" : "text-[#EFE6D8]"}`}>
+              Money Tracker
+            </h1>
+            <p className={`text-sm mt-1 ${isLight ? "text-[#6B5E4F]" : "text-[#9C8F80]"}`}>
+              Enter password to continue
+            </p>
           </div>
 
           <input
@@ -52,14 +64,18 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
               setError("");
             }}
             placeholder="Password"
-            className="w-full px-3 py-3 bg-[#1C1C1E] text-white text-center tracking-[0.3em] border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+            className={`w-full px-3 py-3 text-center tracking-[0.3em] border rounded-lg focus:border-[#C9A374]/50 outline-none ${
+              isLight
+                ? "bg-white text-[#2A2420] border-black/15"
+                : "bg-[#1C1C1E] text-white border-gray-600"
+            }`}
           />
 
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
           <button
             type="submit"
-            className="w-full bg-[#DFF966] text-black font-semibold py-3 rounded-lg"
+            className="w-full bg-[#B5651D] text-black font-semibold py-3 rounded-lg"
           >
             Unlock
           </button>

@@ -7,7 +7,8 @@ import {
 } from "../api/houseExpenses";
 
 import type { HouseExpense } from "../types/houseExpense.type";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { TrashIcon } from "@heroicons/react/24/solid";
+import { HomeIcon } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -24,6 +25,7 @@ const HouseExpensesPage: React.FC = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
     "monthly" | "pending" | "biggest" | "graph"
@@ -103,16 +105,22 @@ const HouseExpensesPage: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async () => {
+    if (!editingId) return;
     if (!confirm("Delete this expense?")) return;
 
+    setDeleting(true);
+
     try {
-      await deleteHouseExpense(id);
+      await deleteHouseExpense(editingId);
       loadExpenses();
       showToast("Expense deleted!", "success");
+      resetForm();
     } catch (error) {
       console.error("Failed to delete expense:", error);
       showToast("Failed to delete expense", "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -294,9 +302,13 @@ const HouseExpensesPage: React.FC = () => {
 
   const totalGraph = graphData.reduce((s, i) => s + i.total, 0);
 
+  const existingCategories = Array.from(
+    new Set(expenses.map((e) => e.category).filter((c): c is string => !!c))
+  ).sort((a, b) => a.localeCompare(b));
+
   const colors = [
-    "#DFF966",
-    "#85D989",
+    "#C9A374",
+    "#FFFFFF",
     "#B2597C",
     "#60A5FA",
     "#F97316",
@@ -307,21 +319,21 @@ const HouseExpensesPage: React.FC = () => {
   // RENDER
   // =========================
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-black text-white">
+    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000] text-[#EFE6D8]">
 
       {/* TOTALS */}
       <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
-          <p className="text-white font-bold">Today</p>
-          <p className="text-[#85D989] font-bold">₱{totalToday.toLocaleString()}</p>
+          <p className="text-[#EFE6D8] font-bold">Today</p>
+          <p className="text-[#FFFFFF] font-bold">₱{totalToday.toLocaleString()}</p>
         </div>
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
-          <p className="text-white font-bold">Week</p>
-          <p className="text-[#85D989] font-bold">₱{totalWeek.toLocaleString()}</p>
+          <p className="text-[#EFE6D8] font-bold">Week</p>
+          <p className="text-[#FFFFFF] font-bold">₱{totalWeek.toLocaleString()}</p>
         </div>
         <div className="bg-[#1C1C1E] p-2 rounded-xl">
-          <p className="text-white font-bold">Month</p>
-          <p className="text-[#85D989] font-bold">₱{totalMonth.toLocaleString()}</p>
+          <p className="text-[#EFE6D8] font-bold">Month</p>
+          <p className="text-[#FFFFFF] font-bold">₱{totalMonth.toLocaleString()}</p>
         </div>
       </div>
 
@@ -334,8 +346,8 @@ const HouseExpensesPage: React.FC = () => {
               onClick={() => setActiveTab(tab as "monthly" | "pending" | "biggest" | "graph")}
               className={`px-2 py-1 rounded-xl text-xs capitalize ${
                 activeTab === tab
-                  ? "bg-[#DFF966] text-black font-bold"
-                  : "bg-[#1C1C1E] text-gray-400"
+                  ? "bg-[#B5651D] text-black font-bold"
+                  : "bg-[#1C1C1E] text-[#9C8F80]"
               }`}
             >
               {tab}
@@ -345,7 +357,7 @@ const HouseExpensesPage: React.FC = () => {
 
         <button
           onClick={() => setShowModal(true)}
-          className="px-[0.7rem] py-[0.3rem] bg-[#DFF966] text-black font-bold rounded-4xl text-sm"
+          className="px-[0.7rem] py-[0.3rem] bg-[#B5651D] text-black font-bold rounded-4xl text-sm"
         >
           +
         </button>
@@ -357,7 +369,7 @@ const HouseExpensesPage: React.FC = () => {
       {activeTab === "monthly" && (
         <div className="space-y-4">
           {sortedMonths.length === 0 ? (
-            <div className="text-gray-600 text-center py-8">No expenses yet</div>
+            <div className="text-[#9C8F80] text-center py-8">No expenses yet</div>
           ) : (
             sortedMonths.map((month) => {
               const monthExpenses = monthly[month];
@@ -368,12 +380,17 @@ const HouseExpensesPage: React.FC = () => {
 
               return (
                 <div key={month} className="bg-[#1C1C1E] rounded-xl p-4">
-                  <h3 className="text-white font-semibold mb-3">{monthLabel}</h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
+                      <HomeIcon className="w-4 h-4 text-[#C9A374]" />
+                    </div>
+                    <h3 className="text-[#EFE6D8] font-semibold">{monthLabel}</h3>
+                  </div>
 
                   {/* BUDGET & REMAINING */}
                   <div className="space-y-2 mb-3">
                     <div className="bg-[#2C2C2E] rounded-lg p-2">
-                      <p className="text-gray-400 text-[10px]">Budget</p>
+                      <p className="text-[#9C8F80] text-[10px]">Budget</p>
                       {editingBudgetMonth === month ? (
                         <div className="flex gap-1 mt-2">
                           <input
@@ -381,18 +398,18 @@ const HouseExpensesPage: React.FC = () => {
                             value={budgetInput}
                             onChange={(e) => setBudgetInput(e.target.value)}
                             placeholder="0"
-                            className="flex-1 px-2 py-2 bg-[#1C1C1E] text-white border border-gray-600 rounded focus:border-[#DFF966]/50 outline-none text-sm"
+                            className="flex-1 px-2 py-2 bg-[#1C1C1E] text-white border border-gray-600 rounded focus:border-[#C9A374]/50 outline-none text-sm"
                             autoFocus
                           />
                           <button
                             onClick={() => handleSaveBudget(month)}
-                            className="px-3 py-2 bg-[#DFF966] text-black text-xs font-bold rounded"
+                            className="px-3 py-2 bg-[#B5651D] text-black text-xs font-bold rounded"
                           >
                             ✓
                           </button>
                           <button
                             onClick={() => setEditingBudgetMonth(null)}
-                            className="px-3 py-2 bg-[#2C2C2E] text-gray-400 text-xs font-bold rounded"
+                            className="px-3 py-2 bg-[#2C2C2E] text-[#9C8F80] text-xs font-bold rounded"
                           >
                             ✕
                           </button>
@@ -403,7 +420,7 @@ const HouseExpensesPage: React.FC = () => {
                             setEditingBudgetMonth(month);
                             setBudgetInput(String(budget));
                           }}
-                          className="text-[#DFF966] font-bold mt-2 hover:underline text-sm"
+                          className="text-[#C9A374] font-bold mt-2 hover:underline text-sm"
                         >
                           {budget > 0 ? `₱${budget.toLocaleString()}` : "Set Budget"}
                         </button>
@@ -411,37 +428,33 @@ const HouseExpensesPage: React.FC = () => {
                     </div>
 
                     <div className={`rounded-lg p-2 ${remaining >= 0 ? "bg-green-900/30" : "bg-red-900/30"}`}>
-                      <p className="text-gray-400 text-[10px]">Remaining</p>
-                      <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[#85D989]" : "text-[#EF6C54]"}`}>
+                      <p className="text-[#9C8F80] text-[10px]">Remaining</p>
+                      <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[#FFFFFF]" : "text-[#EF6C54]"}`}>
                         {remaining < 0 ? "-" : ""}₱{Math.abs(remaining).toLocaleString()}
                       </p>
                     </div>
                   </div>
 
                   {/* TOTAL SPENT */}
-                  <div className="mb-3 pb-3 border-b border-gray-700 flex justify-between text-white">
+                  <div className="mb-3 pb-3 border-b border-[#2A2420] flex justify-between text-[#EFE6D8]">
                     <span>Total Spent</span>
-                    <span className="font-bold text-[#DFF966]">₱{monthTotal.toLocaleString()}</span>
+                    <span className="font-bold text-[#C9A374]">₱{monthTotal.toLocaleString()}</span>
                   </div>
 
                   {/* EXPENSES LIST */}
                   <div className="space-y-2">
                     {monthExpenses.map((exp) => (
-                      <div key={exp._id} className="flex justify-between text-sm bg-[#2C2C2E] p-2 rounded">
-                        <div className="flex-1">
-                          <p className="text-white">{exp.text}</p>
-                          <p className="text-gray-500 text-[10px]">{exp.category}</p>
+                      <button
+                        key={exp._id}
+                        onClick={() => handleEdit(exp)}
+                        className="w-full flex justify-between items-center text-sm bg-[#2C2C2E] p-2 rounded text-left"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[#EFE6D8] truncate">{exp.text}</p>
+                          <p className="text-[#9C8F80] text-[10px]">{exp.category}</p>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-400 font-medium">₱{exp.amount.toLocaleString()}</span>
-                          <button onClick={() => handleEdit(exp)} className="text-gray-500 hover:text-white">
-                            <PencilIcon className="w-3 h-3" />
-                          </button>
-                          <button onClick={() => handleDelete(exp._id)} className="text-red-500 hover:text-red-600">
-                            <TrashIcon className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </div>
+                        <span className="text-[#9C8F80] font-medium shrink-0">₱{exp.amount.toLocaleString()}</span>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -456,13 +469,15 @@ const HouseExpensesPage: React.FC = () => {
       {/* ========================= */}
       {activeTab === "biggest" &&
         sortedBiggest.map((m) => (
-          <div key={m.label} className="mb-3">
-            <div className="text-gray-400 text-[10px] mb-2">{m.label}</div>
+          <div key={m.label} className="mb-4">
+            <div className="text-[#9C8F80] text-[10px] mb-2">{m.label}</div>
 
-            {m.data.map((item) => (
+            {m.data.map((item, idx, arr) => (
               <div
                 key={item.name}
-                className="flex justify-between bg-[#1C1C1E] p-3 rounded-xl mb-2 text-white"
+                className={`flex justify-between py-2.5 text-[#EFE6D8] ${
+                  idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
+                }`}
               >
                 <span>{item.name}</span>
                 <span>₱{item.total.toLocaleString()}</span>
@@ -497,7 +512,7 @@ const HouseExpensesPage: React.FC = () => {
                   .join(", ")})`,
               }}
             >
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-[#EFE6D8]">
                 <div className="text-lg font-bold">
                   ₱{totalGraph.toLocaleString()}
                 </div>
@@ -529,8 +544,8 @@ const HouseExpensesPage: React.FC = () => {
       {/* ========================= */}
       {activeTab === "pending" &&
         sortedDates.map((date) => (
-          <div key={date} className="mb-3">
-            <div className="text-gray-400 text-[10px] mb-1">
+          <div key={date} className="mb-4">
+            <div className="text-[#9C8F80] text-[10px] mb-1">
               {date === today.toDateString()
                 ? "Today"
                 : date === yesterday.toDateString()
@@ -541,28 +556,28 @@ const HouseExpensesPage: React.FC = () => {
                   })}
             </div>
 
-            {grouped[date].map((exp) => (
-              <div
+            {grouped[date].map((exp, idx, arr) => (
+              <button
                 key={exp._id}
-                className="flex justify-between bg-[#1C1C1E] p-2 rounded-xl mb-2 text-white"
+                onClick={() => handleEdit(exp)}
+                className={`w-full flex items-center gap-3 justify-between py-3 text-[#EFE6D8] text-left ${
+                  idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
+                }`}
               >
-                <div>
-                  <div>{exp.text} •   <span className="text-gray-400 text-[10px]">{exp.category}</span></div>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
+                    <HomeIcon className="w-4 h-4 text-[#C9A374]" />
+                  </div>
 
-                  <div className="text-[#B2597C] text-xs">
-                    ₱{exp.amount.toLocaleString()}
+                  <div className="min-w-0">
+                    <div className="truncate">{exp.text} •   <span className="text-[#9C8F80] text-[10px]">{exp.category}</span></div>
+
+                    <div className="text-[#B2597C] text-xs">
+                      ₱{exp.amount.toLocaleString()}
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex gap-2">
-                  <button onClick={() => handleEdit(exp)}>
-                    <PencilIcon className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleDelete(exp._id)}>
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              </button>
             ))}
           </div>
         ))}
@@ -576,14 +591,14 @@ const HouseExpensesPage: React.FC = () => {
         title={editingId ? "Edit Expense" : "Add Expense"}
       >
         <input
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
           placeholder="Expense"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
         <input
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
           placeholder="Amount"
           type="number"
           value={amount}
@@ -591,22 +606,39 @@ const HouseExpensesPage: React.FC = () => {
         />
 
         <input
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
           placeholder="Category"
+          list="house-expense-categories"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         />
+        <datalist id="house-expense-categories">
+          {existingCategories.map((cat) => (
+            <option key={cat} value={cat} />
+          ))}
+        </datalist>
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex items-center gap-2 pt-2">
+          {editingId && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex items-center justify-center gap-2 px-4 py-2 text-red-400 hover:text-red-500 border border-red-500/30 hover:border-red-500/50 rounded-lg disabled:opacity-50"
+            >
+              <TrashIcon className="w-4 h-4" />
+              {deleting ? "Deleting..." : "Delete"}
+            </button>
+          )}
+
           <button
             onClick={resetForm}
-            className="flex-1 p-2 bg-[#2C2C2E] text-gray-400 rounded-lg hover:text-white"
+            className="flex-1 p-2 bg-[#2C2C2E] text-gray-400 rounded-lg hover:text-[#EFE6D8]"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 bg-[#DFF966] text-black font-bold p-2 rounded-lg"
+            className="flex-1 bg-[#B5651D] text-black font-bold p-2 rounded-lg"
           >
             Save
           </button>

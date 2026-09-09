@@ -176,6 +176,18 @@ export default function LoanPage() {
     return true;
   });
 
+  const sortedLoans = filteredLoans
+    .slice() // make a copy so we don't mutate state
+    .sort((a, b) => {
+      const aRemaining =
+        Number(a.initialAmount) +
+        (a.transactions || []).reduce((s, t) => s + Number(t.amount), 0);
+      const bRemaining =
+        Number(b.initialAmount) +
+        (b.transactions || []).reduce((s, t) => s + Number(t.amount), 0);
+      return bRemaining - aRemaining; // highest first
+    });
+
   const totalRemaining = filteredLoans.reduce((sum, loan) => {
     const transactionsSum = (loan.transactions || []).reduce(
       (s, t) => s + Number(t.amount),
@@ -189,13 +201,13 @@ export default function LoanPage() {
   }
 
   return (
-    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans text-gray-800 bg-[#000000]">
+    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[#000000]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
         <div className="flex gap-2">
           <button
             className={`px-3 py-1 rounded text-sm ${
-              activeTab === "active" ? "bg-[#DFF966] text-black font-bold" : "bg-[#1C1C1E] text-white"
+              activeTab === "active" ? "bg-[#B5651D] text-black font-bold" : "bg-[#1C1C1E] text-[#EFE6D8]"
             }`}
             onClick={() => setActiveTab("active")}
           >
@@ -203,7 +215,7 @@ export default function LoanPage() {
           </button>
           <button
             className={`px-3 py-1 rounded text-sm ${
-              activeTab === "archived" ? "bg-[#1C1C1E] text-[#DFF966] font-bold" : "bg-[#1C1C1E] text-gray-400"
+              activeTab === "archived" ? "bg-[#1C1C1E] text-[#C9A374] font-bold" : "bg-[#1C1C1E] text-[#9C8F80]"
             }`}
             onClick={() => setActiveTab("archived")}
           >
@@ -214,7 +226,7 @@ export default function LoanPage() {
         <div className="flex w-full items-center justify-end gap-3">
           <button
             onClick={() => setShowAmounts((prev) => !prev)}
-            className="text-gray-400"
+            className="text-[#9C8F80]"
           >
             {showAmounts ? (
               <EyeSlashIcon className="w-5 h-5" />
@@ -225,7 +237,7 @@ export default function LoanPage() {
 
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-[0.7rem] py-[0.3rem]  bg-[#DFF966] text-black font-bold   rounded-4xl text-sm"
+            className="px-[0.7rem] py-[0.3rem]  bg-[#B5651D] text-black font-bold   rounded-4xl text-sm"
           >
             +
           </button>
@@ -239,7 +251,7 @@ export default function LoanPage() {
           placeholder="Loan name"
           value={newLoanName}
           onChange={(e) => setNewLoanName(e.target.value)}
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
         />
 
         <input
@@ -247,7 +259,7 @@ export default function LoanPage() {
           placeholder="Initial amount"
           value={newLoanAmount}
           onChange={(e) => setNewLoanAmount(e.target.value)}
-          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+          className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
@@ -260,7 +272,7 @@ export default function LoanPage() {
 
           <button
             onClick={handleAddLoan}
-            className="px-3 py-1 bg-[#DFF966] text-black font-semibold rounded-lg"
+            className="px-3 py-1 bg-[#B5651D] text-black font-semibold rounded-lg"
           >
             Save
           </button>
@@ -269,50 +281,38 @@ export default function LoanPage() {
 
       {/* SUMMARY */}
       <div className="mb-6 p-4 bg-[#1C1C1E] rounded-xl text-center">
-        <p className="text-gray-400 text-sm">Total Remaining</p>
-        <p className="text-[2.5rem] font-bold text-[#85d989]">
+        <p className="text-[#9C8F80] text-sm">Total Remaining</p>
+        <p className="text-[2.5rem] font-bold text-[#FFFFFF]">
           {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
         </p>
       </div>
 
       {/* LIST */}
-     <div className="space-y-3">
-  {filteredLoans
-    .slice() // make a copy so we don't mutate state
-    .sort((a, b) => {
-      const aRemaining =
-        Number(a.initialAmount) +
-        (a.transactions || []).reduce((s, t) => s + Number(t.amount), 0);
-      const bRemaining =
-        Number(b.initialAmount) +
-        (b.transactions || []).reduce((s, t) => s + Number(t.amount), 0);
-      return bRemaining - aRemaining; // highest first
-    })
-    .map((loan, index) => {
-      const loanTransactions = loan.transactions || [];
-      const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
-      const remaining = Number(loan.initialAmount) + loanSum;
-
+      <div>
+        {sortedLoans.map((loan, index, arr) => {
+          const loanTransactions = loan.transactions || [];
+          const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
+          const remaining = Number(loan.initialAmount) + loanSum;
 
           return (
             <div
               key={loan._id || index}
-              className="bg-[#1C1C1E] rounded-xl overflow-hidden "
+              className={index !== arr.length - 1 ? "border-b border-[#2A2420]" : ""}
             >
               <button
-                className="w-full flex justify-between items-center px-4 py-3"
+                className="w-full flex justify-between items-center py-4"
                 onClick={() => toggleExpand(index)}
               >
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-10 h-10 rounded-lg bg-[#2C2C2E] flex items-center justify-center">
-                    <PaperClipIcon className="w-5 h-5 text-[#DFF966]" />
+                  <div className="shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
+                    <PaperClipIcon className="w-5 h-5 text-[#C9A374]" />
                   </div>
 
                   <div>
-                    <p className="font-medium text-[1.2rem] text-white">{loan.name}</p>
-                   <p className="text-xs text-[#9C9BA1]">
+                    <p className="font-medium text-[1.2rem] text-[#EFE6D8]">{loan.name}</p>
+                   <p className="text-xs text-[#9C8F80]">
                   Paid:{" "}
-                  <span className="text-[#9C9BA1] font-medium">
+                  <span className="text-[#9C8F80] font-medium">
                     {showAmounts
                       ? loanTransactions
                           .filter((t) => t.amount < 0)
@@ -334,11 +334,11 @@ export default function LoanPage() {
               </button>
 
               {expanded === index && (
-                <div className="border-t px-4 py-3">
+                <div className="pb-4">
                   {loanTransactions.length === 0 ? (
-                    <p className="text-xs text-white">No payments yet</p>
+                    <p className="text-xs text-[#EFE6D8]">No payments yet</p>
                   ) : (
-                   <ul className="text-xs text-white space-y-1">
+                   <ul className="text-xs text-[#EFE6D8] space-y-1">
                   {loanTransactions.map((t, i) => (
                     <li
                       key={`${t.date}-${t.amount}-${t.type}-${i}`}
@@ -354,7 +354,7 @@ export default function LoanPage() {
 
                       <span
                         className={`${
-                          Number(t.amount) < 0 ? "text-[#B2597C]" : "text-[#85D989]"
+                          Number(t.amount) < 0 ? "text-[#B2597C]" : "text-[#FFFFFF]"
                         }`}
                       >
                         {Number(t.amount).toLocaleString("en-PH")}
@@ -374,7 +374,7 @@ export default function LoanPage() {
                           [index]: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 bg-[#2C2C2E] text-sm text-white border border-gray-600 rounded-lg focus:border-[#DFF966]/50 outline-none"
+                      className="w-full px-3 py-2 bg-[#2C2C2E] text-sm text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
                     />
 
                     <div className="flex gap-2">
@@ -386,7 +386,7 @@ export default function LoanPage() {
                             [index]: e.target.value as "+" | "-",
                           }))
                         }
-                        className="px-3 py-2 bg-[#2C2C2E] rounded-lg text-sm text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
+                        className="px-3 py-2 bg-[#2C2C2E] rounded-lg text-sm text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
                       >
                         <option value="+">+</option>
                         <option value="-">-</option>
@@ -402,7 +402,7 @@ export default function LoanPage() {
                             [index]: e.target.value,
                           }))
                         }
-                        className="flex-1 px-3 py-2 bg-[#2C2C2E] rounded-lg text-sm text-white border border-gray-600 focus:border-[#DFF966]/50 outline-none"
+                        className="flex-1 px-3 py-2 bg-[#2C2C2E] rounded-lg text-sm text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
                       />
                     </div>
 
@@ -416,7 +416,7 @@ export default function LoanPage() {
 
                         handleAddPayment(loan._id, index, value);
                       }}
-                      className="w-full bg-[#DFF966] text-black font-bold py-2 rounded-lg text-sm"
+                      className="w-full bg-[#B5651D] text-black font-bold py-2 rounded-lg text-sm"
                     >
                       Add Payment
                     </button>
@@ -433,7 +433,7 @@ export default function LoanPage() {
                     {activeTab === "archived" && (
                       <button
                         onClick={() => handleUnarchiveLoan(loan._id)}
-                        className="w-full bg-[#85D989] text-black font-bold py-2 rounded-lg text-sm"
+                        className="w-full bg-[#FFFFFF] text-black font-bold py-2 rounded-lg text-sm"
                       >
                         Unarchive Loan
                       </button>

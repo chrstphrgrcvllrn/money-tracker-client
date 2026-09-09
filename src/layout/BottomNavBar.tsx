@@ -8,6 +8,8 @@ import {
   CalendarDaysIcon as CalendarDaysOutline,
   BookOpenIcon as BookOpenOutline,
   CheckCircleIcon as CheckCircleOutline,
+  SunIcon,
+  MoonIcon,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -21,7 +23,12 @@ import {
   CheckCircleIcon as CheckCircleSolid,
 } from "@heroicons/react/24/solid";
 
+import { useTheme } from "@/components/useTheme";
+
 export default function BottomNavBar() {
+  const { theme, toggleTheme } = useTheme();
+  const isLight = theme === "light";
+
   const navItems = [
     {
       name: "Loans",
@@ -92,7 +99,13 @@ export default function BottomNavBar() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 px-4 py-2 bg-[rgba(17,19,18,0.55)] backdrop-blur-xl border-t border-white/10">
+    <nav
+      className={`fixed bottom-0 left-0 w-full z-50 px-4 py-2 backdrop-blur-xl border-t ${
+        isLight
+          ? "bg-[rgba(247,243,236,0.75)] border-black/10"
+          : "bg-[rgba(17,19,18,0.55)] border-white/10"
+      }`}
+    >
       <style>{`
         @keyframes nav-icon-pop {
           0% { transform: scale(0.7); }
@@ -111,7 +124,7 @@ export default function BottomNavBar() {
             to={item.path}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center text-xs ${
-                isActive ? "text-[#B98953]" : "text-[#999794]"
+                isActive ? "text-[#C9A374]" : isLight ? "text-[#6B5E4F]" : "text-[#999794]"
               }`
             }
           >
@@ -130,6 +143,23 @@ export default function BottomNavBar() {
             }}
           </NavLink>
         ))}
+
+        {/* THEME TOGGLE — fills the empty 12th grid slot */}
+        <button
+          onClick={toggleTheme}
+          className={`flex flex-col items-center justify-center text-xs ${
+            isLight ? "text-[#6B5E4F]" : "text-[#999794]"
+          }`}
+        >
+          {isLight ? (
+            <MoonIcon key="theme-dark" className="w-6 h-6 mb-1 nav-icon-active" />
+          ) : (
+            <SunIcon key="theme-light" className="w-6 h-6 mb-1 nav-icon-active" />
+          )}
+          <span className="font-semibold text-center">
+            {isLight ? "Dark" : "Light"}
+          </span>
+        </button>
       </div>
     </nav>
   );

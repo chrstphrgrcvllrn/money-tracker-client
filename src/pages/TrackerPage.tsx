@@ -193,7 +193,7 @@ const TrackerPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-[#141210] text-white px-5 pt-6 pb-10">
+    <div className="min-h-[calc(100vh-80px)] bg-[#000000] text-white px-5 pt-6 pb-10">
       <TrackerIconStyles />
 
       <div className="max-w-md mx-auto">
@@ -221,8 +221,8 @@ const TrackerPage: React.FC = () => {
                   <div
                     className={`shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border transition ${
                       isActive
-                        ? "border-[#B98953] bg-[#B98953]/15 text-[#B98953]"
-                        : "border-[#B98953]/40 text-[#B98953]/80"
+                        ? "border-[#C9A374] bg-[#B5651D]/15 text-[#C9A374]"
+                        : "border-[#C9A374]/40 text-[#C9A374]/80"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -245,7 +245,7 @@ const TrackerPage: React.FC = () => {
         {/* ADD BUTTON */}
         <button
           onClick={openAddModal}
-          className="w-full flex items-center gap-2 justify-center bg-[#B98953] text-black font-semibold px-4 py-2 rounded-lg mb-6"
+          className="w-full flex items-center gap-2 justify-center bg-[#B5651D] text-black font-semibold px-4 py-2 rounded-lg mb-6"
         >
           <PlusIcon className="w-4 h-4" />
           Add Entry
@@ -268,7 +268,7 @@ const TrackerPage: React.FC = () => {
               placeholder={categoryExamples[activeTab]}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none"
+              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
             />
           </div>
 
@@ -278,7 +278,7 @@ const TrackerPage: React.FC = () => {
               placeholder="e.g., who, what, procedure, result"
               value={formData.details}
               onChange={(e) => setFormData({ ...formData, details: e.target.value })}
-              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none resize-none"
+              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none resize-none"
               rows={3}
             />
           </div>
@@ -289,7 +289,7 @@ const TrackerPage: React.FC = () => {
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none"
+              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
             />
           </div>
 
@@ -301,7 +301,7 @@ const TrackerPage: React.FC = () => {
                 placeholder="0"
                 value={formData.amount || ""}
                 onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none"
+                className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
               />
             </div>
           )}
@@ -315,7 +315,7 @@ const TrackerPage: React.FC = () => {
                 placeholder="e.g. 11.02"
                 value={formData.price || ""}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none"
+                className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none"
               />
             </div>
           )}
@@ -326,7 +326,7 @@ const TrackerPage: React.FC = () => {
               placeholder="Additional notes..."
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#B98953]/50 outline-none resize-none"
+              className="w-full px-3 py-2 bg-[#2C2C2E] text-white border border-gray-600 rounded-lg focus:border-[#C9A374]/50 outline-none resize-none"
               rows={2}
             />
           </div>
@@ -352,7 +352,7 @@ const TrackerPage: React.FC = () => {
             <button
               onClick={handleSaveEntry}
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-[#B98953] text-black font-semibold rounded-lg disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-[#B5651D] text-black font-semibold rounded-lg disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save"}
             </button>
@@ -388,7 +388,7 @@ const TrackerPage: React.FC = () => {
                   </span>
                 )}
                 {!!entry.amount && entry.amount > 0 && (
-                  <span className="shrink-0 text-xs text-[#B98953] font-semibold">
+                  <span className="shrink-0 text-xs text-[#C9A374] font-semibold">
                     {entry.amount.toLocaleString()}
                   </span>
                 )}

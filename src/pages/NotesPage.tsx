@@ -7,6 +7,7 @@ import {
   // deleteNote,
 } from "../api/note";
 import { CheckIcon } from "@heroicons/react/24/solid";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useToast } from "../components/useToast";
 
 const NotesPage: React.FC = () => {
@@ -142,12 +143,6 @@ const highlightText = (text: string, done: boolean) => {
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[#000000]">
-      {/* HEADER */}
-      <div className="mb-4 flex justify-between items-center">
-        {/* <h1 className="text-lg font-semibold text-white">Notes</h1> */}
-        <div className="flex items-center gap-3"></div>
-      </div>
-
       {/* INPUT */}
       <div className="flex gap-2 mb-4 h-[7vh]">
         <input
@@ -155,7 +150,7 @@ const highlightText = (text: string, done: boolean) => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Enter note"
-          className="flex-1 bg-[#1C1C1E] px-2 py-1 rounded text-white"
+          className="flex-1 bg-[#2C2C2E] px-2 py-1 rounded text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
         />
 
         <select
@@ -163,7 +158,7 @@ const highlightText = (text: string, done: boolean) => {
           onChange={(e) =>
             setCategory(e.target.value as Note["category"])
           }
-          className="bg-[#1C1C1E] px-2 py-1 rounded text-[#fff]"
+          className="bg-[#2C2C2E] px-2 py-1 rounded text-white border border-gray-600 focus:border-[#C9A374]/50 outline-none"
         >
           <option value="work">Work</option>
           <option value="personal">Personal</option>
@@ -173,22 +168,22 @@ const highlightText = (text: string, done: boolean) => {
 
         <button
           onClick={addNote}
-          className="bg-[#DFF966] text-black font-bold px-2 py-1 rounded"
+          className="bg-[#B5651D] text-black font-bold px-2 py-1 rounded"
         >
           Add
         </button>
       </div>
 
       {/* TABS */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 flex-wrap">
         {["pending", "work", "personal", "others", "to buy", "done"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as "all" | "done" | "pending" | "work" | "personal" | "others" | "to buy")}
             className={`px-2 py-1 rounded-xl text-xs capitalize ${
               activeTab === tab
-                ? "bg-[#DFF966] text-black font-bold"
-                : "bg-[#1C1C1E] text-gray-400"
+                ? "bg-[#B5651D] text-black font-bold"
+                : "bg-[#1C1C1E] text-[#9C8F80]"
             }`}
           >
             {tab}
@@ -197,36 +192,38 @@ const highlightText = (text: string, done: boolean) => {
       </div>
 
       {/* LIST */}
-      <ul className="space-y-2 text-sm">
-        {sortedNotes.map((note) => (
+      <ul className="text-sm">
+        {sortedNotes.map((note, idx, arr) => (
           <li
             key={note._id}
-            className={`flex justify-between items-center p-2 bg-[#1C1C1E] rounded-xl ${
-              note.done ? "text-gray-700 line-through" : ""
+            className={`flex items-center gap-3 py-3 ${
+              idx !== arr.length - 1 ? "border-b border-[#2A2420]" : ""
             }`}
           >
-            <div>
+            <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#C9A374]/40">
+              <DocumentTextIcon className="w-4 h-4 text-[#C9A374]" />
+            </div>
+
+            <div className="flex-1 min-w-0">
               <span
                 className={`font-medium ${
-                  note.done ? "text-gray-700 line-through" : "text-white"
+                  note.done ? "text-[#9C8F80] line-through" : "text-[#EFE6D8]"
                 }`}
               >
                   {highlightText(note.text, note.done)}
               </span>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleToggle(note._id)}
-                className="flex items-center justify-center px-2 py-1 rounded text-mist-500 hover:text-white"
-              >
-                <CheckIcon
-                  className={`w-5 h-5 ${
-                    note.done ? "text-white" : "text-[#9C9BA1]"
-                  }`}
-                />
-              </button>
-            </div>
+            <button
+              onClick={() => handleToggle(note._id)}
+              className="shrink-0 flex items-center justify-center px-2 py-1 rounded text-[#9C8F80] hover:text-[#EFE6D8]"
+            >
+              <CheckIcon
+                className={`w-5 h-5 ${
+                  note.done ? "text-[#EFE6D8]" : "text-[#9C8F80]"
+                }`}
+              />
+            </button>
           </li>
         ))}
       </ul>
