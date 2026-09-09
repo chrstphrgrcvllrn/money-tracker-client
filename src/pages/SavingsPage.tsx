@@ -274,7 +274,7 @@ export default function SavingsPage() {
                 onClick={() => openDetails(item._id)}
                 className="shrink-0 w-32 snap-start text-left"
               >
-                <div className="w-32 aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#C9A374]/30 relative flex items-center justify-center">
+                <div className="w-32 h-[221px] rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#C9A374]/30 relative flex items-center justify-center">
                   <img
                     src={paths[0]}
                     alt={item.name}
