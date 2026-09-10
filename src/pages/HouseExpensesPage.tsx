@@ -336,7 +336,7 @@ const HouseExpensesPage: React.FC = () => {
 
   const colors = [
     "#2DE0E6",
-    "#FFFFFF",
+    "rgba(255, 255, 255, 0.87)",
     "#C93B8C",
     "#60A5FA",
     "#F97316",

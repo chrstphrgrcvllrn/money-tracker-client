@@ -18,7 +18,7 @@ body{
 
 [data-theme="light"] {
   --bg-page: #F1F3F7;
-  --bg-surface: #FFFFFF;
+  --bg-surface: rgba(255, 255, 255, 0.87);
   --bg-input: #E8EBF1;
   --text-primary: #12141C;
   --text-secondary: #5B6478;
