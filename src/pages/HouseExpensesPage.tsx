@@ -345,22 +345,6 @@ const HouseExpensesPage: React.FC = () => {
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)] text-[var(--text-primary)]">
 
-      {/* TOTALS */}
-      <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
-        <div className="bg-[var(--bg-surface)] p-2 rounded-xl">
-          <p className="text-[var(--text-primary)] font-bold">Today</p>
-          <p className="text-[var(--text-primary)] font-bold">₱{totalToday.toLocaleString()}</p>
-        </div>
-        <div className="bg-[var(--bg-surface)] p-2 rounded-xl">
-          <p className="text-[var(--text-primary)] font-bold">Week</p>
-          <p className="text-[var(--text-primary)] font-bold">₱{totalWeek.toLocaleString()}</p>
-        </div>
-        <div className="bg-[var(--bg-surface)] p-2 rounded-xl">
-          <p className="text-[var(--text-primary)] font-bold">Month</p>
-          <p className="text-[var(--text-primary)] font-bold">₱{totalMonth.toLocaleString()}</p>
-        </div>
-      </div>
-
       {/* TABS */}
       <div className="flex justify-between mb-4 gap-2">
         <SlidingTabs
@@ -398,6 +382,7 @@ const HouseExpensesPage: React.FC = () => {
               const monthLabel = getCycleLabel(month);
 
               const expanded = isMonthExpanded(month);
+              const isCurrentCycle = month === getCycleKey(today);
 
               return (
                 <div key={month} className="bg-[var(--bg-surface)] rounded-xl p-4">
@@ -408,9 +393,36 @@ const HouseExpensesPage: React.FC = () => {
                     <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
                       <HomeIcon className="w-4 h-4 text-[var(--text-primary)]" />
                     </div>
-                    <h3 className="flex-1 min-w-0 text-[var(--text-primary)] font-semibold truncate">
-                      {monthLabel}
-                    </h3>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[var(--text-primary)] font-semibold truncate">
+                        {monthLabel}
+                      </h3>
+
+                      {isCurrentCycle && (
+                        <div className="flex items-center gap-1.5 text-[9px] text-[var(--text-secondary)] mt-0.5">
+                          <span>
+                            Today{" "}
+                            <span className="text-[var(--text-primary)] font-semibold">
+                              ₱{totalToday.toLocaleString()}
+                            </span>
+                          </span>
+                          <span>·</span>
+                          <span>
+                            Week{" "}
+                            <span className="text-[var(--text-primary)] font-semibold">
+                              ₱{totalWeek.toLocaleString()}
+                            </span>
+                          </span>
+                          <span>·</span>
+                          <span>
+                            Month{" "}
+                            <span className="text-[var(--text-primary)] font-semibold">
+                              ₱{totalMonth.toLocaleString()}
+                            </span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     <span
                       className={`shrink-0 text-[var(--text-secondary)] transition-transform ${
                         expanded ? "rotate-180" : ""
