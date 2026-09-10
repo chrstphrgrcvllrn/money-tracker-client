@@ -349,24 +349,30 @@ export default function SavingsPage() {
                 const topTransformX = exiting === "left" ? -600 : exiting === "right" ? 600 : dragX;
                 const rotation = topTransformX / 20;
 
+                // Centers the card horizontally: `left-1/2` + `translateX(-50%)`
+                // (rather than `inset-0` + `mx-auto`, which pinned both left and
+                // right edges and forced the box to fill the container's full
+                // width, silently overriding the aspect-ratio sizing below).
                 const style: React.CSSProperties = isTop
                   ? {
-                      transform: `translateX(${topTransformX}px) rotate(${rotation}deg)`,
+                      transform: `translateX(-50%) translateX(${topTransformX}px) rotate(${rotation}deg)`,
                       transition: isDragging ? "none" : "transform 0.28s ease, opacity 0.28s ease",
                       opacity: exiting ? 0 : 1,
                       zIndex: 30,
                       touchAction: "pan-y",
                     }
                   : {
-                      transform: `translateY(${depth * 10}px) scale(${1 - depth * 0.045})`,
-                      opacity: 1 - depth * 0.25,
+                      transform: `translateX(-50%) translateY(${depth * 10}px) scale(${1 - depth * 0.045})`,
+                      // Fully opaque — these are stacked, not faded, so the
+                      // card behind never bleeds through the one in front.
+                      opacity: 1,
                       zIndex: 30 - depth * 10,
                     };
 
                 return (
                   <div
                     key={item._id}
-                    className={`absolute inset-0 h-full aspect-[3/5] mx-auto rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 shadow-xl select-none ${
+                    className={`absolute top-0 left-1/2 h-full aspect-[3/5] rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 shadow-xl select-none ${
                       isTop ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"
                     }`}
                     style={style}
