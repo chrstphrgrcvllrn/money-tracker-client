@@ -10,6 +10,7 @@ import type { Expense } from "../types/expenses.type";
 import { TrashIcon, ReceiptPercentIcon } from "@heroicons/react/24/solid";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+import SlidingTabs from "../components/SlidingTabs";
 
 const ExpensesPage: React.FC = () => {
   const showToast = useToast();
@@ -272,22 +273,17 @@ const graphData = Object.values(
       </div>
 
       {/* TABS */}
-      <div className="flex justify-between mb-4">
-        <div className="flex gap-2 flex-wrap">
-          {["pending", "monthly", "biggest", "graph"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as "pending" | "monthly" | "biggest" | "graph")}
-              className={`px-2 py-1 rounded-xl text-xs capitalize ${
-                activeTab === tab
-                  ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
-                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+      <div className="flex justify-between mb-4 gap-2">
+        <SlidingTabs
+          tabs={[
+            { value: "pending", label: "Pending" },
+            { value: "monthly", label: "Monthly" },
+            { value: "biggest", label: "Biggest" },
+            { value: "graph", label: "Graph" },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
 
         <button
           onClick={() => setShowModal(true)}

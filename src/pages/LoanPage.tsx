@@ -6,10 +6,13 @@ import {
   PaperClipIcon,
   EyeIcon,
   EyeSlashIcon,
+  EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+import { useAmountsVisibility } from "../components/useAmountsVisibility";
+import SlidingTabs from "../components/SlidingTabs";
 
 export default function LoanPage() {
   const showToast = useToast();
@@ -26,8 +29,9 @@ export default function LoanPage() {
   const [paymentDates, setPaymentDates] = useState<{ [key: number]: string }>({});
   const [transactionTypes, setTransactionTypes] = useState<{ [key: number]: "+" | "-" }>({});
 
-  const [showAmounts, setShowAmounts] = useState(true);
+  const { showAmounts, toggleShowAmounts } = useAmountsVisibility();
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
+  const [menuOpenFor, setMenuOpenFor] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchLoans = async () => {
@@ -204,28 +208,18 @@ export default function LoanPage() {
     <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[var(--bg-page)]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
-        <div className="flex gap-2">
-          <button
-            className={`px-3 py-1 rounded text-sm ${
-              activeTab === "active" ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold" : "bg-[var(--bg-surface)] text-[var(--text-primary)]"
-            }`}
-            onClick={() => setActiveTab("active")}
-          >
-            Active
-          </button>
-          <button
-            className={`px-3 py-1 rounded text-sm ${
-              activeTab === "archived" ? "bg-[var(--bg-surface)] text-[#2DE0E6] font-bold" : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-            }`}
-            onClick={() => setActiveTab("archived")}
-          >
-            Archive
-          </button>
-        </div>
+        <SlidingTabs
+          tabs={[
+            { value: "active", label: "Active" },
+            { value: "archived", label: "Archive" },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
 
         <div className="flex w-full items-center justify-end gap-3">
           <button
-            onClick={() => setShowAmounts((prev) => !prev)}
+            onClick={toggleShowAmounts}
             className="text-[var(--text-secondary)]"
           >
             {showAmounts ? (
@@ -333,114 +327,147 @@ export default function LoanPage() {
                 </p>
               </button>
 
-              {expanded === index && (
-                <div className="pb-4">
-                  {loanTransactions.length === 0 ? (
-                    <p className="text-xs text-[var(--text-primary)]">No payments yet</p>
-                  ) : (
-                   <ul className="text-xs text-[var(--text-primary)] space-y-1">
-                  {loanTransactions.map((t, i) => (
-                    <li
-                      key={`${t.date}-${t.amount}-${t.type}-${i}`}
-                      className="flex justify-between"
-                    >
-                      <span>
-                        {new Date(t.date).toLocaleDateString("en-PH", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </span>
-
-                      <span
-                        className={`${
-                          Number(t.amount) < 0 ? "text-[#C93B8C]" : "text-[var(--text-primary)]"
-                        }`}
+              <div
+                className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                style={{ gridTemplateRows: expanded === index ? "1fr" : "0fr" }}
+              >
+                <div className="overflow-hidden">
+                  <div className="pb-4">
+                    {loanTransactions.length === 0 ? (
+                      <p className="text-xs text-[var(--text-primary)]">No payments yet</p>
+                    ) : (
+                     <ul className="text-xs text-[var(--text-primary)] space-y-1">
+                    {loanTransactions.map((t, i) => (
+                      <li
+                        key={`${t.date}-${t.amount}-${t.type}-${i}`}
+                        className="flex justify-between"
                       >
-                        {Number(t.amount).toLocaleString("en-PH")}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                  )}
+                        <span>
+                          {new Date(t.date).toLocaleDateString("en-PH", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
 
-                  <div className="mt-3 space-y-2 flex flex-col gap-2">
-                    <input
-                      type="date"
-                      value={paymentDates[index] || ""}
-                      onChange={(e) =>
-                        setPaymentDates((prev) => ({
-                          ...prev,
-                          [index]: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
-                    />
+                        <span
+                          className={`${
+                            Number(t.amount) < 0 ? "text-[#C93B8C]" : "text-[var(--text-primary)]"
+                          }`}
+                        >
+                          {Number(t.amount).toLocaleString("en-PH")}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                    )}
 
-                    <div className="flex gap-2">
-                      <select
-                        value={transactionTypes[index] || "+"}
-                        onChange={(e) =>
-                          setTransactionTypes((prev) => ({
-                            ...prev,
-                            [index]: e.target.value as "+" | "-",
-                          }))
-                        }
-                        className="px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
-                      >
-                        <option value="+">+</option>
-                        <option value="-">-</option>
-                      </select>
-
+                    <div className="mt-3 space-y-2 flex flex-col gap-2">
                       <input
-                        type="number"
-                        placeholder="Enter amount"
-                        value={paymentInputs[index] || ""}
+                        type="date"
+                        value={paymentDates[index] || ""}
                         onChange={(e) =>
-                          setPaymentInputs((prev) => ({
+                          setPaymentDates((prev) => ({
                             ...prev,
                             [index]: e.target.value,
                           }))
                         }
-                        className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+                        className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
                       />
+
+                      <div className="flex gap-2">
+                        <select
+                          value={transactionTypes[index] || "+"}
+                          onChange={(e) =>
+                            setTransactionTypes((prev) => ({
+                              ...prev,
+                              [index]: e.target.value as "+" | "-",
+                            }))
+                          }
+                          className="px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+                        >
+                          <option value="+">+</option>
+                          <option value="-">-</option>
+                        </select>
+
+                        <input
+                          type="number"
+                          placeholder="Enter amount"
+                          value={paymentInputs[index] || ""}
+                          onChange={(e) =>
+                            setPaymentInputs((prev) => ({
+                              ...prev,
+                              [index]: e.target.value,
+                            }))
+                          }
+                          className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            const type = transactionTypes[index] || "+";
+                            const rawValue = paymentInputs[index] || "0";
+                            const value = Number(rawValue) * (type === "-" ? -1 : 1);
+
+                            if (isNaN(value) || !paymentDates[index]) return;
+
+                            handleAddPayment(loan._id, index, value);
+                          }}
+                          className="flex-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold py-2 rounded-lg text-sm"
+                        >
+                          Add Payment
+                        </button>
+
+                        <div className="relative shrink-0">
+                          <button
+                            onClick={() =>
+                              setMenuOpenFor((prev) => (prev === index ? null : index))
+                            }
+                            className="flex items-center justify-center w-9 h-9 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+                            aria-label="More actions"
+                          >
+                            <EllipsisVerticalIcon className="w-5 h-5" />
+                          </button>
+
+                          {menuOpenFor === index && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => setMenuOpenFor(null)}
+                              />
+                              <div className="absolute right-0 bottom-full mb-1 z-20 w-40 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-lg overflow-hidden">
+                                {activeTab === "active" ? (
+                                  <button
+                                    onClick={() => {
+                                      handleArchiveLoan(loan._id);
+                                      setMenuOpenFor(null);
+                                    }}
+                                    className="w-full text-left px-3 py-2 text-sm text-[#E23A55] hover:bg-[var(--bg-input)]"
+                                  >
+                                    Archive Loan
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      handleUnarchiveLoan(loan._id);
+                                      setMenuOpenFor(null);
+                                    }}
+                                    className="w-full text-left px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+                                  >
+                                    Unarchive Loan
+                                  </button>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
-
-                    <button
-                      onClick={() => {
-                        const type = transactionTypes[index] || "+";
-                        const rawValue = paymentInputs[index] || "0";
-                        const value = Number(rawValue) * (type === "-" ? -1 : 1);
-
-                        if (isNaN(value) || !paymentDates[index]) return;
-
-                        handleAddPayment(loan._id, index, value);
-                      }}
-                      className="w-full bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold py-2 rounded-lg text-sm"
-                    >
-                      Add Payment
-                    </button>
-
-                    {activeTab === "active" && (
-                      <button
-                        onClick={() => handleArchiveLoan(loan._id)}
-                        className="w-full bg-[#E23A55] text-[var(--text-primary)] font-bold py-2 rounded-lg text-sm"
-                      >
-                        Archive Loan
-                      </button>
-                    )}
-
-                    {activeTab === "archived" && (
-                      <button
-                        onClick={() => handleUnarchiveLoan(loan._id)}
-                        className="w-full bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold py-2 rounded-lg text-sm"
-                      >
-                        Unarchive Loan
-                      </button>
-                    )}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           );
         })}

@@ -12,6 +12,7 @@ import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+import SlidingTabs from "../components/SlidingTabs";
 
 export default function SalaryPage() {
   const showToast = useToast();
@@ -403,32 +404,15 @@ export default function SalaryPage() {
       </Modal>
 
       <div className="flex mb-4 gap-2 justify-between flex-wrap">
-        <div className="flex mb-4 gap-2">
-          <button
-            className={`px-3 py-1 rounded text-sm ${
-              activeTab === "active" ? " bg-[var(--btn-bg)] text-[var(--btn-text)]  font-bold" : "bg-[var(--bg-surface)] text-[var(--text-primary)]"
-            }`}
-            onClick={() => setActiveTab("active")}
-          >
-            Active
-          </button>
-          <button
-            className={`px-3 py-1 rounded text-sm ${
-              activeTab === "completed" ? " bg-[var(--bg-surface)] text-[#E23A55]  font-bold" : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-            }`}
-            onClick={() => setActiveTab("completed")}
-          >
-            Completed
-          </button>
-          <button
-            className={`px-3 py-1 rounded text-sm ${
-              activeTab === "totals" ? " bg-[var(--bg-surface)] text-[var(--text-primary)]  font-bold" : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-            }`}
-            onClick={() => setActiveTab("totals")}
-          >
-            Totals
-          </button>
-        </div>
+        <SlidingTabs
+          tabs={[
+            { value: "active", label: "Active" },
+            { value: "completed", label: "Completed" },
+            { value: "totals", label: "Totals" },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
 
         <div className="mb-4 flex justify-between items-start">
           <div className="flex items-center gap-3">

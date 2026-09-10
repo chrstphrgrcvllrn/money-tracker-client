@@ -12,6 +12,7 @@ import { HomeIcon } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+import SlidingTabs from "../components/SlidingTabs";
 
 const BUDGET_STORAGE_KEY = "houseExpenseBudgets";
 
@@ -338,22 +339,17 @@ const HouseExpensesPage: React.FC = () => {
       </div>
 
       {/* TABS */}
-      <div className="flex justify-between mb-4">
-        <div className="flex gap-2 flex-wrap">
-          {["monthly", "pending", "biggest", "graph"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as "monthly" | "pending" | "biggest" | "graph")}
-              className={`px-2 py-1 rounded-xl text-xs capitalize ${
-                activeTab === tab
-                  ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
-                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+      <div className="flex justify-between mb-4 gap-2">
+        <SlidingTabs
+          tabs={[
+            { value: "monthly", label: "Monthly" },
+            { value: "pending", label: "Pending" },
+            { value: "biggest", label: "Biggest" },
+            { value: "graph", label: "Graph" },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
 
         <button
           onClick={() => setShowModal(true)}

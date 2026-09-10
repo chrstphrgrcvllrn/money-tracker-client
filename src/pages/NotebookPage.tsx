@@ -21,6 +21,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { useToast } from "../components/useToast";
+import SlidingTabs from "../components/SlidingTabs";
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error && typeof error === "object") {
@@ -420,26 +421,16 @@ const NotebookPage: React.FC = () => {
       </div>
 
       {/* TABS */}
-      <div className="flex gap-2 px-5 pb-5">
-
-        {["open", "closed", "all"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() =>
-              setActiveTab(
-                tab as "all" | "open" | "closed"
-              )
-            }
-            className={`px-3 py-1.5 rounded-xl capitalize ${
-              activeTab === tab
-                ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold"
-                : "bg-[var(--bg-surface)] text-gray-400"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-
+      <div className="px-5 pb-5">
+        <SlidingTabs
+          tabs={[
+            { value: "open", label: "Open" },
+            { value: "closed", label: "Closed" },
+            { value: "all", label: "All" },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
       </div>
 
       {/* NOTE LIST */}

@@ -7,9 +7,10 @@ import {
   deleteSavings,
 } from "../api/savings";
 
-import { EyeIcon, EyeSlashIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon, TrashIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+import { useAmountsVisibility } from "../components/useAmountsVisibility";
 
 export default function SavingsPage() {
   const showToast = useToast();
@@ -25,8 +26,9 @@ export default function SavingsPage() {
   const [txDate, setTxDate] = useState("");
   const [txType, setTxType] = useState<"+" | "-">("+");
   const [deleting, setDeleting] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const [showAmounts, setShowAmounts] = useState(true);
+  const { showAmounts, toggleShowAmounts } = useAmountsVisibility();
 
   // ✅ icon paths
   const getIconPaths = (name: string) => {
@@ -71,6 +73,7 @@ export default function SavingsPage() {
     setTxAmount("");
     setTxDate("");
     setTxType("+");
+    setMenuOpen(false);
   };
 
   const closeDetails = () => {
@@ -78,6 +81,7 @@ export default function SavingsPage() {
     setTxAmount("");
     setTxDate("");
     setTxType("+");
+    setMenuOpen(false);
   };
 
   const handleAddSavings = async () => {
@@ -189,7 +193,7 @@ export default function SavingsPage() {
         <div className="mb-4 flex justify-between items-start">
           <div className="flex w-full items-center justify-between gap-3">
             <button
-              onClick={() => setShowAmounts((prev) => !prev)}
+              onClick={toggleShowAmounts}
               className="text-[var(--text-secondary)]"
             >
               {showAmounts ? (
@@ -317,6 +321,34 @@ export default function SavingsPage() {
       <Modal open={!!selectedItem} onClose={closeDetails} title={selectedItem?.name}>
         {selectedItem && (
           <>
+            <div className="w-full h-24 rounded-lg overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 relative flex items-center justify-center">
+              <img
+                src={getIconPaths(selectedItem.name)[0]}
+                alt={selectedItem.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  const paths = getIconPaths(selectedItem.name);
+                  const currentIndex = paths.indexOf(
+                    img.src.replace(window.location.origin, "")
+                  );
+                  const nextPath = paths[currentIndex + 1];
+
+                  if (nextPath) {
+                    img.src = nextPath;
+                  } else {
+                    img.style.display = "none";
+                    if (img.nextSibling) {
+                      (img.nextSibling as HTMLElement).style.display = "flex";
+                    }
+                  }
+                }}
+              />
+              <span className="hidden absolute inset-0 items-center justify-center text-2xl font-bold text-[#2DE0E6]">
+                {selectedItem.name?.charAt(0).toUpperCase()}
+              </span>
+            </div>
+
             <div className="text-center pb-2">
               <p className="text-[var(--text-secondary)] text-xs">Balance</p>
               <p className="text-2xl font-bold text-[var(--text-primary)]">
@@ -370,21 +402,43 @@ export default function SavingsPage() {
               />
             </div>
 
-            <button
-              onClick={handleAddTransaction}
-              className="w-full bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold py-2 rounded-lg text-sm"
-            >
-              Add Transaction
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleAddTransaction}
+                className="flex-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold py-2 rounded-lg text-sm"
+              >
+                Add Transaction
+              </button>
 
-            <button
-              onClick={handleDeleteSavings}
-              disabled={deleting}
-              className="w-full flex items-center justify-center gap-2 py-2 text-red-400 hover:text-red-500 border border-red-500/30 hover:border-red-500/50 rounded-lg disabled:opacity-50"
-            >
-              <TrashIcon className="w-4 h-4" />
-              {deleting ? "Deleting..." : "Delete"}
-            </button>
+              <div className="relative shrink-0">
+                <button
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  className="flex items-center justify-center w-9 h-9 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+                  aria-label="More actions"
+                >
+                  <EllipsisVerticalIcon className="w-5 h-5" />
+                </button>
+
+                {menuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                    <div className="absolute right-0 bottom-full mb-1 z-20 w-36 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-lg overflow-hidden">
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          handleDeleteSavings();
+                        }}
+                        disabled={deleting}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-[var(--bg-input)] disabled:opacity-50"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                        {deleting ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           </>
         )}
       </Modal>

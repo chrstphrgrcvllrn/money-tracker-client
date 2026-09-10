@@ -11,6 +11,8 @@ import { EyeIcon, EyeSlashIcon, TrashIcon, CheckIcon, LinkIcon, ShoppingBagIcon 
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+import { useAmountsVisibility } from "../components/useAmountsVisibility";
+import SlidingTabs from "../components/SlidingTabs";
 
 const emptyForm = {
   name: "",
@@ -27,7 +29,7 @@ export default function SubscriptionPage() {
 
   const [items, setItems] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAmounts, setShowAmounts] = useState(true);
+  const { showAmounts, toggleShowAmounts } = useAmountsVisibility();
   const [tab, setTab] = useState<"ongoing" | "completed">("ongoing");
 
   const [showForm, setShowForm] = useState(false);
@@ -184,7 +186,7 @@ export default function SubscriptionPage() {
         <h1 className="text-lg font-semibold text-[var(--text-primary)]">Buy List</h1>
 
         <div className="flex items-center gap-3">
-          <button onClick={() => setShowAmounts((p) => !p)} className="text-[var(--text-secondary)]">
+          <button onClick={toggleShowAmounts} className="text-[var(--text-secondary)]">
             {showAmounts ? (
               <EyeSlashIcon className="w-5 h-5" />
             ) : (
@@ -202,29 +204,15 @@ export default function SubscriptionPage() {
       </div>
 
       {/* TABS */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setTab("ongoing")}
-          className={`px-3 py-1 rounded-full text-xs ${
-            tab === "ongoing"
-              ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
-              : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-          }`}
-        >
-          Ongoing
-        </button>
-
-        <button
-          onClick={() => setTab("completed")}
-          className={`px-3 py-1 rounded-full text-xs ${
-            tab === "completed"
-              ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
-              : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-          }`}
-        >
-          Completed
-        </button>
-      </div>
+      <SlidingTabs
+        className="mb-4"
+        tabs={[
+          { value: "ongoing", label: "Ongoing" },
+          { value: "completed", label: "Completed" },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
 
       {/* TOTAL */}
       <div className="mb-6 p-4 bg-[var(--bg-surface)] rounded-xl text-center">

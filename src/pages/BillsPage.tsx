@@ -9,6 +9,7 @@ import type { BillsEntry, Bill } from "../types/bills.type";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+import SlidingTabs from "../components/SlidingTabs";
 
 export default function BillsPage() {
   const showToast = useToast();
@@ -245,29 +246,14 @@ export default function BillsPage() {
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
       {/* TABS */}
        <div className="flex gap-2 mb-4 justify-between">
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => setTab("ongoing")}
-              className={`px-3 py-1 rounded-full text-xs ${
-                tab === "ongoing"
-                  ? " bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
-                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-              }`}
-            >
-              Ongoing
-            </button>
-
-            <button
-              onClick={() => setTab("done")}
-              className={`px-3 py-1 rounded-full text-xs ${
-                tab === "done"
-                  ? " bg-[var(--btn-bg)] text-[var(--btn-text)] "
-                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-              }`}
-            >
-              Done
-            </button>
-          </div>
+          <SlidingTabs
+            tabs={[
+              { value: "ongoing", label: "Ongoing" },
+              { value: "done", label: "Done" },
+            ]}
+            active={tab}
+            onChange={setTab}
+          />
 
             <div className="mb-4 flex justify-between items-start">
             <button
