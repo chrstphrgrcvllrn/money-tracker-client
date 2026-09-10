@@ -419,8 +419,8 @@ export default function SavingsPage() {
 
                     {/* NAME + AMOUNT, overlaid inside the card */}
                     <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-3 bg-gradient-to-t from-black/85 via-black/40 to-transparent">
-                      <p className="text-sm font-semibold text-white truncate">{item.name}</p>
-                      <p className="text-sm font-bold text-white">
+                      <p className="text-sm font-semibold text-[rgba(255,255,255,0.87)] truncate">{item.name}</p>
+                      <p className="text-sm font-bold text-[rgba(255,255,255,0.87)]">
                         {showAmounts ? balance.toLocaleString() : mask(balance)}
                       </p>
                     </div>
