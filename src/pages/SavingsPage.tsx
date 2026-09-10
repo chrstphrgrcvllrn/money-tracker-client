@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Savings } from "../types/savings.type";
 import {
   getSavings,
@@ -29,6 +29,14 @@ export default function SavingsPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const { showAmounts, toggleShowAmounts } = useAmountsVisibility();
+
+  // --- Tinder-style card stack ---
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [exiting, setExiting] = useState<"left" | "right" | null>(null);
+  const dragStartX = useRef(0);
+  const hasMovedRef = useRef(false);
 
   // ✅ icon paths
   const getIconPaths = (name: string) => {
@@ -177,6 +185,58 @@ export default function SavingsPage() {
 
   const totalBalance = savings.reduce((sum, item) => sum + getBalance(item), 0);
 
+  // Keep the stack index in range if a card is deleted or the list reloads.
+  useEffect(() => {
+    setCurrentIndex((i) => Math.min(i, Math.max(0, savings.length - 1)));
+  }, [savings.length]);
+
+  // Auto-advance the fly-off animation, then hand off to the next/previous card.
+  useEffect(() => {
+    if (!exiting) return;
+
+    const timer = setTimeout(() => {
+      setCurrentIndex((i) => (exiting === "left" ? i + 1 : i - 1));
+      setDragX(0);
+      setExiting(null);
+    }, 220);
+
+    return () => clearTimeout(timer);
+  }, [exiting]);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (exiting) return;
+    setIsDragging(true);
+    hasMovedRef.current = false;
+    dragStartX.current = e.clientX;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStartX.current;
+    if (Math.abs(dx) > 6) hasMovedRef.current = true;
+    setDragX(dx);
+  };
+
+  const handlePointerUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    const SWIPE_THRESHOLD = 90;
+    if (dragX <= -SWIPE_THRESHOLD && currentIndex < savings.length - 1) {
+      setExiting("left");
+    } else if (dragX >= SWIPE_THRESHOLD && currentIndex > 0) {
+      setExiting("right");
+    } else {
+      setDragX(0);
+    }
+  };
+
+  const handleTopCardClick = (id: string) => {
+    if (hasMovedRef.current) return;
+    openDetails(id);
+  };
+
   if (loading) {
     return <div className="p-4 text-center">Loading...</div>;
   }
@@ -261,59 +321,96 @@ export default function SavingsPage() {
         </div>
       </div>
 
-      {/* SWIPEABLE CARD CAROUSEL */}
+      {/* TINDER-STYLE CARD STACK */}
       {savings.length === 0 ? (
         <p className="px-6 max-w-md mx-auto text-[var(--text-secondary)] text-sm text-center py-8 shrink-0">
           No savings yet. Add one to get started!
         </p>
       ) : (
-        <div className="savings-scroll flex-1 min-h-0 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 px-6">
-          {savings.map((item) => {
-            const balance = getBalance(item);
-            const paths = getIconPaths(item.name);
+        <div className="flex-1 min-h-0 flex flex-col items-center px-6">
+          <div className="relative flex-1 min-h-0 w-full max-w-[220px] flex items-center justify-center">
+            {[2, 1, 0].map((depth) => {
+              const item = savings[currentIndex + depth];
+              if (!item) return null;
 
-            return (
-              <button
-                key={item._id}
-                onClick={() => openDetails(item._id)}
-                className="shrink-0 h-full aspect-[3/5] snap-start text-left flex flex-col"
-              >
-                <div className="w-full flex-1 min-h-0 rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 relative flex items-center justify-center">
-                  <img
-                    src={paths[0]}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const img = e.currentTarget;
-                      const currentIndex = paths.indexOf(
-                        img.src.replace(window.location.origin, "")
-                      );
-                      const nextPath = paths[currentIndex + 1];
+              const isTop = depth === 0;
+              const balance = getBalance(item);
+              const paths = getIconPaths(item.name);
 
-                      if (nextPath) {
-                        img.src = nextPath;
-                      } else {
-                        img.style.display = "none";
-                        if (img.nextSibling) {
-                          (img.nextSibling as HTMLElement).style.display = "flex";
+              const topTransformX = exiting === "left" ? -600 : exiting === "right" ? 600 : dragX;
+              const rotation = topTransformX / 20;
+
+              const style: React.CSSProperties = isTop
+                ? {
+                    transform: `translateX(${topTransformX}px) rotate(${rotation}deg)`,
+                    transition: isDragging ? "none" : "transform 0.28s ease, opacity 0.28s ease",
+                    opacity: exiting ? 0 : 1,
+                    zIndex: 30,
+                    touchAction: "pan-y",
+                  }
+                : {
+                    transform: `translateY(${depth * 10}px) scale(${1 - depth * 0.045})`,
+                    opacity: 1 - depth * 0.25,
+                    zIndex: 30 - depth * 10,
+                  };
+
+              return (
+                <div
+                  key={item._id}
+                  className={`absolute inset-0 h-full aspect-[3/5] mx-auto flex flex-col select-none ${
+                    isTop ? "" : "pointer-events-none"
+                  }`}
+                  style={style}
+                  onPointerDown={isTop ? handlePointerDown : undefined}
+                  onPointerMove={isTop ? handlePointerMove : undefined}
+                  onPointerUp={isTop ? handlePointerUp : undefined}
+                  onPointerCancel={isTop ? handlePointerUp : undefined}
+                  onClick={isTop ? () => handleTopCardClick(item._id) : undefined}
+                >
+                  <div className="w-full flex-1 min-h-0 rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 relative flex items-center justify-center shadow-xl cursor-grab active:cursor-grabbing">
+                    <img
+                      src={paths[0]}
+                      alt={item.name}
+                      draggable={false}
+                      className="w-full h-full object-cover pointer-events-none"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        const pathIndex = paths.indexOf(
+                          img.src.replace(window.location.origin, "")
+                        );
+                        const nextPath = paths[pathIndex + 1];
+
+                        if (nextPath) {
+                          img.src = nextPath;
+                        } else {
+                          img.style.display = "none";
+                          if (img.nextSibling) {
+                            (img.nextSibling as HTMLElement).style.display = "flex";
+                          }
                         }
-                      }
-                    }}
-                  />
-                  <span className="hidden absolute inset-0 items-center justify-center text-2xl font-bold text-[#2DE0E6]">
-                    {item.name?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
+                      }}
+                    />
+                    <span className="hidden absolute inset-0 items-center justify-center text-2xl font-bold text-[#2DE0E6]">
+                      {item.name?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
 
-                <p className="mt-2 text-sm font-semibold text-[var(--text-primary)] truncate shrink-0">
-                  {item.name}
-                </p>
-                <p className="text-sm font-bold text-[var(--text-primary)] shrink-0">
-                  {showAmounts ? balance.toLocaleString() : mask(balance)}
-                </p>
-              </button>
-            );
-          })}
+                  <p className="mt-2 text-sm font-semibold text-[var(--text-primary)] truncate shrink-0 text-center">
+                    {item.name}
+                  </p>
+                  <p className="text-sm font-bold text-[var(--text-primary)] shrink-0 text-center">
+                    {showAmounts ? balance.toLocaleString() : mask(balance)}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          {savings.length > 1 && (
+            <p className="text-xs text-[var(--text-secondary)] mt-2 shrink-0">
+              {currentIndex + 1} / {savings.length} · swipe to browse
+            </p>
+          )}
         </div>
       )}
 
