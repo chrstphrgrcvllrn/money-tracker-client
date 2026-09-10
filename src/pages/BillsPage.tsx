@@ -246,25 +246,23 @@ export default function BillsPage() {
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
       {/* TABS */}
-       <div className="flex gap-2 mb-4 justify-between">
-          <SlidingTabs
-            tabs={[
-              { value: "ongoing", label: "Ongoing" },
-              { value: "done", label: "Done" },
-            ]}
-            active={tab}
-            onChange={setTab}
-          />
+      <div className="flex items-center gap-2 mb-4 justify-between">
+        <SlidingTabs
+          tabs={[
+            { value: "ongoing", label: "Ongoing" },
+            { value: "done", label: "Done" },
+          ]}
+          active={tab}
+          onChange={setTab}
+        />
 
-            <div className="mb-4 flex justify-between items-start">
-            <button
-              onClick={() => setShowForm(true)}
-              className="px-[0.7rem] py-[0.3rem]  bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold rounded-4xl text-sm"
-            >
-              +
-            </button>
-          </div>
-        </div>
+        <button
+          onClick={() => setShowForm(true)}
+          className="px-[0.7rem] py-[0.3rem] bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold rounded-4xl text-sm"
+        >
+          +
+        </button>
+      </div>
 
       {/* ADD MONTH MODAL */}
       <Modal open={showForm} onClose={() => setShowForm(false)} title="Add Month">
