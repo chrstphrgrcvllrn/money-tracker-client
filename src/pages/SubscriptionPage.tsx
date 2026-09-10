@@ -7,7 +7,68 @@ import {
   deleteSubscription,
 } from "../api/subscription";
 
-import { EyeIcon, EyeSlashIcon, TrashIcon, CheckIcon, LinkIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  TrashIcon,
+  CheckIcon,
+  LinkIcon,
+  ShoppingBagIcon,
+  TvIcon,
+  WrenchScrewdriverIcon,
+  SparklesIcon,
+  DevicePhoneMobileIcon,
+  ScissorsIcon,
+} from "@heroicons/react/24/outline";
+
+type ItemIcon = React.ComponentType<{ className?: string }>;
+
+// Best-effort icon by keyword match on the item name — the Buy List has no
+// category field, so this is inferred rather than stored.
+const ICON_RULES: { keywords: string[]; icon: ItemIcon }[] = [
+  { keywords: ["haircut", "salon", "spa", "massage"], icon: ScissorsIcon },
+  { keywords: ["load", "sim", "data plan", "prepaid"], icon: DevicePhoneMobileIcon },
+  {
+    keywords: ["tv", "television", "cctv", "camera", "speaker", "router", "laptop", "computer"],
+    icon: TvIcon,
+  },
+  {
+    keywords: [
+      "tile",
+      "hagdan",
+      "window",
+      "steel",
+      "grille",
+      "solar",
+      "light",
+      "cement",
+      "paint",
+      "lababo",
+    ],
+    icon: WrenchScrewdriverIcon,
+  },
+  {
+    keywords: [
+      "wipe",
+      "perfume",
+      "wax",
+      "deo",
+      "spray",
+      "towel",
+      "tuwalya",
+      "shampoo",
+      "soap",
+      "lotion",
+    ],
+    icon: SparklesIcon,
+  },
+];
+
+const getItemIcon = (name: string): ItemIcon => {
+  const lower = (name || "").toLowerCase();
+  const rule = ICON_RULES.find((r) => r.keywords.some((kw) => lower.includes(kw)));
+  return rule ? rule.icon : ShoppingBagIcon;
+};
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -229,7 +290,10 @@ export default function SubscriptionPage() {
             {tab === "completed" ? "No completed items yet." : "No items yet. Add one to get started!"}
           </div>
         ) : (
-          filteredItems.map((item, idx, arr) => (
+          filteredItems.map((item, idx, arr) => {
+            const Icon = getItemIcon(item.name);
+
+            return (
             <div
               key={item._id}
               className={`w-full flex items-center gap-3 py-3 ${
@@ -237,7 +301,7 @@ export default function SubscriptionPage() {
               }`}
             >
               <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
-                <ShoppingBagIcon className="w-4 h-4 text-[var(--text-primary)]" />
+                <Icon className="w-4 h-4 text-[var(--text-primary)]" />
               </div>
 
               <button
@@ -270,7 +334,8 @@ export default function SubscriptionPage() {
                 ₱{showAmounts ? itemTotal(item).toLocaleString() : mask(itemTotal(item))}
               </button>
             </div>
-          ))
+            );
+          })
         )}
       </div>
 
