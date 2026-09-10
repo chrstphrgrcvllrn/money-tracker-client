@@ -11,11 +11,13 @@ import { TrashIcon, ReceiptPercentIcon } from "@heroicons/react/24/solid";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
+import { SkeletonBlock, SkeletonRows } from "../components/Skeleton";
 
 const ExpensesPage: React.FC = () => {
   const showToast = useToast();
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -38,6 +40,8 @@ const ExpensesPage: React.FC = () => {
     } catch (error) {
       console.error("Failed to load expenses:", error);
       showToast("Failed to load expenses", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -253,6 +257,16 @@ const graphData = Object.values(
   // =========================
   // RENDER
   // =========================
+  if (loading) {
+    return (
+      <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6">
+        <SkeletonBlock className="h-16 w-full mb-4" />
+        <SkeletonBlock className="h-8 w-full mb-4" />
+        <SkeletonRows count={5} />
+      </div>
+    );
+  }
+
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6">
 

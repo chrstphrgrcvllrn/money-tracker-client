@@ -13,11 +13,13 @@ import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
+import { SkeletonBlock, SkeletonCards } from "../components/Skeleton";
 
 export default function SalaryPage() {
   const showToast = useToast();
 
   const [salaryData, setSalaryData] = useState<SalaryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editingAllEntryId, setEditingAllEntryId] = useState<string | null>(null);
   const [editedExpenses, setEditedExpenses] = useState<Expense[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -57,6 +59,8 @@ export default function SalaryPage() {
       } catch (error) {
         console.error("Failed to load salaries:", error);
         showToast("Failed to load salaries", "error");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -316,6 +320,15 @@ export default function SalaryPage() {
   };
 
   const totals = calculateTotals();
+
+  if (loading) {
+    return (
+      <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
+        <SkeletonBlock className="h-8 w-48 mb-4" />
+        <SkeletonCards count={3} className="h-32" />
+      </div>
+    );
+  }
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">

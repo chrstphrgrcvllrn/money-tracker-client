@@ -11,6 +11,7 @@ import {
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
+import { SkeletonRows } from "../components/Skeleton";
 import {
   TrackerIconStyles,
   MedicalIcon,
@@ -351,7 +352,7 @@ const TrackerPage: React.FC = () => {
         {/* ENTRIES LIST */}
         <div className="space-y-2">
           {loading ? (
-            <div className="text-center py-12 text-gray-500">Loading...</div>
+            <SkeletonRows count={4} withValue={false} />
           ) : filteredEntries.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               No entries yet. Add one to get started!

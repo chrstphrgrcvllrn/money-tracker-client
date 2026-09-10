@@ -13,6 +13,7 @@ import { HomeIcon } from "@heroicons/react/24/outline";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
+import { SkeletonBlock, SkeletonCards } from "../components/Skeleton";
 
 const BUDGET_STORAGE_KEY = "houseExpenseBudgets";
 
@@ -20,6 +21,7 @@ const HouseExpensesPage: React.FC = () => {
   const showToast = useToast();
 
   const [expenses, setExpenses] = useState<HouseExpense[]>([]);
+  const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -58,6 +60,8 @@ const HouseExpensesPage: React.FC = () => {
     } catch (error) {
       console.error("Failed to load house expenses:", error);
       showToast("Failed to load expenses", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -342,6 +346,15 @@ const HouseExpensesPage: React.FC = () => {
   // =========================
   // RENDER
   // =========================
+  if (loading) {
+    return (
+      <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)] text-[var(--text-primary)]">
+        <SkeletonBlock className="h-8 w-full mb-4" />
+        <SkeletonCards count={2} className="h-56" />
+      </div>
+    );
+  }
+
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)] text-[var(--text-primary)]">
 

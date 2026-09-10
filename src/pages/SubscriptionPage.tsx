@@ -74,6 +74,7 @@ import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import { useAmountsVisibility } from "../components/useAmountsVisibility";
 import SlidingTabs from "../components/SlidingTabs";
+import { SkeletonBlock, SkeletonRows } from "../components/Skeleton";
 
 const emptyForm = {
   name: "",
@@ -236,7 +237,14 @@ export default function SubscriptionPage() {
     : null;
 
   if (loading) {
-    return <div className="p-4 text-center text-[var(--text-primary)]">Loading...</div>;
+    return (
+      <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[var(--bg-page)]">
+        <SkeletonBlock className="h-8 w-full mb-4" />
+        <SkeletonBlock className="h-8 w-40 mb-4 rounded-full" />
+        <SkeletonBlock className="h-24 w-full mb-6 rounded-xl" />
+        <SkeletonRows count={5} />
+      </div>
+    );
   }
 
   return (

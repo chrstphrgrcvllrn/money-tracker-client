@@ -22,6 +22,7 @@ import {
 
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
+import { SkeletonCard } from "../components/Skeleton";
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error && typeof error === "object") {
@@ -35,6 +36,7 @@ const NotebookPage: React.FC = () => {
   const showToast = useToast();
 
   const [notes, setNotes] = useState<NotebookNote[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
@@ -142,6 +144,8 @@ const NotebookPage: React.FC = () => {
       console.error("Fetch notes error:", error);
 
       showToast("Failed to load notes", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -436,7 +440,13 @@ const NotebookPage: React.FC = () => {
       {/* NOTE LIST */}
       <div className="px-5 pb-10">
 
-        {filteredNotes.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} className="h-28" />
+            ))}
+          </div>
+        ) : filteredNotes.length === 0 ? (
           <div className="text-gray-600 text-center py-16">
             No notes
           </div>

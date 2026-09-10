@@ -10,11 +10,13 @@ import { CalendarDaysIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outl
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
+import { SkeletonBlock, SkeletonCards } from "../components/Skeleton";
 
 export default function BillsPage() {
   const showToast = useToast();
 
   const [data, setData] = useState<BillsEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editedBills, setEditedBills] = useState<Bill[]>([]);
 
@@ -57,6 +59,8 @@ export default function BillsPage() {
       } catch (error) {
         console.error("Failed to load bills:", error);
         showToast("Failed to load bills", "error");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -242,6 +246,15 @@ export default function BillsPage() {
         parseMonth(a.month).getTime() -
         parseMonth(b.month).getTime()
     );
+
+  if (loading) {
+    return (
+      <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
+        <SkeletonBlock className="h-8 w-48 mb-6" />
+        <SkeletonCards count={2} className="h-56" />
+      </div>
+    );
+  }
 
   return (
     <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">

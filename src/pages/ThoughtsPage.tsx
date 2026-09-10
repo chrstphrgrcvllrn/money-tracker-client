@@ -3,6 +3,7 @@ import type { Thought } from "../types/thoughts.type";
 import { getThoughts, createThought } from "../api/thought";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { useToast } from "../components/useToast";
+import { SkeletonBubbles } from "../components/Skeleton";
 
 const formatTime = (ts: number) =>
   new Date(ts).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -23,6 +24,7 @@ const ThoughtsPage: React.FC = () => {
   const showToast = useToast();
 
   const [thoughts, setThoughts] = useState<Thought[]>([]);
+  const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -34,6 +36,8 @@ const ThoughtsPage: React.FC = () => {
     } catch (error) {
       console.error("Failed to load thoughts:", error);
       showToast("Failed to load thoughts", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,7 +84,9 @@ const ThoughtsPage: React.FC = () => {
 
       {/* MESSAGE LIST */}
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 pb-3">
-        {sortedThoughts.length === 0 ? (
+        {loading ? (
+          <SkeletonBubbles />
+        ) : sortedThoughts.length === 0 ? (
           <p className="text-center text-[var(--text-secondary)] text-sm py-8">
             No thoughts yet. Write your first one below.
           </p>

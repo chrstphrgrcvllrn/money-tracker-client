@@ -11,6 +11,7 @@ import { EyeIcon, EyeSlashIcon, TrashIcon, EllipsisVerticalIcon } from "@heroico
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import { useAmountsVisibility } from "../components/useAmountsVisibility";
+import { SkeletonBlock, SkeletonSavingsCard } from "../components/Skeleton";
 
 // Wraps an index into [0, len) — this is what makes the card deck rotate
 // infinitely: a swiped card doesn't disappear, it moves to the back of
@@ -243,7 +244,15 @@ export default function SavingsPage() {
   };
 
   if (loading) {
-    return <div className="p-4 text-center">Loading...</div>;
+    return (
+      <div className="pb-6 pt-8 font-sans bg-[var(--bg-page)] h-full flex flex-col">
+        <div className="px-6 max-w-md mx-auto w-full shrink-0 space-y-4 mb-6">
+          <SkeletonBlock className="h-8 w-full" />
+          <SkeletonBlock className="h-24 w-full rounded-xl" />
+        </div>
+        <SkeletonSavingsCard />
+      </div>
+    );
   }
 
   return (

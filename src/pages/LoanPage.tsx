@@ -13,6 +13,7 @@ import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import { useAmountsVisibility } from "../components/useAmountsVisibility";
 import SlidingTabs from "../components/SlidingTabs";
+import { SkeletonBlock, SkeletonRows } from "../components/Skeleton";
 
 export default function LoanPage() {
   const showToast = useToast();
@@ -201,7 +202,12 @@ export default function LoanPage() {
   }, 0);
 
   if (loading) {
-    return <div className="p-4 text-center">Loading...</div>;
+    return (
+      <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[var(--bg-page)]">
+        <SkeletonBlock className="h-8 w-full mb-6 rounded-xl" />
+        <SkeletonRows count={5} />
+      </div>
+    );
   }
 
   return (

@@ -9,11 +9,13 @@ import {
 import { CheckIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useToast } from "../components/useToast";
+import { SkeletonRows } from "../components/Skeleton";
 
 const NotesPage: React.FC = () => {
   const showToast = useToast();
 
   const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
   const [category, setCategory] = useState<Note["category"]>("work");
 
@@ -28,6 +30,8 @@ const NotesPage: React.FC = () => {
     } catch (error) {
       console.error("Failed to load notes:", error);
       showToast("Failed to load notes", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -166,7 +170,10 @@ const highlightText = (text: string, done: boolean) => {
 
       {/* LIST */}
       <ul className="flex-1 min-h-0 overflow-y-auto px-6 text-sm">
-        {sortedNotes.map((note, idx, arr) => (
+        {loading ? (
+          <SkeletonRows count={6} withValue={false} />
+        ) : (
+        sortedNotes.map((note, idx, arr) => (
           <li
             key={note._id}
             className={`flex items-center gap-3 py-3 ${
@@ -198,7 +205,8 @@ const highlightText = (text: string, done: boolean) => {
               />
             </button>
           </li>
-        ))}
+        ))
+        )}
       </ul>
 
       {/* COMPOSER */}
