@@ -6,7 +6,7 @@ import {
 } from "../api/bills";
 
 import type { BillsEntry, Bill } from "../types/bills.type";
-import { CalendarDaysIcon } from "@heroicons/react/24/outline";
+import { CalendarDaysIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
@@ -22,6 +22,7 @@ export default function BillsPage() {
   const [newMonth, setNewMonth] = useState("");
 
   const [tab, setTab] = useState<"ongoing" | "done">("ongoing");
+  const [menuOpenFor, setMenuOpenFor] = useState<string | null>(null);
 
   // ADD BILL MODAL
   const [showBillModal, setShowBillModal] = useState(false);
@@ -376,16 +377,51 @@ export default function BillsPage() {
                 </h2>
               </div>
 
-              <div className="flex gap-3 text-sm text-[var(--text-secondary)] ">
-                <button onClick={() => handleEditAll(entry._id)}>
-                  Edit
+              <div className="relative shrink-0">
+                <button
+                  onClick={() =>
+                    setMenuOpenFor((prev) => (prev === entry._id ? null : entry._id))
+                  }
+                  className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+                  aria-label="More actions"
+                >
+                  <EllipsisVerticalIcon className="w-5 h-5" />
                 </button>
-                <button onClick={() => handleAddBill(entry._id)}>
-                  Add
-                </button>
-                <button onClick={() => handleDuplicateMonth(entry)}>
-                  Duplicate
-                </button>
+
+                {menuOpenFor === entry._id && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setMenuOpenFor(null)} />
+                    <div className="absolute right-0 top-full mt-1 z-20 w-36 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-lg overflow-hidden">
+                      <button
+                        onClick={() => {
+                          handleEditAll(entry._id);
+                          setMenuOpenFor(null);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleAddBill(entry._id);
+                          setMenuOpenFor(null);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+                      >
+                        Add Bill
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleDuplicateMonth(entry);
+                          setMenuOpenFor(null);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+                      >
+                        Duplicate
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
