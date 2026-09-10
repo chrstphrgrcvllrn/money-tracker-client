@@ -12,6 +12,11 @@ import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import { useAmountsVisibility } from "../components/useAmountsVisibility";
 
+// Wraps an index into [0, len) — this is what makes the card deck rotate
+// infinitely: a swiped card doesn't disappear, it moves to the back of
+// the deck and comes around again instead of hitting a dead end.
+const wrapIndex = (i: number, len: number) => (len === 0 ? 0 : ((i % len) + len) % len);
+
 export default function SavingsPage() {
   const showToast = useToast();
   const [savings, setSavings] = useState<Savings[]>([]);
@@ -187,7 +192,7 @@ export default function SavingsPage() {
 
   // Keep the stack index in range if a card is deleted or the list reloads.
   useEffect(() => {
-    setCurrentIndex((i) => Math.min(i, Math.max(0, savings.length - 1)));
+    setCurrentIndex((i) => wrapIndex(i, savings.length));
   }, [savings.length]);
 
   // Auto-advance the fly-off animation, then hand off to the next/previous card.
@@ -195,13 +200,13 @@ export default function SavingsPage() {
     if (!exiting) return;
 
     const timer = setTimeout(() => {
-      setCurrentIndex((i) => (exiting === "left" ? i + 1 : i - 1));
+      setCurrentIndex((i) => wrapIndex(exiting === "left" ? i + 1 : i - 1, savings.length));
       setDragX(0);
       setExiting(null);
     }, 220);
 
     return () => clearTimeout(timer);
-  }, [exiting]);
+  }, [exiting, savings.length]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (exiting) return;
@@ -223,9 +228,9 @@ export default function SavingsPage() {
     setIsDragging(false);
 
     const SWIPE_THRESHOLD = 90;
-    if (dragX <= -SWIPE_THRESHOLD && currentIndex < savings.length - 1) {
+    if (dragX <= -SWIPE_THRESHOLD && savings.length > 1) {
       setExiting("left");
-    } else if (dragX >= SWIPE_THRESHOLD && currentIndex > 0) {
+    } else if (dragX >= SWIPE_THRESHOLD && savings.length > 1) {
       setExiting("right");
     } else {
       setDragX(0);
@@ -321,7 +326,7 @@ export default function SavingsPage() {
         </div>
       </div>
 
-      {/* TINDER-STYLE CARD STACK */}
+      {/* TINDER-STYLE CARD STACK (rotates infinitely — a swiped card goes to the back) */}
       {savings.length === 0 ? (
         <p className="px-6 max-w-md mx-auto text-[var(--text-secondary)] text-sm text-center py-8 shrink-0">
           No savings yet. Add one to get started!
@@ -329,45 +334,48 @@ export default function SavingsPage() {
       ) : (
         <div className="flex-1 min-h-0 flex flex-col items-center px-6">
           <div className="relative flex-1 min-h-0 w-full max-w-[220px] flex items-center justify-center">
-            {[2, 1, 0].map((depth) => {
-              const item = savings[currentIndex + depth];
-              if (!item) return null;
+            {(() => {
+              // Only stack as many layers as there are distinct cards, so a
+              // list of 1-2 items never wraps around onto itself mid-stack.
+              const maxDepth = Math.min(2, savings.length - 1);
+              const depths = Array.from({ length: maxDepth + 1 }, (_, i) => maxDepth - i);
 
-              const isTop = depth === 0;
-              const balance = getBalance(item);
-              const paths = getIconPaths(item.name);
+              return depths.map((depth) => {
+                const item = savings[wrapIndex(currentIndex + depth, savings.length)];
+                const isTop = depth === 0;
+                const balance = getBalance(item);
+                const paths = getIconPaths(item.name);
 
-              const topTransformX = exiting === "left" ? -600 : exiting === "right" ? 600 : dragX;
-              const rotation = topTransformX / 20;
+                const topTransformX = exiting === "left" ? -600 : exiting === "right" ? 600 : dragX;
+                const rotation = topTransformX / 20;
 
-              const style: React.CSSProperties = isTop
-                ? {
-                    transform: `translateX(${topTransformX}px) rotate(${rotation}deg)`,
-                    transition: isDragging ? "none" : "transform 0.28s ease, opacity 0.28s ease",
-                    opacity: exiting ? 0 : 1,
-                    zIndex: 30,
-                    touchAction: "pan-y",
-                  }
-                : {
-                    transform: `translateY(${depth * 10}px) scale(${1 - depth * 0.045})`,
-                    opacity: 1 - depth * 0.25,
-                    zIndex: 30 - depth * 10,
-                  };
+                const style: React.CSSProperties = isTop
+                  ? {
+                      transform: `translateX(${topTransformX}px) rotate(${rotation}deg)`,
+                      transition: isDragging ? "none" : "transform 0.28s ease, opacity 0.28s ease",
+                      opacity: exiting ? 0 : 1,
+                      zIndex: 30,
+                      touchAction: "pan-y",
+                    }
+                  : {
+                      transform: `translateY(${depth * 10}px) scale(${1 - depth * 0.045})`,
+                      opacity: 1 - depth * 0.25,
+                      zIndex: 30 - depth * 10,
+                    };
 
-              return (
-                <div
-                  key={item._id}
-                  className={`absolute inset-0 h-full aspect-[3/5] mx-auto flex flex-col select-none ${
-                    isTop ? "" : "pointer-events-none"
-                  }`}
-                  style={style}
-                  onPointerDown={isTop ? handlePointerDown : undefined}
-                  onPointerMove={isTop ? handlePointerMove : undefined}
-                  onPointerUp={isTop ? handlePointerUp : undefined}
-                  onPointerCancel={isTop ? handlePointerUp : undefined}
-                  onClick={isTop ? () => handleTopCardClick(item._id) : undefined}
-                >
-                  <div className="w-full flex-1 min-h-0 rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 relative flex items-center justify-center shadow-xl cursor-grab active:cursor-grabbing">
+                return (
+                  <div
+                    key={item._id}
+                    className={`absolute inset-0 h-full aspect-[3/5] mx-auto rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 shadow-xl select-none ${
+                      isTop ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"
+                    }`}
+                    style={style}
+                    onPointerDown={isTop ? handlePointerDown : undefined}
+                    onPointerMove={isTop ? handlePointerMove : undefined}
+                    onPointerUp={isTop ? handlePointerUp : undefined}
+                    onPointerCancel={isTop ? handlePointerUp : undefined}
+                    onClick={isTop ? () => handleTopCardClick(item._id) : undefined}
+                  >
                     <img
                       src={paths[0]}
                       alt={item.name}
@@ -393,17 +401,18 @@ export default function SavingsPage() {
                     <span className="hidden absolute inset-0 items-center justify-center text-2xl font-bold text-[#2DE0E6]">
                       {item.name?.charAt(0).toUpperCase()}
                     </span>
-                  </div>
 
-                  <p className="mt-2 text-sm font-semibold text-[var(--text-primary)] truncate shrink-0 text-center">
-                    {item.name}
-                  </p>
-                  <p className="text-sm font-bold text-[var(--text-primary)] shrink-0 text-center">
-                    {showAmounts ? balance.toLocaleString() : mask(balance)}
-                  </p>
-                </div>
-              );
-            })}
+                    {/* NAME + AMOUNT, overlaid inside the card */}
+                    <div className="absolute inset-x-0 bottom-0 px-3 pt-8 pb-3 bg-gradient-to-t from-black/85 via-black/40 to-transparent">
+                      <p className="text-sm font-semibold text-white truncate">{item.name}</p>
+                      <p className="text-sm font-bold text-white">
+                        {showAmounts ? balance.toLocaleString() : mask(balance)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
 
           {savings.length > 1 && (
