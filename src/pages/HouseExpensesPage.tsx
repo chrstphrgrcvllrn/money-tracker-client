@@ -43,6 +43,11 @@ const HouseExpensesPage: React.FC = () => {
   const [editingBudgetMonth, setEditingBudgetMonth] = useState<string | null>(null);
   const [budgetInput, setBudgetInput] = useState("");
 
+  // Monthly cards default to open only for the current billing cycle;
+  // past cycles default to collapsed. This set tracks months the user
+  // has manually flipped away from that default, in either direction.
+  const [toggledMonths, setToggledMonths] = useState<Set<string>>(new Set());
+
   // =========================
   // LOAD
   // =========================
@@ -210,6 +215,24 @@ const HouseExpensesPage: React.FC = () => {
 
   const isThisMonth = (d: string) => getCycleKey(d) === getCycleKey(today);
 
+  const isMonthExpanded = (month: string) => {
+    const isCurrentCycle = month === getCycleKey(today);
+    const wasToggled = toggledMonths.has(month);
+    return wasToggled ? !isCurrentCycle : isCurrentCycle;
+  };
+
+  const toggleMonth = (month: string) => {
+    setToggledMonths((prev) => {
+      const next = new Set(prev);
+      if (next.has(month)) {
+        next.delete(month);
+      } else {
+        next.add(month);
+      }
+      return next;
+    });
+  };
+
   // =========================
   // TOTALS
   // =========================
@@ -374,84 +397,107 @@ const HouseExpensesPage: React.FC = () => {
               const remaining = budget - monthTotal;
               const monthLabel = getCycleLabel(month);
 
+              const expanded = isMonthExpanded(month);
+
               return (
                 <div key={month} className="bg-[var(--bg-surface)] rounded-xl p-4">
-                  <div className="flex items-center gap-3 mb-3">
+                  <button
+                    onClick={() => toggleMonth(month)}
+                    className="w-full flex items-center gap-3 text-left"
+                  >
                     <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
                       <HomeIcon className="w-4 h-4 text-[var(--text-primary)]" />
                     </div>
-                    <h3 className="text-[var(--text-primary)] font-semibold">{monthLabel}</h3>
-                  </div>
+                    <h3 className="flex-1 min-w-0 text-[var(--text-primary)] font-semibold truncate">
+                      {monthLabel}
+                    </h3>
+                    <span
+                      className={`shrink-0 text-[var(--text-secondary)] transition-transform ${
+                        expanded ? "rotate-180" : ""
+                      }`}
+                    >
+                      ▾
+                    </span>
+                  </button>
 
-                  {/* BUDGET & REMAINING */}
-                  <div className="space-y-2 mb-3">
-                    <div className="bg-[var(--bg-input)] rounded-lg p-2">
-                      <p className="text-[var(--text-secondary)] text-[10px]">Budget</p>
-                      {editingBudgetMonth === month ? (
-                        <div className="flex gap-1 mt-2">
-                          <input
-                            type="number"
-                            value={budgetInput}
-                            onChange={(e) => setBudgetInput(e.target.value)}
-                            placeholder="0"
-                            className="flex-1 px-2 py-2 bg-[var(--bg-surface)] text-[var(--text-primary)] border border-gray-600 rounded focus:border-[#2DE0E6]/50 outline-none text-sm"
-                            autoFocus
-                          />
-                          <button
-                            onClick={() => handleSaveBudget(month)}
-                            className="px-3 py-2 bg-[var(--btn-bg)] text-[var(--btn-text)] text-xs font-bold rounded"
-                          >
-                            ✓
-                          </button>
-                          <button
-                            onClick={() => setEditingBudgetMonth(null)}
-                            className="px-3 py-2 bg-[var(--bg-input)] text-[var(--text-secondary)] text-xs font-bold rounded"
-                          >
-                            ✕
-                          </button>
+                  <div
+                    className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                    style={{ gridTemplateRows: expanded ? "1fr" : "0fr" }}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="pt-3">
+                        {/* BUDGET & REMAINING */}
+                        <div className="space-y-2 mb-3">
+                          <div className="bg-[var(--bg-input)] rounded-lg p-2">
+                            <p className="text-[var(--text-secondary)] text-[10px]">Budget</p>
+                            {editingBudgetMonth === month ? (
+                              <div className="flex gap-1 mt-2">
+                                <input
+                                  type="number"
+                                  value={budgetInput}
+                                  onChange={(e) => setBudgetInput(e.target.value)}
+                                  placeholder="0"
+                                  className="flex-1 px-2 py-2 bg-[var(--bg-surface)] text-[var(--text-primary)] border border-gray-600 rounded focus:border-[#2DE0E6]/50 outline-none text-sm"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => handleSaveBudget(month)}
+                                  className="px-3 py-2 bg-[var(--btn-bg)] text-[var(--btn-text)] text-xs font-bold rounded"
+                                >
+                                  ✓
+                                </button>
+                                <button
+                                  onClick={() => setEditingBudgetMonth(null)}
+                                  className="px-3 py-2 bg-[var(--bg-input)] text-[var(--text-secondary)] text-xs font-bold rounded"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setEditingBudgetMonth(month);
+                                  setBudgetInput(String(budget));
+                                }}
+                                className="text-[#2DE0E6] font-bold mt-2 hover:underline text-sm"
+                              >
+                                {budget > 0 ? `₱${budget.toLocaleString()}` : "Set Budget"}
+                              </button>
+                            )}
+                          </div>
+
+                          <div className={`rounded-lg p-2 ${remaining >= 0 ? "bg-green-900/30" : "bg-red-900/30"}`}>
+                            <p className="text-[var(--text-secondary)] text-[10px]">Remaining</p>
+                            <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[var(--text-primary)]" : "text-[#E23A55]"}`}>
+                              {remaining < 0 ? "-" : ""}₱{Math.abs(remaining).toLocaleString()}
+                            </p>
+                          </div>
                         </div>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setEditingBudgetMonth(month);
-                            setBudgetInput(String(budget));
-                          }}
-                          className="text-[#2DE0E6] font-bold mt-2 hover:underline text-sm"
-                        >
-                          {budget > 0 ? `₱${budget.toLocaleString()}` : "Set Budget"}
-                        </button>
-                      )}
-                    </div>
 
-                    <div className={`rounded-lg p-2 ${remaining >= 0 ? "bg-green-900/30" : "bg-red-900/30"}`}>
-                      <p className="text-[var(--text-secondary)] text-[10px]">Remaining</p>
-                      <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[var(--text-primary)]" : "text-[#E23A55]"}`}>
-                        {remaining < 0 ? "-" : ""}₱{Math.abs(remaining).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* TOTAL SPENT */}
-                  <div className="mb-3 pb-3 border-b border-[var(--border-subtle)] flex justify-between text-[var(--text-primary)]">
-                    <span>Total Spent</span>
-                    <span className="font-bold text-[#2DE0E6]">₱{monthTotal.toLocaleString()}</span>
-                  </div>
-
-                  {/* EXPENSES LIST */}
-                  <div className="space-y-2">
-                    {monthExpenses.map((exp) => (
-                      <button
-                        key={exp._id}
-                        onClick={() => handleEdit(exp)}
-                        className="w-full flex justify-between items-center text-sm bg-[var(--bg-input)] p-2 rounded text-left"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[var(--text-primary)] truncate">{exp.text}</p>
-                          <p className="text-[var(--text-secondary)] text-[10px]">{exp.category}</p>
+                        {/* TOTAL SPENT */}
+                        <div className="mb-3 pb-3 border-b border-[var(--border-subtle)] flex justify-between text-[var(--text-primary)]">
+                          <span>Total Spent</span>
+                          <span className="font-bold text-[#2DE0E6]">₱{monthTotal.toLocaleString()}</span>
                         </div>
-                        <span className="text-[var(--text-secondary)] font-medium shrink-0">₱{exp.amount.toLocaleString()}</span>
-                      </button>
-                    ))}
+
+                        {/* EXPENSES LIST */}
+                        <div className="space-y-2">
+                          {monthExpenses.map((exp) => (
+                            <button
+                              key={exp._id}
+                              onClick={() => handleEdit(exp)}
+                              className="w-full flex justify-between items-center text-sm bg-[var(--bg-input)] p-2 rounded text-left"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[var(--text-primary)] truncate">{exp.text}</p>
+                                <p className="text-[var(--text-secondary)] text-[10px]">{exp.category}</p>
+                              </div>
+                              <span className="text-[var(--text-secondary)] font-medium shrink-0">₱{exp.amount.toLocaleString()}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );

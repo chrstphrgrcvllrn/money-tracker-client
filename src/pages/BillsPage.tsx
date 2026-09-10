@@ -463,12 +463,13 @@ export default function BillsPage() {
                     <div
                       onClick={() => handleToggle(entry._id, i)}
                       className={`flex-1 cursor-pointer ${
-                        bill.paid
-                          ? "line-through text-[var(--text-secondary)]"
-                          : "text-[var(--text-primary)]"
+                        bill.paid ? "line-through text-[var(--text-secondary)]" : ""
                       }`}
                     >
-                      {bill.name} • {bill.dueDate}
+                      <span className={bill.paid ? "" : "text-[var(--text-primary)]"}>
+                        {bill.name}
+                      </span>
+                      <span className="text-[var(--text-secondary)]"> • {bill.dueDate}</span>
                     </div>
                   )}
 
