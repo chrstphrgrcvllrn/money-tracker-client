@@ -6,7 +6,7 @@ import {
   toggleNote,
   // deleteNote,
 } from "../api/note";
-import { CheckIcon } from "@heroicons/react/24/solid";
+import { CheckIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useToast } from "../components/useToast";
 
@@ -142,57 +142,30 @@ const highlightText = (text: string, done: boolean) => {
 
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
-      {/* INPUT */}
-      <div className="flex gap-2 mb-4 h-[7vh]">
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Enter note"
-          className="flex-1 bg-[var(--bg-input)] px-2 py-1 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
-        />
+    <div className="h-full flex flex-col bg-[var(--bg-page)] text-xs">
+      {/* HEADER + TABS */}
+      <div className="px-6 pt-6 pb-3 shrink-0">
+        <h1 className="text-lg font-semibold text-[var(--text-primary)] mb-3">Notes</h1>
 
-        <select
-          value={category}
-          onChange={(e) =>
-            setCategory(e.target.value as Note["category"])
-          }
-          className="bg-[var(--bg-input)] px-2 py-1 rounded text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
-        >
-          <option value="work">Work</option>
-          <option value="personal">Personal</option>
-          <option value="to buy">To Buy</option>
-          <option value="others">Others</option>
-        </select>
-
-        <button
-          onClick={addNote}
-          className="bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold px-2 py-1 rounded"
-        >
-          Add
-        </button>
-      </div>
-
-      {/* TABS */}
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {["pending", "work", "personal", "others", "to buy", "done"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab as "all" | "done" | "pending" | "work" | "personal" | "others" | "to buy")}
-            className={`px-2 py-1 rounded-xl text-xs capitalize ${
-              activeTab === tab
-                ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
-                : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+        <div className="flex gap-2 flex-wrap">
+          {["pending", "work", "personal", "others", "to buy", "done"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as "all" | "done" | "pending" | "work" | "personal" | "others" | "to buy")}
+              className={`px-2 py-1 rounded-xl text-xs capitalize ${
+                activeTab === tab
+                  ? "bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold"
+                  : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* LIST */}
-      <ul className="text-sm">
+      <ul className="flex-1 min-h-0 overflow-y-auto px-6 text-sm">
         {sortedNotes.map((note, idx, arr) => (
           <li
             key={note._id}
@@ -227,6 +200,40 @@ const highlightText = (text: string, done: boolean) => {
           </li>
         ))}
       </ul>
+
+      {/* COMPOSER */}
+      <div className="shrink-0 flex items-center gap-2 px-4 py-3 border-t border-[var(--border-subtle)]">
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as Note["category"])}
+          className="shrink-0 bg-[var(--bg-input)] px-3 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+        >
+          <option value="work">Work</option>
+          <option value="personal">Personal</option>
+          <option value="to buy">To Buy</option>
+          <option value="others">Others</option>
+        </select>
+
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") addNote();
+          }}
+          placeholder="Enter note"
+          className="flex-1 min-w-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+        />
+
+        <button
+          onClick={addNote}
+          disabled={!text.trim()}
+          aria-label="Add note"
+          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-[var(--btn-bg)] text-[var(--btn-text)] disabled:opacity-40"
+        >
+          <PaperAirplaneIcon className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 };
