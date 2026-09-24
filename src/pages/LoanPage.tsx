@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { Loan } from "../types/loans.type";
 import { getLoans, createLoan, addTransaction, updateLoan } from "../api/loan";
 
-import { PaperClipIcon } from "@heroicons/react/24/solid";
+import { UserIcon } from "@heroicons/react/24/solid";
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -305,7 +305,7 @@ export default function LoanPage() {
               >
                 <div className="flex items-center gap-3 text-left">
                   <div className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
-                    <PaperClipIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
+                    <UserIcon className="w-6 h-6 text-[var(--avatar-fg)]" />
                   </div>
 
                   <div>
