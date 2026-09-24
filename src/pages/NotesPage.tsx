@@ -6,8 +6,7 @@ import {
   toggleNote,
   // deleteNote,
 } from "../api/note";
-import { CheckIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, PaperAirplaneIcon, DocumentTextIcon } from "@heroicons/react/24/solid";
 import { useToast } from "../components/useToast";
 import { SkeletonRows } from "../components/Skeleton";
 
@@ -180,8 +179,8 @@ const highlightText = (text: string, done: boolean) => {
               idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
             }`}
           >
-            <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
-              <DocumentTextIcon className="w-4 h-4 text-[var(--text-primary)]" />
+            <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+              <DocumentTextIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
             </div>
 
             <div className="flex-1 min-w-0">

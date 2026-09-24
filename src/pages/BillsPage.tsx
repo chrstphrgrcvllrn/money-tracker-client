@@ -6,7 +6,8 @@ import {
 } from "../api/bills";
 
 import type { BillsEntry, Bill } from "../types/bills.type";
-import { CalendarDaysIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { CalendarDaysIcon } from "@heroicons/react/24/solid";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
@@ -380,8 +381,8 @@ export default function BillsPage() {
           >
             <div className="flex justify-between items-center pb-3 mb-2">
               <div className="flex items-center gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
-                  <CalendarDaysIcon className="w-5 h-5 text-[var(--text-primary)]" />
+                <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                  <CalendarDaysIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
                 </div>
                 <h2 className="text-[var(--text-primary)] font-semibold text-[1.5rem]">
                   {entry.month}

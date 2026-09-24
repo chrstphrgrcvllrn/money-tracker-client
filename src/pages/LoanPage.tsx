@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import type { Loan } from "../types/loans.type";
 import { getLoans, createLoan, addTransaction, updateLoan } from "../api/loan";
 
+import { PaperClipIcon } from "@heroicons/react/24/solid";
 import {
-  PaperClipIcon,
   EyeIcon,
   EyeSlashIcon,
   EllipsisVerticalIcon,
@@ -304,8 +304,8 @@ export default function LoanPage() {
                 onClick={() => toggleExpand(index)}
               >
                 <div className="flex items-center gap-3 text-left">
-                  <div className="shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
-                    <PaperClipIcon className="w-5 h-5 text-[var(--text-primary)]" />
+                  <div className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                    <PaperClipIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
                   </div>
 
                   <div>

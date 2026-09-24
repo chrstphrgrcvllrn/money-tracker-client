@@ -13,13 +13,15 @@ import {
   TrashIcon,
   CheckIcon,
   LinkIcon,
+} from "@heroicons/react/24/outline";
+import {
   ShoppingBagIcon,
   TvIcon,
   WrenchScrewdriverIcon,
   SparklesIcon,
   DevicePhoneMobileIcon,
   ScissorsIcon,
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/24/solid";
 
 type ItemIcon = React.ComponentType<{ className?: string }>;
 
@@ -308,8 +310,8 @@ export default function SubscriptionPage() {
                 idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
               }`}
             >
-              <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
-                <Icon className="w-4 h-4 text-[var(--text-primary)]" />
+              <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                <Icon className="w-5 h-5 text-[var(--avatar-fg)]" />
               </div>
 
               <button

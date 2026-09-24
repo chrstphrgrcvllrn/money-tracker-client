@@ -17,6 +17,8 @@ body {
   --border-strong: #4a4a4a;
   --accent: #7f85f5;
   --accent-soft: rgba(127, 133, 245, 0.16);
+  --avatar-bg: #333333;
+  --avatar-fg: #9a9a9a;
   --accent-ink: #0b0b14;
   --danger: #f1707b;
   --negative: #e879b9;
@@ -34,6 +36,8 @@ body {
   --border-strong: #bdbdbd;
   --accent: #5b5fc7;
   --accent-soft: rgba(91, 95, 199, 0.12);
+  --avatar-bg: #e0e0e0;
+  --avatar-fg: #6b6b6b;
   --accent-ink: #ffffff;
   --danger: #c4314b;
   --negative: #b4358a;

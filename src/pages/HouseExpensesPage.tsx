@@ -7,8 +7,7 @@ import {
 } from "../api/houseExpenses";
 
 import type { HouseExpense } from "../types/houseExpense.type";
-import { TrashIcon } from "@heroicons/react/24/solid";
-import { HomeIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, HomeIcon } from "@heroicons/react/24/solid";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -403,8 +402,8 @@ const HouseExpensesPage: React.FC = () => {
                     onClick={() => toggleMonth(month)}
                     className="w-full flex items-center gap-3 text-left"
                   >
-                    <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
-                      <HomeIcon className="w-4 h-4 text-[var(--text-primary)]" />
+                    <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                      <HomeIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-[var(--text-primary)] font-semibold truncate">
@@ -632,8 +631,8 @@ const HouseExpensesPage: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
-                    <HomeIcon className="w-4 h-4 text-[var(--accent)]" />
+                  <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                    <HomeIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
                   </div>
 
                   <div className="min-w-0">

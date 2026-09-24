@@ -7,8 +7,7 @@ import {
   deleteSalary
 } from "../api/salary";
 
-import { TrashIcon } from "@heroicons/react/24/solid";
-import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, CurrencyDollarIcon } from "@heroicons/react/24/solid";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -469,8 +468,8 @@ export default function SalaryPage() {
             <div key={entry._id} className="mb-6 bg-[var(--bg-surface)] shadow rounded-xl p-4">
               <div className="flex justify-between items-center mb-2">
                 <button onClick={() => handleEditSalaryName(entry._id)} className="flex items-center gap-3">
-                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
-                    <CurrencyDollarIcon className="w-4 h-4 text-[var(--text-primary)]" />
+                  <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                    <CurrencyDollarIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
                   </div>
                   <h2 className="font-semibold text-[1.5rem] text-[var(--text-primary)]">{entry.date}</h2>
                 </button>

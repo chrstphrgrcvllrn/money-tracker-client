@@ -434,8 +434,8 @@ const graphData = Object.values(
                   idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
                 }`}
               >
-                <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
-                  <ReceiptPercentIcon className="w-4 h-4 text-[var(--text-primary)]" />
+                <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                  <ReceiptPercentIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
                 </div>
 
                 <div className="flex-1 min-w-0">
