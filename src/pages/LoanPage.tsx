@@ -15,6 +15,26 @@ import { useAmountsVisibility } from "../components/useAmountsVisibility";
 import SlidingTabs from "../components/SlidingTabs";
 import { SkeletonBlock, SkeletonRows } from "../components/Skeleton";
 
+// Teams-style avatar backgrounds (Fluent named avatar colors). Full class
+// strings so Tailwind can see them; picked per loan from a hash of its name
+// so a person keeps the same color across renders and sessions.
+const AVATAR_COLORS = [
+  "bg-[#4F6BED]", // cornflower
+  "bg-[#038387]", // teal
+  "bg-[#CA5010]", // pumpkin
+  "bg-[#BF0077]", // magenta
+  "bg-[#498205]", // forest
+  "bg-[#8764B8]", // purple
+  "bg-[#C50F1F]", // cranberry
+  "bg-[#0078D4]", // blue
+];
+
+const getAvatarColor = (name: string): string => {
+  let hash = 0;
+  for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+};
+
 export default function LoanPage() {
   const showToast = useToast();
 
@@ -304,8 +324,10 @@ export default function LoanPage() {
                 onClick={() => toggleExpand(index)}
               >
                 <div className="flex items-center gap-3 text-left">
-                  <div className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
-                    <UserIcon className="w-6 h-6 text-[var(--avatar-fg)]" />
+                  <div
+                    className={`shrink-0 w-11 h-11 rounded-full flex items-center justify-center ${getAvatarColor(loan.name)}`}
+                  >
+                    <UserIcon className="w-6 h-6 text-white/90" />
                   </div>
 
                   <div>
