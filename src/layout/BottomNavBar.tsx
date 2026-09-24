@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   BanknotesIcon as BanknotesOutline,
   BuildingLibraryIcon as BuildingLibraryOutline,
@@ -10,6 +11,7 @@ import {
   CheckCircleIcon as CheckCircleOutline,
   SunIcon,
   MoonIcon,
+  EllipsisHorizontalIcon,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -28,6 +30,49 @@ import { useTheme } from "@/components/useTheme";
 export default function BottomNavBar() {
   const { theme, toggleTheme } = useTheme();
   const isLight = theme === "light";
+
+  const { pathname } = useLocation();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  // Close the menu on an outside tap or Escape.
+  useEffect(() => {
+    if (!moreOpen) return;
+
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMoreOpen(false);
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [moreOpen]);
+
+  // Less-used pages live behind the "More" (…) button instead of the main grid.
+  const moreItems = [
+    {
+      name: "Buy List",
+      path: "/subscription",
+      icon: CalendarDaysOutline,
+      activeIcon: CalendarDaysSolid,
+    },
+    {
+      name: "Tracker",
+      path: "/tracker",
+      icon: CheckCircleOutline,
+      activeIcon: CheckCircleSolid,
+    },
+  ];
+
+  const moreActive = moreItems.some((item) => pathname.startsWith(item.path));
 
   const navItems = [
     {
@@ -79,22 +124,10 @@ export default function BottomNavBar() {
       activeIcon: CalendarDaysSolid,
     },
     {
-      name: "Buy List",
-      path: "/subscription",
-      icon: CalendarDaysOutline,
-      activeIcon: CalendarDaysSolid,
-    },
-    {
       name: "Notebook",
       path: "/notebook",
       icon: BookOpenOutline,
       activeIcon: BookOpenSolid,
-    },
-    {
-      name: "Tracker",
-      path: "/tracker",
-      icon: CheckCircleOutline,
-      activeIcon: CheckCircleSolid,
     },
   ];
 
@@ -144,7 +177,7 @@ export default function BottomNavBar() {
           </NavLink>
         ))}
 
-        {/* THEME TOGGLE — fills the empty 12th grid slot */}
+        {/* THEME TOGGLE */}
         <button
           onClick={toggleTheme}
           className="flex flex-col items-center justify-center text-xs text-[var(--text-secondary)]"
@@ -158,6 +191,52 @@ export default function BottomNavBar() {
             {isLight ? "Dark" : "Light"}
           </span>
         </button>
+
+        {/* MORE — Buy List + Tracker */}
+        <div ref={moreRef} className="relative flex">
+          <button
+            onClick={() => setMoreOpen((open) => !open)}
+            aria-haspopup="menu"
+            aria-expanded={moreOpen}
+            className={`flex-1 flex flex-col items-center justify-center text-xs ${
+              moreActive || moreOpen ? "text-[var(--accent)]" : "text-[var(--text-secondary)]"
+            }`}
+          >
+            <EllipsisHorizontalIcon className="w-6 h-6 mb-1" />
+            <span className="font-semibold text-center">More</span>
+          </button>
+
+          {moreOpen && (
+            <div
+              role="menu"
+              className="absolute bottom-full right-0 mb-3 w-44 rounded-xl bg-[var(--bg-input)] border border-[var(--border-subtle)] shadow-2xl py-1"
+            >
+              {moreItems.map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  role="menuitem"
+                  onClick={() => setMoreOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-3 text-sm font-semibold ${
+                      isActive ? "text-[var(--accent)]" : "text-[var(--text-primary)]"
+                    }`
+                  }
+                >
+                  {({ isActive }) => {
+                    const Icon = isActive ? item.activeIcon : item.icon;
+                    return (
+                      <>
+                        <Icon className="w-5 h-5" />
+                        {item.name}
+                      </>
+                    );
+                  }}
+                </NavLink>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );
