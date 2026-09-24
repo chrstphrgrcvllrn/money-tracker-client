@@ -1,36 +1,21 @@
+import axios from "axios";
 import type { CalendarEvent } from "../types/calendar.type";
 
-// const API_URL =
-//   import.meta.env.PROD
-//     ? `${import.meta.env.VITE_PROD_API_URL}/api/calendar-events`
-//     : `${import.meta.env.VITE_DEV_API_URL}/api/calendar-events`;
+const BASE_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_PROD_API_URL
+    : import.meta.env.VITE_DEV_API_URL;
 
+const API_URL = `${BASE_URL}/api/calendar-events`;
 
-    const API_URL = import.meta.env.NODE_ENV === 'production'
-  ? `${import.meta.env.VITE_PROD_API_URL}/api/calendar-events` // actual site
-  : `${import.meta.env.VITE_DEV_API_URL}/api/calendar-events` ; // local/dev
-
-
-
-// GET all events
-export const getEvents = async (): Promise<
-  CalendarEvent[]
-> => {
-  const res = await fetch(API_URL);
-  return res.json();
+export const getEvents = async (): Promise<CalendarEvent[]> => {
+  const res = await axios.get(API_URL);
+  return res.data;
 };
 
-// CREATE event
 export const createEvent = async (
-  event: Omit<CalendarEvent, "id">
+  event: Omit<CalendarEvent, "_id" | "createdAt">
 ): Promise<CalendarEvent> => {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(event),
-  });
-
-  return res.json();
+  const res = await axios.post(API_URL, event);
+  return res.data;
 };

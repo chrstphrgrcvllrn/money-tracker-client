@@ -13,6 +13,7 @@ import {
   MoonIcon,
   EllipsisHorizontalIcon,
   CalculatorIcon,
+  CalendarIcon,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -28,6 +29,7 @@ import {
 
 import { useTheme } from "@/components/useTheme";
 import CalculatorModal from "@/components/CalculatorModal";
+import CalendarModal from "@/components/CalendarModal";
 
 export default function BottomNavBar() {
   const { theme, toggleTheme } = useTheme();
@@ -36,6 +38,7 @@ export default function BottomNavBar() {
   const { pathname } = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const [calculatorOpen, setCalculatorOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
   // Close the menu on an outside tap or Escape.
@@ -250,6 +253,18 @@ export default function BottomNavBar() {
                   <CalculatorIcon className="w-5 h-5" />
                   Calculator
                 </button>
+
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setMoreOpen(false);
+                    setCalendarOpen(true);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--text-primary)]"
+                >
+                  <CalendarIcon className="w-5 h-5" />
+                  Calendar
+                </button>
               </div>
             )}
           </div>
@@ -259,6 +274,7 @@ export default function BottomNavBar() {
       {/* Rendered outside the <nav>: its backdrop-blur would otherwise become the
           containing block for the modal's fixed overlay. */}
       <CalculatorModal open={calculatorOpen} onClose={() => setCalculatorOpen(false)} />
+      <CalendarModal open={calendarOpen} onClose={() => setCalendarOpen(false)} />
     </>
   );
 }

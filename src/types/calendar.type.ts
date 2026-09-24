@@ -7,7 +7,7 @@ export type CalendarEventType =
   | "event";
 
 export type CalendarEvent = {
-  id: string;
+  _id: string;
   date: string; // "YYYY-MM-DD"
   type: CalendarEventType;
   title?: string;

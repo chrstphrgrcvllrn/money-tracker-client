@@ -7,7 +7,6 @@ import BillsPage from "@/pages/BillsPage";
 import NotesPage from "@/pages/NotesPage";
 import SavingsPage from "@/pages/SavingsPage";
 import ExpensesPage from "@/pages/ExpensesPage";
-// import CalendarPage from "@/pages/CalendarPage"
 import HouseExpensesPage from "@/pages/HouseExpensesPage"
 import ThoughtsPage from "@/pages/ThoughtsPage"
 // import WatchlistPage from "@/pages/WatchlistPage"
@@ -30,7 +29,6 @@ export default function AppRoutes() {
         <Route path="notes" element={<NotesPage/>} />
         <Route path="savings" element={<SavingsPage/>} />
         <Route path="expenses" element={<ExpensesPage/>} />
-        {/* <Route path="calendar" element={<CalendarPage/>} /> */}
         <Route path="/house-expenses" element={<HouseExpensesPage />} />
         <Route path="thoughts" element={<ThoughtsPage/>} />
         {/* <Route path="watchlist" element={<WatchlistPage/>} /> */}
