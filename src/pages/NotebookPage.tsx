@@ -383,7 +383,7 @@ const NotebookPage: React.FC = () => {
         .notebook-editor .ql-snow .ql-picker-label.ql-active,
         .notebook-editor .ql-snow .ql-picker-item:hover,
         .notebook-editor .ql-snow .ql-picker-item.ql-selected {
-          color: #2DE0E6;
+          color: var(--accent);
         }
         .notebook-editor .ql-snow.ql-toolbar button:hover .ql-stroke,
         .notebook-editor .ql-snow .ql-toolbar button:hover .ql-stroke,
@@ -391,13 +391,13 @@ const NotebookPage: React.FC = () => {
         .notebook-editor .ql-snow .ql-toolbar button.ql-active .ql-stroke,
         .notebook-editor .ql-snow .ql-picker-label:hover .ql-stroke,
         .notebook-editor .ql-snow .ql-picker-label.ql-active .ql-stroke {
-          stroke: #2DE0E6;
+          stroke: var(--accent);
         }
         .notebook-editor .ql-snow.ql-toolbar button:hover .ql-fill,
         .notebook-editor .ql-snow .ql-toolbar button:hover .ql-fill,
         .notebook-editor .ql-snow.ql-toolbar button.ql-active .ql-fill,
         .notebook-editor .ql-snow .ql-toolbar button.ql-active .ql-fill {
-          fill: #2DE0E6;
+          fill: var(--accent);
         }
       `}</style>
 
@@ -409,7 +409,7 @@ const NotebookPage: React.FC = () => {
             Notebook
           </h1>
 
-          <p className="text-gray-500 mt-1">
+          <p className="text-[var(--text-secondary)] mt-1">
             Rich notes
           </p>
         </div>
@@ -447,7 +447,7 @@ const NotebookPage: React.FC = () => {
             ))}
           </div>
         ) : filteredNotes.length === 0 ? (
-          <div className="text-gray-600 text-center py-16">
+          <div className="text-[var(--text-secondary)] text-center py-16">
             No notes
           </div>
         ) : (
@@ -457,7 +457,7 @@ const NotebookPage: React.FC = () => {
               <button
                 key={note._id}
                 onClick={() => openNote(note)}
-                className="text-left p-4 bg-[var(--bg-surface)] hover:bg-[#242426] rounded-xl transition"
+                className="text-left p-4 bg-[var(--bg-surface)] hover:bg-[var(--bg-input)] rounded-xl transition"
               >
 
                 <div className="flex items-start justify-between gap-3">
@@ -465,7 +465,7 @@ const NotebookPage: React.FC = () => {
                   <h2
                     className={`font-semibold text-sm truncate ${
                       note.status === "closed"
-                        ? "text-gray-500"
+                        ? "text-[var(--text-secondary)]"
                         : "text-[var(--text-primary)]"
                     }`}
                   >
@@ -475,8 +475,8 @@ const NotebookPage: React.FC = () => {
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${
                       note.status === "open"
-                        ? "border border-[#2DE0E6] text-[#2DE0E6]"
-                        : "bg-[#2A2A2C] text-gray-500"
+                        ? "border border-[var(--accent)] text-[var(--accent)]"
+                        : "bg-[var(--bg-input)] text-[var(--text-secondary)]"
                     }`}
                   >
                     {note.status}
@@ -486,7 +486,7 @@ const NotebookPage: React.FC = () => {
 
                 {/* CONTENT PREVIEW */}
                 <div
-                  className="mt-3 text-gray-500 line-clamp-3 text-xs"
+                  className="mt-3 text-[var(--text-secondary)] line-clamp-3 text-xs"
                   dangerouslySetInnerHTML={{
                     __html:
                       note.content ||
@@ -494,7 +494,7 @@ const NotebookPage: React.FC = () => {
                   }}
                 />
 
-                <div className="mt-4 text-[10px] text-gray-600">
+                <div className="mt-4 text-[10px] text-[var(--text-secondary)]">
                   {new Date(
                     note.updatedAt
                   ).toLocaleDateString()}
@@ -535,7 +535,7 @@ const NotebookPage: React.FC = () => {
                   placeholder="Note title"
                 />
 
-                <div className="text-[10px] text-gray-500 mt-1">
+                <div className="text-[10px] text-[var(--text-secondary)] mt-1">
                   {selectedNote.status === "open"
                     ? "Open"
                     : "Closed"}
@@ -545,7 +545,7 @@ const NotebookPage: React.FC = () => {
 
               <button
                 onClick={closeNote}
-                className="ml-4 p-2 rounded-lg text-gray-500 hover:text-[var(--text-primary)] hover:bg-[#2A2A2C]"
+                className="ml-4 p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -569,7 +569,7 @@ const NotebookPage: React.FC = () => {
                   onClick={toggleStatus}
                   title={selectedNote.status === "open" ? "Close Note" : "Reopen Note"}
                   aria-label={selectedNote.status === "open" ? "Close Note" : "Reopen Note"}
-                  className="flex items-center justify-center p-2.5 rounded-lg bg-[#2A2A2C] text-gray-300 hover:bg-[#333335]"
+                  className="flex items-center justify-center p-2.5 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] hover:bg-[var(--border-subtle)]"
                 >
                   <CheckIcon className="w-4 h-4" />
                 </button>
@@ -578,7 +578,7 @@ const NotebookPage: React.FC = () => {
                   onClick={deleteNote}
                   title="Delete"
                   aria-label="Delete"
-                  className="flex items-center justify-center p-2.5 rounded-lg text-gray-500 hover:text-red-400"
+                  className="flex items-center justify-center p-2.5 rounded-lg text-[var(--text-secondary)] hover:text-red-400"
                 >
                   <TrashIcon className="w-5 h-5" />
                 </button>
@@ -589,7 +589,7 @@ const NotebookPage: React.FC = () => {
 
                 <button
                   onClick={closeNote}
-                  className="px-4 py-2 rounded-lg text-gray-400 hover:text-[var(--text-primary)] border border-gray-600"
+                  className="px-4 py-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-strong)]"
                 >
                   Cancel
                 </button>

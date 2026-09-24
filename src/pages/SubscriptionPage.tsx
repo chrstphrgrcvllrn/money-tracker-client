@@ -308,7 +308,7 @@ export default function SubscriptionPage() {
                 idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
               }`}
             >
-              <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+              <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
                 <Icon className="w-4 h-4 text-[var(--text-primary)]" />
               </div>
 
@@ -354,54 +354,54 @@ export default function SubscriptionPage() {
         title={editingItem ? "Edit Item" : "Add Item"}
       >
         <div>
-          <label className="block text-sm text-gray-400 mb-2">Item</label>
+          <label className="block text-sm text-[var(--text-secondary)] mb-2">Item</label>
           <input
             placeholder="e.g. Netflix"
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
           />
         </div>
 
         <div className="flex gap-2">
           <div className="flex-1">
-            <label className="block text-sm text-gray-400 mb-2">Price</label>
+            <label className="block text-sm text-[var(--text-secondary)] mb-2">Price</label>
             <input
               type="number"
               placeholder="0"
               value={form.amount || ""}
               onChange={(e) => setForm((p) => ({ ...p, amount: Number(e.target.value) }))}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
             />
           </div>
 
           <div className="w-24">
-            <label className="block text-sm text-gray-400 mb-2">Qty</label>
+            <label className="block text-sm text-[var(--text-secondary)] mb-2">Qty</label>
             <input
               type="number"
               min={1}
               placeholder="1"
               value={form.quantity || ""}
               onChange={(e) => setForm((p) => ({ ...p, quantity: Number(e.target.value) }))}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
             />
           </div>
         </div>
 
         {form.amount > 0 && form.quantity > 1 && (
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[var(--text-secondary)]">
             {form.amount.toLocaleString()} × {form.quantity} = ₱
             {(form.amount * form.quantity).toLocaleString()}
           </p>
         )}
 
         <div>
-          <label className="block text-sm text-gray-400 mb-2">Notes</label>
+          <label className="block text-sm text-[var(--text-secondary)] mb-2">Notes</label>
           <textarea
             placeholder="Where to buy, links, etc."
             value={form.notes}
             onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none resize-none"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none resize-none"
             rows={2}
           />
         </div>
@@ -414,8 +414,8 @@ export default function SubscriptionPage() {
                 title={editingItemLive.completed ? "Mark as ongoing" : "Mark as completed"}
                 className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-lg border transition ${
                   editingItemLive.completed
-                    ? "bg-[var(--btn-bg)] border-[#2DE0E6]"
-                    : "border-[#2DE0E6]/40 hover:border-[#2DE0E6]"
+                    ? "bg-[var(--btn-bg)] border-[var(--accent)]"
+                    : "border-[var(--accent)]/40 hover:border-[var(--accent)]"
                 }`}
               >
                 <CheckIcon
@@ -438,7 +438,7 @@ export default function SubscriptionPage() {
 
           <button
             onClick={closeModal}
-            className="flex-1 px-4 py-2 text-gray-400 hover:text-[var(--text-primary)] border border-gray-600 rounded-lg"
+            className="flex-1 px-4 py-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg"
           >
             Cancel
           </button>

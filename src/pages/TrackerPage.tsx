@@ -215,8 +215,8 @@ const TrackerPage: React.FC = () => {
                   <div
                     className={`w-12 h-12 rounded-xl flex items-center justify-center border transition ${
                       isActive
-                        ? "border-[#2DE0E6] bg-[var(--btn-bg)]/15 text-[var(--text-primary)]"
-                        : "border-[#2DE0E6]/40 text-[var(--text-secondary)]"
+                        ? "border-[var(--accent)] bg-[var(--btn-bg)]/15 text-[var(--text-primary)]"
+                        : "border-[var(--accent)]/40 text-[var(--text-secondary)]"
                     }`}
                   >
                     <Icon className="w-6 h-6" />
@@ -254,69 +254,69 @@ const TrackerPage: React.FC = () => {
           }
         >
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Name/Title *</label>
+            <label className="block text-sm text-[var(--text-secondary)] mb-2">Name/Title *</label>
             <input
               type="text"
               placeholder={categoryExamples[activeTab]}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Details</label>
+            <label className="block text-sm text-[var(--text-secondary)] mb-2">Details</label>
             <textarea
               placeholder="e.g., who, what, procedure, result"
               value={formData.details}
               onChange={(e) => setFormData({ ...formData, details: e.target.value })}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none resize-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none resize-none"
               rows={3}
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Date *</label>
+            <label className="block text-sm text-[var(--text-secondary)] mb-2">Date *</label>
             <input
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Amount</label>
+            <label className="block text-sm text-[var(--text-secondary)] mb-2">Amount</label>
             <input
               type="number"
               placeholder="0"
               value={formData.amount || ""}
               onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
             />
           </div>
 
           {activeTab === "crypto" && (
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Price</label>
+              <label className="block text-sm text-[var(--text-secondary)] mb-2">Price</label>
               <input
                 type="number"
                 step="any"
                 placeholder="e.g. 11.02"
                 value={formData.price || ""}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+                className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Notes</label>
+            <label className="block text-sm text-[var(--text-secondary)] mb-2">Notes</label>
             <textarea
               placeholder="Additional notes..."
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none resize-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none resize-none"
               rows={2}
             />
           </div>
@@ -335,7 +335,7 @@ const TrackerPage: React.FC = () => {
 
             <button
               onClick={closeModal}
-              className="flex-1 px-4 py-2 text-gray-400 hover:text-[var(--text-primary)] border border-gray-600 rounded-lg"
+              className="flex-1 px-4 py-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg"
             >
               Cancel
             </button>
@@ -354,7 +354,7 @@ const TrackerPage: React.FC = () => {
           {loading ? (
             <SkeletonRows count={4} withValue={false} />
           ) : filteredEntries.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-[var(--text-secondary)]">
               No entries yet. Add one to get started!
             </div>
           ) : (
@@ -378,7 +378,7 @@ const TrackerPage: React.FC = () => {
                   </span>
                 )}
                 {!!entry.amount && entry.amount > 0 && (
-                  <span className="shrink-0 text-xs text-[#2DE0E6] font-semibold">
+                  <span className="shrink-0 text-xs text-[var(--accent)] font-semibold">
                     {entry.amount.toLocaleString()}
                   </span>
                 )}

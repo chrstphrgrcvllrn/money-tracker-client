@@ -116,7 +116,7 @@ const highlightText = (text: string, done: boolean) => {
 
     if (part === "Upcoming Holiday:") {
       return (
-        <span key={idx} className="text-[#01E4E7] font-medium">
+        <span key={idx} className="text-[var(--accent)] font-medium">
           {part}
         </span>
       );
@@ -124,7 +124,7 @@ const highlightText = (text: string, done: boolean) => {
 
     if (part === "Upcoming Leave:") {
       return (
-        <span key={idx} className="text-[#e70171] font-medium">
+        <span key={idx} className="text-[var(--negative)] font-medium">
           {part}
         </span>
       );
@@ -180,7 +180,7 @@ const highlightText = (text: string, done: boolean) => {
               idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
             }`}
           >
-            <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+            <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
               <DocumentTextIcon className="w-4 h-4 text-[var(--text-primary)]" />
             </div>
 
@@ -214,7 +214,7 @@ const highlightText = (text: string, done: boolean) => {
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as Note["category"])}
-          className="shrink-0 bg-[var(--bg-input)] px-3 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+          className="shrink-0 bg-[var(--bg-input)] px-3 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
         >
           <option value="work">Work</option>
           <option value="personal">Personal</option>
@@ -230,7 +230,7 @@ const highlightText = (text: string, done: boolean) => {
             if (e.key === "Enter") addNote();
           }}
           placeholder="Enter note"
-          className="flex-1 min-w-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+          className="flex-1 min-w-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
         />
 
         <button

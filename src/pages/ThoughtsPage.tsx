@@ -144,7 +144,7 @@ const ThoughtsPage: React.FC = () => {
             if (e.key === "Enter") addThought();
           }}
           placeholder="Write a thought..."
-          className="flex-1 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+          className="flex-1 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
         />
 
         <button

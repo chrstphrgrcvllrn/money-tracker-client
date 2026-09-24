@@ -293,7 +293,7 @@ export default function SavingsPage() {
             placeholder="Savings name"
             value={newSavingsName}
             onChange={(e) => setNewSavingsName(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+            className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
           />
 
           <input
@@ -301,13 +301,13 @@ export default function SavingsPage() {
             placeholder="Initial amount"
             value={newSavingsAmount}
             onChange={(e) => setNewSavingsAmount(e.target.value)}
-            className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+            className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
           />
 
           <div className="flex justify-end gap-2 pt-2">
             <button
               onClick={() => setShowForm(false)}
-              className="px-3 py-1 text-gray-400"
+              className="px-3 py-1 text-[var(--text-secondary)]"
             >
               Cancel
             </button>
@@ -330,7 +330,7 @@ export default function SavingsPage() {
         </div>
 
         <div className="flex items-center gap-2 mb-3">
-          <span className="w-1 h-4 bg-[#2DE0E6] rounded-full" />
+          <span className="w-1 h-4 bg-[var(--accent)] rounded-full" />
           <h2 className="text-[var(--text-primary)] font-semibold">My Accounts</h2>
         </div>
       </div>
@@ -381,7 +381,7 @@ export default function SavingsPage() {
                 return (
                   <div
                     key={item._id}
-                    className={`absolute top-0 left-1/2 h-full aspect-[3/5] rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 shadow-xl select-none ${
+                    className={`absolute top-0 left-1/2 h-full aspect-[3/5] rounded-2xl overflow-hidden bg-[var(--bg-input)] border border-[var(--accent)]/30 shadow-xl select-none ${
                       isTop ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"
                     }`}
                     style={style}
@@ -413,7 +413,7 @@ export default function SavingsPage() {
                         }
                       }}
                     />
-                    <span className="hidden absolute inset-0 items-center justify-center text-2xl font-bold text-[#2DE0E6]">
+                    <span className="hidden absolute inset-0 items-center justify-center text-2xl font-bold text-[var(--accent)]">
                       {item.name?.charAt(0).toUpperCase()}
                     </span>
 
@@ -442,7 +442,7 @@ export default function SavingsPage() {
       <Modal open={!!selectedItem} onClose={closeDetails} title={selectedItem?.name}>
         {selectedItem && (
           <>
-            <div className="w-full h-24 rounded-lg overflow-hidden bg-[var(--bg-input)] border border-[#2DE0E6]/30 relative flex items-center justify-center">
+            <div className="w-full h-24 rounded-lg overflow-hidden bg-[var(--bg-input)] border border-[var(--accent)]/30 relative flex items-center justify-center">
               <img
                 src={getIconPaths(selectedItem.name)[0]}
                 alt={selectedItem.name}
@@ -465,7 +465,7 @@ export default function SavingsPage() {
                   }
                 }}
               />
-              <span className="hidden absolute inset-0 items-center justify-center text-2xl font-bold text-[#2DE0E6]">
+              <span className="hidden absolute inset-0 items-center justify-center text-2xl font-bold text-[var(--accent)]">
                 {selectedItem.name?.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -486,7 +486,7 @@ export default function SavingsPage() {
                     <span>{t.date}</span>
                     <span
                       className={
-                        t.amount < 0 ? "text-[#C93B8C]" : "text-[var(--text-primary)]"
+                        t.amount < 0 ? "text-[var(--negative)]" : "text-[var(--text-primary)]"
                       }
                     >
                       {t.amount > 0 ? "+" : "-"}
@@ -501,14 +501,14 @@ export default function SavingsPage() {
               type="date"
               value={txDate}
               onChange={(e) => setTxDate(e.target.value)}
-              className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
             />
 
             <div className="flex gap-2">
               <select
                 value={txType}
                 onChange={(e) => setTxType(e.target.value as "+" | "-")}
-                className="w-20 px-2 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+                className="w-20 px-2 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
               >
                 <option value="+">+</option>
                 <option value="-">-</option>
@@ -519,7 +519,7 @@ export default function SavingsPage() {
                 placeholder="Enter amount"
                 value={txAmount}
                 onChange={(e) => setTxAmount(e.target.value)}
-                className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+                className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
               />
             </div>
 

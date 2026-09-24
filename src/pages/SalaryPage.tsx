@@ -340,14 +340,14 @@ export default function SalaryPage() {
           placeholder="Date (e.g., May 2026)"
           value={newSalaryDate}
           onChange={(e) => setNewSalaryDate(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
         />
         <input
           type="number"
           placeholder="Salary amount"
           value={newSalaryAmount}
           onChange={(e) => setNewSalaryAmount(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
         />
         <div className="flex justify-end space-x-2 pt-2">
           <button
@@ -372,14 +372,14 @@ export default function SalaryPage() {
           placeholder="Expense name"
           value={expenseName}
           onChange={(e) => setExpenseName(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
         />
         <input
           type="number"
           placeholder="Expense amount"
           value={expenseAmount}
           onChange={(e) => setExpenseAmount(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
         />
         <div className="flex justify-end space-x-2 pt-2">
           <button
@@ -453,7 +453,7 @@ export default function SalaryPage() {
                 }`}
               >
                 <span className="text-[var(--text-primary)] font-semibold">{item.name}</span>
-                <span className="text-[#B5651D] font-bold">{format(item.total)}</span>
+                <span className="text-[var(--accent)] font-bold">{format(item.total)}</span>
               </div>
             ))
           )}
@@ -469,7 +469,7 @@ export default function SalaryPage() {
             <div key={entry._id} className="mb-6 bg-[var(--bg-surface)] shadow rounded-xl p-4">
               <div className="flex justify-between items-center mb-2">
                 <button onClick={() => handleEditSalaryName(entry._id)} className="flex items-center gap-3">
-                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
                     <CurrencyDollarIcon className="w-4 h-4 text-[var(--text-primary)]" />
                   </div>
                   <h2 className="font-semibold text-[1.5rem] text-[var(--text-primary)]">{entry.date}</h2>
@@ -486,14 +486,14 @@ export default function SalaryPage() {
                   </button>
 
                   {openMenuId === entry._id && (
-                    <div className="absolute right-0 top-7 min-w-[130px] bg-[var(--bg-surface)] border border-gray-800 rounded-xl shadow-lg z-30 py-1">
+                    <div className="absolute right-0 top-7 min-w-[130px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl shadow-lg z-30 py-1">
                       {!isEditingAll && expenses.length > 0 && (
                         <button
                           onClick={() => {
                             handleEditAllExpenses(entry._id);
                             setOpenMenuId(null);
                           }}
-                          className="w-full text-left px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[#2A2A2D]"
+                          className="w-full text-left px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-input)]"
                         >
                           Edit
                         </button>
@@ -504,7 +504,7 @@ export default function SalaryPage() {
                           openAddExpenseModal(entry._id);
                           setOpenMenuId(null);
                         }}
-                        className="w-full text-left px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[#2A2A2D]"
+                        className="w-full text-left px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-input)]"
                       >
                         Add
                       </button>
@@ -514,7 +514,7 @@ export default function SalaryPage() {
                           handleDuplicateSalary(entry);
                           setOpenMenuId(null);
                         }}
-                        className="w-full text-left px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[#2A2A2D]"
+                        className="w-full text-left px-4 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-input)]"
                       >
                         Duplicate
                       </button>
@@ -524,7 +524,7 @@ export default function SalaryPage() {
                           openDeleteSalaryModal(entry._id);
                           setOpenMenuId(null);
                         }}
-                        className="w-full text-left px-4 py-2 text-sm text-[#E23A55] hover:bg-[#2A2A2D]"
+                        className="w-full text-left px-4 py-2 text-sm text-[var(--danger)] hover:bg-[var(--bg-input)]"
                       >
                         Delete
                       </button>
@@ -536,11 +536,11 @@ export default function SalaryPage() {
               <div className="flex justify-between text-[var(--text-primary)] mb-2">
                 <span>Salary</span>
                 <button onClick={() => handleEditSalary(entry._id)}>
-                  <span className="font-semibold text-[#2DE0E6]">{format(entry.salary)}</span>
+                  <span className="font-semibold text-[var(--accent)]">{format(entry.salary)}</span>
                 </button>
               </div>
 
-              <ul className="border border-gray-800 rounded divide-y divide-mist-900 text-xs">
+              <ul className="border border-[var(--border-subtle)] rounded divide-y divide-mist-900 text-xs">
                 {expenses.map((expense, idx) => (
                   <li key={idx} className="flex justify-between items-center gap-2 m-2">
                     {isEditingAll ? (
@@ -621,12 +621,12 @@ export default function SalaryPage() {
 
               <div className="flex justify-between font-semibold pt-2 mb-2">
                 <span className="text-[var(--text-primary)]">Total</span>
-                <span className="text-[#C93B8C]">{format(totalExpenses)}</span>
+                <span className="text-[var(--negative)]">{format(totalExpenses)}</span>
               </div>
 
               <div className="flex justify-between font-semibold">
                 <span></span>
-                <span className={`${remaining < 0 ? "text-[#C93B8C]" : "text-[var(--text-primary)]"}`}>
+                <span className={`${remaining < 0 ? "text-[var(--negative)]" : "text-[var(--text-primary)]"}`}>
                   {format(remaining)}
                 </span>
               </div>

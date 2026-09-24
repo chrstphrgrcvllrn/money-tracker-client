@@ -6,7 +6,7 @@ import { ToastContext, type Severity } from "./ToastContext";
 const severityColors: Record<Severity, string> = {
   success: "#1F3A2E",
   error: "#3A1F1F",
-  info: "#1C1C1E",
+  info: "#1F1F1F",
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {

@@ -251,7 +251,7 @@ export default function LoanPage() {
           placeholder="Loan name"
           value={newLoanName}
           onChange={(e) => setNewLoanName(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
         />
 
         <input
@@ -259,13 +259,13 @@ export default function LoanPage() {
           placeholder="Initial amount"
           value={newLoanAmount}
           onChange={(e) => setNewLoanAmount(e.target.value)}
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
         />
 
         <div className="flex justify-end gap-2 pt-2">
           <button
             onClick={() => setShowForm(false)}
-            className="px-3 py-1 text-gray-400"
+            className="px-3 py-1 text-[var(--text-secondary)]"
           >
             Cancel
           </button>
@@ -304,7 +304,7 @@ export default function LoanPage() {
                 onClick={() => toggleExpand(index)}
               >
                 <div className="flex items-center gap-3 text-left">
-                  <div className="shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                  <div className="shrink-0 w-11 h-11 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
                     <PaperClipIcon className="w-5 h-5 text-[var(--text-primary)]" />
                   </div>
 
@@ -328,7 +328,7 @@ export default function LoanPage() {
                   </div>
                 </div>
 
-                <p className="font-bold text-[#E23A55]">
+                <p className="font-bold text-[var(--danger)]">
                   {showAmounts ? remaining.toLocaleString() : mask(remaining)}
                 </p>
               </button>
@@ -358,7 +358,7 @@ export default function LoanPage() {
 
                         <span
                           className={`${
-                            Number(t.amount) < 0 ? "text-[#C93B8C]" : "text-[var(--text-primary)]"
+                            Number(t.amount) < 0 ? "text-[var(--negative)]" : "text-[var(--text-primary)]"
                           }`}
                         >
                           {Number(t.amount).toLocaleString("en-PH")}
@@ -378,7 +378,7 @@ export default function LoanPage() {
                             [index]: e.target.value,
                           }))
                         }
-                        className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+                        className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
                       />
 
                       <div className="flex gap-2">
@@ -390,7 +390,7 @@ export default function LoanPage() {
                               [index]: e.target.value as "+" | "-",
                             }))
                           }
-                          className="px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+                          className="px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
                         >
                           <option value="+">+</option>
                           <option value="-">-</option>
@@ -406,7 +406,7 @@ export default function LoanPage() {
                               [index]: e.target.value,
                             }))
                           }
-                          className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-gray-600 focus:border-[#2DE0E6]/50 outline-none"
+                          className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
                         />
                       </div>
 
@@ -450,7 +450,7 @@ export default function LoanPage() {
                                       handleArchiveLoan(loan._id);
                                       setMenuOpenFor(null);
                                     }}
-                                    className="w-full text-left px-3 py-2 text-sm text-[#E23A55] hover:bg-[var(--bg-input)]"
+                                    className="w-full text-left px-3 py-2 text-sm text-[var(--danger)] hover:bg-[var(--bg-input)]"
                                   >
                                     Archive Loan
                                   </button>

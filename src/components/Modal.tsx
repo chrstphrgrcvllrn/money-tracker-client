@@ -40,7 +40,7 @@ export default function Modal({
             <h2 className="text-[var(--text-primary)] text-lg font-semibold">{title}</h2>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-[var(--text-primary)] hover:bg-[#2A2A2C] transition"
+              className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)] transition"
             >
               <XMarkIcon className="w-5 h-5" />
             </button>

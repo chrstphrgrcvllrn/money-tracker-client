@@ -335,12 +335,12 @@ const HouseExpensesPage: React.FC = () => {
   ).sort((a, b) => a.localeCompare(b));
 
   const colors = [
-    "#2DE0E6",
+    "var(--accent)",
     "rgba(255, 255, 255, 0.87)",
-    "#C93B8C",
-    "#60A5FA",
-    "#F97316",
-    "#A78BFA",
+    "var(--negative)",
+    "#4FC3B5",
+    "#F59E4B",
+    "#6CB6FF",
   ];
 
   // =========================
@@ -403,7 +403,7 @@ const HouseExpensesPage: React.FC = () => {
                     onClick={() => toggleMonth(month)}
                     className="w-full flex items-center gap-3 text-left"
                   >
-                    <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
+                    <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
                       <HomeIcon className="w-4 h-4 text-[var(--text-primary)]" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -462,7 +462,7 @@ const HouseExpensesPage: React.FC = () => {
                                   value={budgetInput}
                                   onChange={(e) => setBudgetInput(e.target.value)}
                                   placeholder="0"
-                                  className="flex-1 px-2 py-2 bg-[var(--bg-surface)] text-[var(--text-primary)] border border-gray-600 rounded focus:border-[#2DE0E6]/50 outline-none text-sm"
+                                  className="flex-1 px-2 py-2 bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded focus:border-[var(--accent)]/50 outline-none text-sm"
                                   autoFocus
                                 />
                                 <button
@@ -484,7 +484,7 @@ const HouseExpensesPage: React.FC = () => {
                                   setEditingBudgetMonth(month);
                                   setBudgetInput(String(budget));
                                 }}
-                                className="text-[#2DE0E6] font-bold mt-2 hover:underline text-sm"
+                                className="text-[var(--accent)] font-bold mt-2 hover:underline text-sm"
                               >
                                 {budget > 0 ? `₱${budget.toLocaleString()}` : "Set Budget"}
                               </button>
@@ -493,7 +493,7 @@ const HouseExpensesPage: React.FC = () => {
 
                           <div className={`rounded-lg p-2 ${remaining >= 0 ? "bg-green-900/30" : "bg-red-900/30"}`}>
                             <p className="text-[var(--text-secondary)] text-[10px]">Remaining</p>
-                            <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[var(--text-primary)]" : "text-[#E23A55]"}`}>
+                            <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[var(--text-primary)]" : "text-[var(--danger)]"}`}>
                               {remaining < 0 ? "-" : ""}₱{Math.abs(remaining).toLocaleString()}
                             </p>
                           </div>
@@ -502,7 +502,7 @@ const HouseExpensesPage: React.FC = () => {
                         {/* TOTAL SPENT */}
                         <div className="mb-3 pb-3 border-b border-[var(--border-subtle)] flex justify-between text-[var(--text-primary)]">
                           <span>Total Spent</span>
-                          <span className="font-bold text-[#2DE0E6]">₱{monthTotal.toLocaleString()}</span>
+                          <span className="font-bold text-[var(--accent)]">₱{monthTotal.toLocaleString()}</span>
                         </div>
 
                         {/* EXPENSES LIST */}
@@ -632,14 +632,14 @@ const HouseExpensesPage: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[#2DE0E6]/40">
-                    <HomeIcon className="w-4 h-4 text-[#2DE0E6]" />
+                  <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border border-[var(--accent)]/40">
+                    <HomeIcon className="w-4 h-4 text-[var(--accent)]" />
                   </div>
 
                   <div className="min-w-0">
                     <div className="truncate">{exp.text} •   <span className="text-[var(--text-secondary)] text-[10px]">{exp.category}</span></div>
 
-                    <div className="text-[#C93B8C] text-xs">
+                    <div className="text-[var(--negative)] text-xs">
                       ₱{exp.amount.toLocaleString()}
                     </div>
                   </div>
@@ -658,14 +658,14 @@ const HouseExpensesPage: React.FC = () => {
         title={editingId ? "Edit Expense" : "Add Expense"}
       >
         <input
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
           placeholder="Expense"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
         <input
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
           placeholder="Amount"
           type="number"
           value={amount}
@@ -673,7 +673,7 @@ const HouseExpensesPage: React.FC = () => {
         />
 
         <input
-          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-gray-600 rounded-lg focus:border-[#2DE0E6]/50 outline-none"
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
           placeholder="Category"
           list="house-expense-categories"
           value={category}
@@ -699,7 +699,7 @@ const HouseExpensesPage: React.FC = () => {
 
           <button
             onClick={resetForm}
-            className="flex-1 p-2 bg-[var(--bg-input)] text-gray-400 rounded-lg hover:text-[var(--text-primary)]"
+            className="flex-1 p-2 bg-[var(--bg-input)] text-[var(--text-secondary)] rounded-lg hover:text-[var(--text-primary)]"
           >
             Cancel
           </button>

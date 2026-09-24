@@ -35,7 +35,7 @@ export default function SlidingTabs<T extends string>({
     <div ref={containerRef} className={`relative flex gap-2 ${className}`}>
       {pillStyle && (
         <div
-          className="absolute top-0 bottom-0 rounded-full bg-[var(--btn-bg)] transition-[left,width] duration-300 ease-out"
+          className="absolute top-0 bottom-0 rounded-full bg-[var(--accent-soft)] transition-[left,width] duration-300 ease-out"
           style={{ left: pillStyle.left, width: pillStyle.width }}
         />
       )}
@@ -49,10 +49,10 @@ export default function SlidingTabs<T extends string>({
               btnRefs.current[tab.value] = el;
             }}
             onClick={() => onChange(tab.value)}
-            className={`relative z-10 px-3 py-1.5 rounded-full text-sm transition-colors duration-300 ${
+            className={`relative z-10 px-3 py-1.5 rounded-full border text-sm transition-colors duration-300 ${
               isActive
-                ? "text-[var(--btn-text)] font-semibold"
-                : "bg-[var(--bg-surface)] text-[var(--text-secondary)]"
+                ? "border-transparent text-[var(--accent)] font-semibold"
+                : "border-[var(--border-strong)] bg-[var(--bg-page)] text-[var(--text-primary)]"
             }`}
           >
             {tab.label}
