@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/solid";
 import MotorcycleSolidIcon from "../components/icons/MotorcycleSolidIcon";
 import FoodSolidIcon from "../components/icons/FoodSolidIcon";
+import CarSolidIcon from "../components/icons/CarSolidIcon";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
@@ -30,6 +31,7 @@ const CATEGORY_ICON_RULES: { keyword: string; icon: CategoryIcon }[] = [
   { keyword: "food", icon: FoodSolidIcon },
   { keyword: "family", icon: UserGroupIcon },
   { keyword: "personal care", icon: SparklesIcon },
+  { keyword: "transport", icon: CarSolidIcon },
 ];
 
 const getCategoryIcon = (category?: string): CategoryIcon => {
