@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Loan } from "../types/loans.type";
 import { getLoans, createLoan, addTransaction, updateLoan } from "../api/loan";
 
@@ -16,8 +16,9 @@ import SlidingTabs from "../components/SlidingTabs";
 import { SkeletonBlock, SkeletonRows } from "../components/Skeleton";
 
 // Teams-style avatar backgrounds (Fluent named avatar colors). Full class
-// strings so Tailwind can see them; picked per loan from a hash of its name
-// so a person keeps the same color across renders and sessions.
+// strings so Tailwind can see them. Loans are assigned one in creation order
+// (see avatarColors in LoanPage) so no two loans share a color until there
+// are more loans than colors.
 const AVATAR_COLORS = [
   "bg-[#4F6BED]", // cornflower
   "bg-[#038387]", // teal
@@ -27,13 +28,19 @@ const AVATAR_COLORS = [
   "bg-[#8764B8]", // purple
   "bg-[#C50F1F]", // cranberry
   "bg-[#0078D4]", // blue
+  "bg-[#986F0B]", // brass
+  "bg-[#B146C2]", // lilac
+  "bg-[#0B6A0B]", // dark green
+  "bg-[#E3008C]", // pink
+  "bg-[#0027B4]", // navy
+  "bg-[#8E562E]", // brown
+  "bg-[#005B70]", // steel
+  "bg-[#750B1C]", // dark red
+  "bg-[#7160E8]", // lavender
+  "bg-[#77004D]", // plum
+  "bg-[#394146]", // anchor
+  "bg-[#D13438]", // red
 ];
-
-const getAvatarColor = (name: string): string => {
-  let hash = 0;
-  for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-};
 
 export default function LoanPage() {
   const showToast = useToast();
@@ -195,6 +202,16 @@ export default function LoanPage() {
     setTransactionTypes((prev) => ({ ...prev, [index]: "+" }));
   };
 
+  // Keyed by _id and ordered by it (ids are creation-ordered) so a loan keeps
+  // its color across tabs and re-sorts, and colors don't repeat.
+  const avatarColors = useMemo(() => {
+    const colors = new Map<string, string>();
+    [...loans]
+      .sort((a, b) => a._id.localeCompare(b._id))
+      .forEach((loan, i) => colors.set(loan._id, AVATAR_COLORS[i % AVATAR_COLORS.length]));
+    return colors;
+  }, [loans]);
+
   const filteredLoans = loans.filter((loan) => {
     if (activeTab === "active") return !loan.archived;
     if (activeTab === "archived") return loan.archived;
@@ -325,7 +342,7 @@ export default function LoanPage() {
               >
                 <div className="flex items-center gap-3 text-left">
                   <div
-                    className={`shrink-0 w-11 h-11 rounded-full flex items-center justify-center ${getAvatarColor(loan.name)}`}
+                    className={`shrink-0 w-11 h-11 rounded-full flex items-center justify-center ${avatarColors.get(loan._id) ?? AVATAR_COLORS[0]}`}
                   >
                     <UserIcon className="w-6 h-6 text-white/90" />
                   </div>
