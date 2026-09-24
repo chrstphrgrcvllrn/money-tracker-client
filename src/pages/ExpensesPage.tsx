@@ -22,6 +22,7 @@ import DropletSolidIcon from "../components/icons/DropletSolidIcon";
 import NetflixSolidIcon from "../components/icons/NetflixSolidIcon";
 import GoogleSolidIcon from "../components/icons/GoogleSolidIcon";
 import TrainSolidIcon from "../components/icons/TrainSolidIcon";
+import PillSolidIcon from "../components/icons/PillSolidIcon";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
@@ -44,6 +45,7 @@ const CATEGORY_ICON_RULES: { category: string; text?: string; icon: CategoryIcon
   { category: "transport", icon: CarSolidIcon },
   { category: "travel", icon: PlaneSolidIcon },
   { category: "water", icon: DropletSolidIcon },
+  { category: "medical", icon: PillSolidIcon },
 ];
 
 const getCategoryIcon = (category?: string, text?: string): CategoryIcon => {
