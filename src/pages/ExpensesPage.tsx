@@ -7,7 +7,12 @@ import {
 } from "../api/expenses";
 
 import type { Expense } from "../types/expenses.type";
-import { TrashIcon, ReceiptPercentIcon, DevicePhoneMobileIcon } from "@heroicons/react/24/solid";
+import {
+  TrashIcon,
+  ReceiptPercentIcon,
+  DevicePhoneMobileIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/solid";
 import MotorcycleSolidIcon from "../components/icons/MotorcycleSolidIcon";
 import FoodSolidIcon from "../components/icons/FoodSolidIcon";
 import Modal from "../components/Modal";
@@ -22,6 +27,7 @@ const CATEGORY_ICON_RULES: { keyword: string; icon: CategoryIcon }[] = [
   { keyword: "mobile", icon: DevicePhoneMobileIcon },
   { keyword: "motor", icon: MotorcycleSolidIcon },
   { keyword: "food", icon: FoodSolidIcon },
+  { keyword: "family", icon: UserGroupIcon },
 ];
 
 const getCategoryIcon = (category?: string): CategoryIcon => {
