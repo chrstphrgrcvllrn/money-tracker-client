@@ -7,7 +7,7 @@ import {
 } from "../api/expenses";
 
 import type { Expense } from "../types/expenses.type";
-import { TrashIcon, ReceiptPercentIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, ReceiptPercentIcon, DevicePhoneMobileIcon } from "@heroicons/react/24/solid";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
@@ -426,7 +426,12 @@ const graphData = Object.values(
                   })}
             </div>
 
-            {grouped[date].map((exp, idx, arr) => (
+            {grouped[date].map((exp, idx, arr) => {
+              const ExpenseIcon = (exp.category || "").toLowerCase().includes("mobile")
+                ? DevicePhoneMobileIcon
+                : ReceiptPercentIcon;
+
+              return (
               <button
                 key={exp._id}
                 onClick={() => handleEdit(exp)}
@@ -435,7 +440,7 @@ const graphData = Object.values(
                 }`}
               >
                 <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
-                  <ReceiptPercentIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
+                  <ExpenseIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -449,7 +454,8 @@ const graphData = Object.values(
                   </div>
                 </div>
               </button>
-            ))}
+              );
+            })}
           </div>
         ))}
 
