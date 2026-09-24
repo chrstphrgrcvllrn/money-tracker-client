@@ -12,6 +12,7 @@ import {
   ReceiptPercentIcon,
   DevicePhoneMobileIcon,
   UserGroupIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/solid";
 import MotorcycleSolidIcon from "../components/icons/MotorcycleSolidIcon";
 import FoodSolidIcon from "../components/icons/FoodSolidIcon";
@@ -28,6 +29,7 @@ const CATEGORY_ICON_RULES: { keyword: string; icon: CategoryIcon }[] = [
   { keyword: "motor", icon: MotorcycleSolidIcon },
   { keyword: "food", icon: FoodSolidIcon },
   { keyword: "family", icon: UserGroupIcon },
+  { keyword: "personal care", icon: SparklesIcon },
 ];
 
 const getCategoryIcon = (category?: string): CategoryIcon => {
