@@ -30,6 +30,8 @@ import {
 import { useTheme } from "@/components/useTheme";
 import CalculatorModal from "@/components/CalculatorModal";
 import CalendarModal from "@/components/CalendarModal";
+import WaterModal from "@/components/WaterModal";
+import DropletSolidIcon from "@/components/icons/DropletSolidIcon";
 
 export default function BottomNavBar() {
   const { theme, toggleTheme } = useTheme();
@@ -39,6 +41,7 @@ export default function BottomNavBar() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [calculatorOpen, setCalculatorOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [waterOpen, setWaterOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
   // Close the menu on an outside tap or Escape.
@@ -265,6 +268,18 @@ export default function BottomNavBar() {
                   <CalendarIcon className="w-5 h-5" />
                   Calendar
                 </button>
+
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setMoreOpen(false);
+                    setWaterOpen(true);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--text-primary)]"
+                >
+                  <DropletSolidIcon className="w-5 h-5" />
+                  Water
+                </button>
               </div>
             )}
           </div>
@@ -275,6 +290,7 @@ export default function BottomNavBar() {
           containing block for the modal's fixed overlay. */}
       <CalculatorModal open={calculatorOpen} onClose={() => setCalculatorOpen(false)} />
       <CalendarModal open={calendarOpen} onClose={() => setCalendarOpen(false)} />
+      <WaterModal open={waterOpen} onClose={() => setWaterOpen(false)} />
     </>
   );
 }
