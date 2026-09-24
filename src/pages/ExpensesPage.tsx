@@ -18,6 +18,7 @@ import MotorcycleSolidIcon from "../components/icons/MotorcycleSolidIcon";
 import FoodSolidIcon from "../components/icons/FoodSolidIcon";
 import CarSolidIcon from "../components/icons/CarSolidIcon";
 import PlaneSolidIcon from "../components/icons/PlaneSolidIcon";
+import DropletSolidIcon from "../components/icons/DropletSolidIcon";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
@@ -34,6 +35,7 @@ const CATEGORY_ICON_RULES: { keyword: string; icon: CategoryIcon }[] = [
   { keyword: "personal care", icon: SparklesIcon },
   { keyword: "transport", icon: CarSolidIcon },
   { keyword: "travel", icon: PlaneSolidIcon },
+  { keyword: "water", icon: DropletSolidIcon },
 ];
 
 const getCategoryIcon = (category?: string): CategoryIcon => {
