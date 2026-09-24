@@ -432,28 +432,28 @@ const graphData = Object.values(
                 : ReceiptPercentIcon;
 
               return (
-              <button
-                key={exp._id}
-                onClick={() => handleEdit(exp)}
-                className={`w-full flex items-center gap-3 py-3 text-left ${
-                  idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
-                }`}
-              >
-                <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
-                  <ExpenseIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="text-[var(--text-primary)] truncate">
-                    {exp.text} •{" "}
-                    <span className="text-[var(--text-secondary)] text-[10px]">{exp.category}</span>
+                <button
+                  key={exp._id}
+                  onClick={() => handleEdit(exp)}
+                  className={`w-full flex items-center gap-3 py-3 text-left ${
+                    idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+                  }`}
+                >
+                  <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                    <ExpenseIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
                   </div>
 
-                  <div className="text-[var(--negative)] text-xs">
-                    ₱{exp.amount.toLocaleString()}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[var(--text-primary)] truncate">
+                      {exp.text} •{" "}
+                      <span className="text-[var(--text-secondary)] text-[10px]">{exp.category}</span>
+                    </div>
+
+                    <div className="text-[var(--negative)] text-xs">
+                      ₱{exp.amount.toLocaleString()}
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
               );
             })}
           </div>
