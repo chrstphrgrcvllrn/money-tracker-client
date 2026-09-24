@@ -19,6 +19,9 @@ import FoodSolidIcon from "../components/icons/FoodSolidIcon";
 import CarSolidIcon from "../components/icons/CarSolidIcon";
 import PlaneSolidIcon from "../components/icons/PlaneSolidIcon";
 import DropletSolidIcon from "../components/icons/DropletSolidIcon";
+import NetflixSolidIcon from "../components/icons/NetflixSolidIcon";
+import GoogleSolidIcon from "../components/icons/GoogleSolidIcon";
+import TrainSolidIcon from "../components/icons/TrainSolidIcon";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
@@ -27,20 +30,28 @@ import { SkeletonBlock, SkeletonRows } from "../components/Skeleton";
 type CategoryIcon = React.ComponentType<{ className?: string }>;
 
 // First match wins; anything else falls back to the generic receipt icon.
-const CATEGORY_ICON_RULES: { keyword: string; icon: CategoryIcon }[] = [
-  { keyword: "mobile", icon: DevicePhoneMobileIcon },
-  { keyword: "motor", icon: MotorcycleSolidIcon },
-  { keyword: "food", icon: FoodSolidIcon },
-  { keyword: "family", icon: UserGroupIcon },
-  { keyword: "personal care", icon: SparklesIcon },
-  { keyword: "transport", icon: CarSolidIcon },
-  { keyword: "travel", icon: PlaneSolidIcon },
-  { keyword: "water", icon: DropletSolidIcon },
+// `category` must appear in the expense's category; `text`, when set, must
+// also appear in the expense's name (e.g. category "Digital" + name "Netflix").
+const CATEGORY_ICON_RULES: { category: string; text?: string; icon: CategoryIcon }[] = [
+  { category: "digital", text: "netflix", icon: NetflixSolidIcon },
+  { category: "digital", text: "google", icon: GoogleSolidIcon },
+  { category: "digital", text: "railway", icon: TrainSolidIcon },
+  { category: "mobile", icon: DevicePhoneMobileIcon },
+  { category: "motor", icon: MotorcycleSolidIcon },
+  { category: "food", icon: FoodSolidIcon },
+  { category: "family", icon: UserGroupIcon },
+  { category: "personal care", icon: SparklesIcon },
+  { category: "transport", icon: CarSolidIcon },
+  { category: "travel", icon: PlaneSolidIcon },
+  { category: "water", icon: DropletSolidIcon },
 ];
 
-const getCategoryIcon = (category?: string): CategoryIcon => {
-  const lower = (category || "").toLowerCase();
-  const rule = CATEGORY_ICON_RULES.find((r) => lower.includes(r.keyword));
+const getCategoryIcon = (category?: string, text?: string): CategoryIcon => {
+  const cat = (category || "").toLowerCase();
+  const name = (text || "").toLowerCase();
+  const rule = CATEGORY_ICON_RULES.find(
+    (r) => cat.includes(r.category) && (!r.text || name.includes(r.text))
+  );
   return rule ? rule.icon : ReceiptPercentIcon;
 };
 
@@ -458,7 +469,7 @@ const graphData = Object.values(
             </div>
 
             {grouped[date].map((exp, idx, arr) => {
-              const ExpenseIcon = getCategoryIcon(exp.category);
+              const ExpenseIcon = getCategoryIcon(exp.category, exp.text);
 
               return (
                 <button
