@@ -728,23 +728,13 @@ const HouseExpensesPage: React.FC = () => {
 
       {/* COMPOSER */}
       <div className="shrink-0 space-y-2 px-4 py-3 border-t border-[var(--border-subtle)]">
-        <div className="flex gap-2">
-          <input
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            placeholder="Category"
-            list="house-expense-categories"
-            className="flex-1 min-w-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
-          />
-          <input
-            value={newAmount}
-            onChange={(e) => setNewAmount(e.target.value)}
-            placeholder="Amount"
-            type="number"
-            inputMode="decimal"
-            className="w-28 shrink-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
-          />
-        </div>
+        <input
+          value={newCategory}
+          onChange={(e) => setNewCategory(e.target.value)}
+          placeholder="Category"
+          list="house-expense-categories"
+          className="w-full bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
+        />
 
         <div className="flex items-center gap-2">
           <input
@@ -755,6 +745,17 @@ const HouseExpensesPage: React.FC = () => {
             }}
             placeholder="Add an expense..."
             className="flex-1 min-w-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
+          />
+          <input
+            value={newAmount}
+            onChange={(e) => setNewAmount(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleAdd();
+            }}
+            placeholder="Amount"
+            type="number"
+            inputMode="decimal"
+            className="w-24 shrink-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
           />
 
           <button
