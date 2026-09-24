@@ -8,10 +8,27 @@ import {
 
 import type { Expense } from "../types/expenses.type";
 import { TrashIcon, ReceiptPercentIcon, DevicePhoneMobileIcon } from "@heroicons/react/24/solid";
+import MotorcycleSolidIcon from "../components/icons/MotorcycleSolidIcon";
+import FoodSolidIcon from "../components/icons/FoodSolidIcon";
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
 import { SkeletonBlock, SkeletonRows } from "../components/Skeleton";
+
+type CategoryIcon = React.ComponentType<{ className?: string }>;
+
+// First match wins; anything else falls back to the generic receipt icon.
+const CATEGORY_ICON_RULES: { keyword: string; icon: CategoryIcon }[] = [
+  { keyword: "mobile", icon: DevicePhoneMobileIcon },
+  { keyword: "motor", icon: MotorcycleSolidIcon },
+  { keyword: "food", icon: FoodSolidIcon },
+];
+
+const getCategoryIcon = (category?: string): CategoryIcon => {
+  const lower = (category || "").toLowerCase();
+  const rule = CATEGORY_ICON_RULES.find((r) => lower.includes(r.keyword));
+  return rule ? rule.icon : ReceiptPercentIcon;
+};
 
 const ExpensesPage: React.FC = () => {
   const showToast = useToast();
@@ -427,9 +444,7 @@ const graphData = Object.values(
             </div>
 
             {grouped[date].map((exp, idx, arr) => {
-              const ExpenseIcon = (exp.category || "").toLowerCase().includes("mobile")
-                ? DevicePhoneMobileIcon
-                : ReceiptPercentIcon;
+              const ExpenseIcon = getCategoryIcon(exp.category);
 
               return (
                 <button
