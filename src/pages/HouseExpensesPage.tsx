@@ -7,7 +7,7 @@ import {
 } from "../api/houseExpenses";
 
 import type { HouseExpense } from "../types/houseExpense.type";
-import { TrashIcon, HomeIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, HomeIcon, PaperAirplaneIcon, UserIcon } from "@heroicons/react/24/solid";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -15,6 +15,13 @@ import SlidingTabs from "../components/SlidingTabs";
 import { SkeletonBlock, SkeletonCards } from "../components/Skeleton";
 
 const BUDGET_STORAGE_KEY = "houseExpenseBudgets";
+
+// People who can borrow from the house budget. Add a name here to add a button.
+const BORROWERS = ["Mokz", "Shanen"];
+
+const isBorrowed = (e: HouseExpense) => !!e.borrowedBy;
+
+const formatPeso = (n: number) => `${n < 0 ? "-" : ""}₱${Math.abs(n).toLocaleString()}`;
 
 const HouseExpensesPage: React.FC = () => {
   const showToast = useToast();
@@ -29,11 +36,13 @@ const HouseExpensesPage: React.FC = () => {
   const [newText, setNewText] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [newCategory, setNewCategory] = useState("");
+  const [newBorrower, setNewBorrower] = useState(""); // "" = a normal expense
   const [adding, setAdding] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [editBorrower, setEditBorrower] = useState(""); // borrower of the entry being edited
 
   const [activeTab, setActiveTab] = useState<
     "monthly" | "pending" | "biggest" | "graph"
@@ -79,16 +88,18 @@ const HouseExpensesPage: React.FC = () => {
   // ADD (composer)
   // =========================
   const handleAdd = async () => {
-    if (!newText.trim() || !newAmount || adding) return;
+    // A borrowed entry only needs an amount; the note is optional.
+    if (!newAmount || adding || (!newBorrower && !newText.trim())) return;
 
     setAdding(true);
     try {
       await createHouseExpense({
-        text: newText.trim(),
+        text: newText.trim() || `Borrowed by ${newBorrower}`,
         amount: Number(newAmount),
-        category: newCategory,
+        category: newBorrower ? "Borrowed" : newCategory,
+        borrowedBy: newBorrower,
       });
-      showToast("Expense added!", "success");
+      showToast(newBorrower ? "Borrowed amount added!" : "Expense added!", "success");
       setNewText("");
       setNewAmount("");
       setNewCategory("");
@@ -112,6 +123,7 @@ const HouseExpensesPage: React.FC = () => {
         text: text.trim(),
         amount: Number(amount),
         category,
+        borrowedBy: editBorrower,
       });
       showToast("Expense updated!", "success");
 
@@ -127,6 +139,7 @@ const HouseExpensesPage: React.FC = () => {
     setText("");
     setAmount("");
     setCategory("");
+    setEditBorrower("");
     setEditingId(null);
     setShowModal(false);
   };
@@ -135,6 +148,7 @@ const HouseExpensesPage: React.FC = () => {
     setText(exp.text);
     setAmount(String(exp.amount));
     setCategory(exp.category || "");
+    setEditBorrower(exp.borrowedBy || "");
     setEditingId(exp._id);
     setShowModal(true);
   };
@@ -264,15 +278,19 @@ const HouseExpensesPage: React.FC = () => {
   // =========================
   // TOTALS
   // =========================
-  const totalToday = expenses
+  // Borrowed money isn't spending: it's kept out of these totals and the
+  // category breakdowns, and instead subtracted from each month's remaining.
+  const spentExpenses = expenses.filter((e) => !isBorrowed(e));
+
+  const totalToday = spentExpenses
     .filter((e) => isToday(e.createdAt))
     .reduce((s, e) => s + e.amount, 0);
 
-  const totalWeek = expenses
+  const totalWeek = spentExpenses
     .filter((e) => isThisWeek(e.createdAt))
     .reduce((s, e) => s + e.amount, 0);
 
-  const totalMonth = expenses
+  const totalMonth = spentExpenses
     .filter((e) => isThisMonth(e.createdAt))
     .reduce((s, e) => s + e.amount, 0);
 
@@ -313,7 +331,7 @@ const HouseExpensesPage: React.FC = () => {
   // =========================
   const biggest = Object.entries(monthly).map(([key, monthGroup]) => {
     const groupedByCategory = Object.values(
-      monthGroup.reduce((acc: Record<string, HouseExpense[]>, e) => {
+      monthGroup.filter((e) => !isBorrowed(e)).reduce((acc: Record<string, HouseExpense[]>, e) => {
         const catKey = e.category || "Uncategorized";
         if (!acc[catKey]) acc[catKey] = [];
         acc[catKey].push(e);
@@ -339,7 +357,7 @@ const HouseExpensesPage: React.FC = () => {
   // GRAPH DATA (CATEGORY PIE)
   // =========================
   const graphData = Object.values(
-    expenses.reduce((acc: Record<string, HouseExpense[]>, e) => {
+    spentExpenses.reduce((acc: Record<string, HouseExpense[]>, e) => {
       const key = e.category || "Uncategorized";
       if (!acc[key]) acc[key] = [];
       acc[key].push(e);
@@ -355,7 +373,7 @@ const HouseExpensesPage: React.FC = () => {
   const totalGraph = graphData.reduce((s, i) => s + i.total, 0);
 
   const existingCategories = Array.from(
-    new Set(expenses.map((e) => e.category).filter((c): c is string => !!c))
+    new Set(spentExpenses.map((e) => e.category).filter((c): c is string => !!c))
   ).sort((a, b) => a.localeCompare(b));
 
   const colors = [
@@ -407,9 +425,23 @@ const HouseExpensesPage: React.FC = () => {
             ) : (
               sortedMonths.map((month) => {
                 const monthExpenses = monthly[month];
-                const monthTotal = monthExpenses.reduce((s, e) => s + e.amount, 0);
+                const monthTotal = monthExpenses
+                  .filter((e) => !isBorrowed(e))
+                  .reduce((s, e) => s + e.amount, 0);
+
+                // Outstanding per person: borrowed amounts minus repayments (negative entries).
+                const borrowedByPerson = monthExpenses.filter(isBorrowed).reduce(
+                  (acc: Record<string, number>, e) => {
+                    const name = e.borrowedBy as string;
+                    acc[name] = (acc[name] || 0) + e.amount;
+                    return acc;
+                  },
+                  {}
+                );
+                const monthBorrowed = Object.values(borrowedByPerson).reduce((s, n) => s + n, 0);
+
                 const budget = monthlyBudgets[month] || 0;
-                const remaining = budget - monthTotal;
+                const remaining = budget - monthTotal - monthBorrowed;
                 const monthLabel = getCycleLabel(month);
 
                 const expanded = isMonthExpanded(month);
@@ -451,6 +483,21 @@ const HouseExpensesPage: React.FC = () => {
                                 ₱{totalMonth.toLocaleString()}
                               </span>
                             </span>
+                            {budget > 0 && (
+                              <>
+                                <span>·</span>
+                                <span>
+                                  Left{" "}
+                                  <span
+                                    className={`font-semibold ${
+                                      remaining >= 0 ? "text-[var(--text-primary)]" : "text-[var(--danger)]"
+                                    }`}
+                                  >
+                                    {formatPeso(remaining)}
+                                  </span>
+                                </span>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
@@ -512,9 +559,35 @@ const HouseExpensesPage: React.FC = () => {
                             <div className={`rounded-lg p-2 ${remaining >= 0 ? "bg-green-900/30" : "bg-red-900/30"}`}>
                               <p className="text-[var(--text-secondary)] text-[10px]">Remaining</p>
                               <p className={`font-bold mt-2 text-sm ${remaining >= 0 ? "text-[var(--text-primary)]" : "text-[var(--danger)]"}`}>
-                                {remaining < 0 ? "-" : ""}₱{Math.abs(remaining).toLocaleString()}
+                                {formatPeso(remaining)}
                               </p>
+                              {monthBorrowed !== 0 && (
+                                <p className="text-[var(--text-secondary)] text-[9px] mt-1">
+                                  after spent and borrowed
+                                </p>
+                              )}
                             </div>
+
+                            {Object.keys(borrowedByPerson).length > 0 && (
+                              <div className="bg-[var(--bg-input)] rounded-lg p-2">
+                                <div className="flex justify-between items-center">
+                                  <p className="text-[var(--text-secondary)] text-[10px]">Borrowed</p>
+                                  <p className="font-bold text-sm text-[var(--accent)]">
+                                    {formatPeso(monthBorrowed)}
+                                  </p>
+                                </div>
+                                <div className="mt-2 space-y-1">
+                                  {Object.entries(borrowedByPerson).map(([name, total]) => (
+                                    <div key={name} className="flex justify-between text-sm">
+                                      <span className="text-[var(--text-primary)]">{name}</span>
+                                      <span className="text-[var(--text-secondary)] font-medium">
+                                        {formatPeso(total)}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
 
                           {/* TOTAL SPENT */}
@@ -533,9 +606,17 @@ const HouseExpensesPage: React.FC = () => {
                               >
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[var(--text-primary)] truncate">{exp.text}</p>
-                                  <p className="text-[var(--text-secondary)] text-[10px]">{exp.category}</p>
+                                  <p className="text-[var(--text-secondary)] text-[10px]">
+                                    {exp.borrowedBy ? `Borrowed by ${exp.borrowedBy}` : exp.category}
+                                  </p>
                                 </div>
-                                <span className="text-[var(--text-secondary)] font-medium shrink-0">₱{exp.amount.toLocaleString()}</span>
+                                <span
+                                  className={`font-medium shrink-0 ${
+                                    exp.borrowedBy ? "text-[var(--accent)]" : "text-[var(--text-secondary)]"
+                                  }`}
+                                >
+                                  {formatPeso(exp.amount)}
+                                </span>
                               </button>
                             ))}
                           </div>
@@ -641,29 +722,42 @@ const HouseExpensesPage: React.FC = () => {
                     })}
               </div>
 
-              {grouped[date].map((exp, idx, arr) => (
-                <button
-                  key={exp._id}
-                  onClick={() => handleEdit(exp)}
-                  className={`w-full flex items-center gap-3 justify-between py-3 text-[var(--text-primary)] text-left ${
-                    idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
-                      <HomeIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
-                    </div>
+              {grouped[date].map((exp, idx, arr) => {
+                const RowIcon = exp.borrowedBy ? UserIcon : HomeIcon;
 
-                    <div className="min-w-0">
-                      <div className="truncate">{exp.text} •   <span className="text-[var(--text-secondary)] text-[10px]">{exp.category}</span></div>
+                return (
+                  <button
+                    key={exp._id}
+                    onClick={() => handleEdit(exp)}
+                    className={`w-full flex items-center gap-3 justify-between py-3 text-[var(--text-primary)] text-left ${
+                      idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                        <RowIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
+                      </div>
 
-                      <div className="text-[var(--negative)] text-xs">
-                        ₱{exp.amount.toLocaleString()}
+                      <div className="min-w-0">
+                        <div className="truncate">
+                          {exp.text} •{" "}
+                          <span className="text-[var(--text-secondary)] text-[10px]">
+                            {exp.borrowedBy ? `Borrowed by ${exp.borrowedBy}` : exp.category}
+                          </span>
+                        </div>
+
+                        <div
+                          className={`${
+                            exp.borrowedBy ? "text-[var(--accent)]" : "text-[var(--negative)]"
+                          } text-xs`}
+                        >
+                          {formatPeso(exp.amount)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           ))}
 
@@ -673,7 +767,7 @@ const HouseExpensesPage: React.FC = () => {
         <Modal
           open={showModal}
           onClose={resetForm}
-          title="Edit Expense"
+          title={editBorrower ? "Edit Borrowed" : "Edit Expense"}
         >
           <input
             className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
@@ -690,13 +784,30 @@ const HouseExpensesPage: React.FC = () => {
             onChange={(e) => setAmount(e.target.value)}
           />
 
-          <input
-            className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
-            placeholder="Category"
-            list="house-expense-categories"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          />
+          {editBorrower ? (
+            <select
+              aria-label="Borrowed by"
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+              value={editBorrower}
+              onChange={(e) => setEditBorrower(e.target.value)}
+            >
+              {(BORROWERS.includes(editBorrower) ? BORROWERS : [...BORROWERS, editBorrower]).map(
+                (name) => (
+                  <option key={name} value={name}>
+                    Borrowed by {name}
+                  </option>
+                )
+              )}
+            </select>
+          ) : (
+            <input
+              className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+              placeholder="Category"
+              list="house-expense-categories"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
+          )}
 
           <div className="flex items-center gap-2 pt-2">
             {editingId && (
@@ -728,13 +839,42 @@ const HouseExpensesPage: React.FC = () => {
 
       {/* COMPOSER */}
       <div className="shrink-0 space-y-2 px-4 py-3 border-t border-[var(--border-subtle)]">
-        <input
-          value={newCategory}
-          onChange={(e) => setNewCategory(e.target.value)}
-          placeholder="Category"
-          list="house-expense-categories"
-          className="w-full bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
-        />
+        <div className="flex items-center gap-2" role="group" aria-label="Entry type">
+          {["", ...BORROWERS].map((who) => {
+            const active = newBorrower === who;
+
+            return (
+              <button
+                key={who || "expense"}
+                onClick={() => setNewBorrower(who)}
+                aria-pressed={active}
+                className={`px-3 py-1 rounded-full border text-xs font-semibold ${
+                  active
+                    ? "border-transparent bg-[var(--accent-soft)] text-[var(--accent)]"
+                    : "border-[var(--border-strong)] text-[var(--text-primary)]"
+                }`}
+              >
+                {who ? `${who} borrowed` : "Expense"}
+              </button>
+            );
+          })}
+        </div>
+
+        {newBorrower && (
+          <p className="text-[10px] text-[var(--text-secondary)] px-1">
+            Money {newBorrower} borrowed from the house budget. Enter a negative amount if it was paid back.
+          </p>
+        )}
+
+        {!newBorrower && (
+          <input
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Category"
+            list="house-expense-categories"
+            className="w-full bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
+          />
+        )}
 
         <div className="flex items-center gap-2">
           <input
@@ -743,7 +883,7 @@ const HouseExpensesPage: React.FC = () => {
             onKeyDown={(e) => {
               if (e.key === "Enter") handleAdd();
             }}
-            placeholder="Add an expense..."
+            placeholder={newBorrower ? "Note (optional)" : "Add an expense..."}
             className="flex-1 min-w-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
           />
           <input
@@ -754,14 +894,14 @@ const HouseExpensesPage: React.FC = () => {
             }}
             placeholder="Amount"
             type="number"
-            inputMode="decimal"
+            inputMode={newBorrower ? undefined : "decimal"}
             className="w-24 shrink-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
           />
 
           <button
             onClick={handleAdd}
-            disabled={!newText.trim() || !newAmount || adding}
-            aria-label="Add expense"
+            disabled={!newAmount || (!newBorrower && !newText.trim()) || adding}
+            aria-label={newBorrower ? `Add amount borrowed by ${newBorrower}` : "Add expense"}
             className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-[var(--btn-bg)] text-[var(--btn-text)] disabled:opacity-40"
           >
             <PaperAirplaneIcon className="w-4 h-4" />

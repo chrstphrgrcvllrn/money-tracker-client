@@ -4,6 +4,7 @@ export type HouseExpense = {
   amount: number;
   done: boolean;
   category: string;
+  borrowedBy?: string; // who borrowed it from the house budget ("" = normal expense)
   createdAt: string;
   updatedAt?: string;
 };

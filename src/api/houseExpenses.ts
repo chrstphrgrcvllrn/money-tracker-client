@@ -18,6 +18,7 @@ export const createHouseExpense = async (data: {
   text: string;
   amount: number;
   category?: string;
+  borrowedBy?: string;
 }) => {
   const res = await axios.post(API_URL, data);
   return res.data;
@@ -30,6 +31,7 @@ export const updateHouseExpense = async (
     text: string;
     amount: number;
     category?: string;
+    borrowedBy?: string;
   }
 ) => {
   const res = await axios.put(`${API_URL}/${id}`, data);
