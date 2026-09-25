@@ -1,15 +1,8 @@
-import axios from "axios";
-
-const BASE_URL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_PROD_API_URL
-    : import.meta.env.VITE_DEV_API_URL;
-
-const API_URL = `${BASE_URL}/api/house-expenses`;
+import { api } from "@/api/client";
 
 // FETCH
 export const fetchHouseExpenses = async () => {
-  const res = await axios.get(API_URL);
+  const res = await api.get("/house-expenses");
   return res.data;
 };
 
@@ -20,7 +13,7 @@ export const createHouseExpense = async (data: {
   category?: string;
   borrowedBy?: string;
 }) => {
-  const res = await axios.post(API_URL, data);
+  const res = await api.post("/house-expenses", data);
   return res.data;
 };
 
@@ -34,18 +27,18 @@ export const updateHouseExpense = async (
     borrowedBy?: string;
   }
 ) => {
-  const res = await axios.put(`${API_URL}/${id}`, data);
+  const res = await api.put(`/house-expenses/${id}`, data);
   return res.data;
 };
 
 // DELETE
 export const deleteHouseExpense = async (id: string) => {
-  const res = await axios.delete(`${API_URL}/${id}`);
+  const res = await api.delete(`/house-expenses/${id}`);
   return res.data;
 };
 
 // TOGGLE
 export const toggleHouseExpense = async (id: string) => {
-  const res = await axios.patch(`${API_URL}/${id}/toggle`);
+  const res = await api.patch(`/house-expenses/${id}/toggle`);
   return res.data;
 };

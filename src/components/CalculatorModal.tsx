@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "./Modal";
+import { useAuthStore } from "@/stores/auth.store";
+import { readUserItem, writeUserItem } from "@/lib/userStorage";
 
 const STORAGE_KEY = "calculatorDisplay";
 
@@ -53,21 +55,14 @@ interface CalculatorModalProps {
 }
 
 export default function CalculatorModal({ open, onClose }: CalculatorModalProps) {
-  const [display, setDisplay] = useState(() => {
-    try {
-      return localStorage.getItem(STORAGE_KEY) || "0";
-    } catch {
-      return "0";
-    }
-  });
+  const userId = useAuthStore((s) => s.user?.id ?? "");
+
+  const [display, setDisplay] = useState(() => readUserItem(STORAGE_KEY, userId) || "0");
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, display);
-    } catch {
-      // ignore storage errors — the calculator still works for this session
-    }
-  }, [display]);
+    // storage errors are ignored inside writeUserItem: the calculator still works
+    writeUserItem(STORAGE_KEY, userId, display);
+  }, [display, userId]);
 
   const handleClick = (value: string) => {
     // Typing after an "Error" starts a fresh expression.

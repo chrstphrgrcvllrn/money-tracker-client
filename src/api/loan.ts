@@ -1,24 +1,11 @@
+import { api } from "@/api/client";
 import type { Loan } from "../types/loans.type";
-
-// const API_URL = "http://localhost:5000/api/loans";
-// const API_URL = `${import.meta.env.VITE_API_URL}/api/loans`;
-
-
-const API_URL = import.meta.env.NODE_ENV === 'production'
-  ? `${import.meta.env.VITE_PROD_API_URL}/api/loans` // actual site
-  : `${import.meta.env.VITE_DEV_API_URL}/api/loans` ; // local/dev
-
-
-console.log("API_URL:", API_URL);
-
 
 // GET loans
 export const getLoans = async (): Promise<Loan[]> => {
-  const res = await fetch(API_URL);
+  const res = await api.get("/loans");
 
-  if (!res.ok) throw new Error("Failed to fetch loans");
-
-  const json = await res.json();
+  const json = res.data;
   return Array.isArray(json) ? json : [json];
 };
 
@@ -26,17 +13,8 @@ export const getLoans = async (): Promise<Loan[]> => {
 export const createLoan = async (
   loan: Omit<Loan, "_id">
 ): Promise<Loan> => {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(loan),
-  });
-
-  if (!res.ok) throw new Error("Failed to create loan");
-
-  return res.json();
+  const res = await api.post("/loans", loan);
+  return res.data;
 };
 
 // UPDATE loan (rename, edit amount, archive/unarchive)
@@ -44,32 +22,12 @@ export const updateLoan = async (
   id: string,
   data: Partial<Pick<Loan, "name" | "initialAmount" | "archived">>
 ): Promise<Loan> => {
-  const res = await fetch(`${API_URL}/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!res.ok) throw new Error("Failed to update loan");
-
-  return res.json();
+  const res = await api.put(`/loans/${id}`, data);
+  return res.data;
 };
 
 // ADD transaction
 export const addTransaction = async (id: string, data: unknown) => {
-  const res = await fetch(`${API_URL}/${id}/transactions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to add transaction");
-  }
-
-  return res.json();
+  const res = await api.post(`/loans/${id}/transactions`, data);
+  return res.data;
 };

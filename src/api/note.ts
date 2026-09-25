@@ -1,19 +1,9 @@
-import axios from "axios";
+import { api } from "@/api/client";
 import type { Note } from "../types/notes.type";
 
-// const API_URL = "http://localhost:5000/api/notes";
-// const API_URL = `${import.meta.env.VITE_API_URL}/api/notes`;
-
-const API_URL = import.meta.env.NODE_ENV === 'production'
-  ? `${import.meta.env.VITE_PROD_API_URL}/api/notes` // actual site
-  : `${import.meta.env.VITE_DEV_API_URL}/api/notes` ; // local/dev
-
-
-
-console.log("API_URL:", API_URL);
 // Get all notes
 export const getNotes = async (): Promise<Note[]> => {
-  const res = await axios.get(API_URL);
+  const res = await api.get("/notes");
   return res.data;
 };
 
@@ -21,17 +11,17 @@ export const getNotes = async (): Promise<Note[]> => {
 export const createNote = async (
   data: Pick<Note, "text" | "category">
 ): Promise<Note> => {
-  const res = await axios.post(API_URL, data);
+  const res = await api.post("/notes", data);
   return res.data;
 };
 
 // Toggle done
 export const toggleNote = async (id: string): Promise<Note> => {
-  const res = await axios.patch(`${API_URL}/${id}`);
+  const res = await api.patch(`/notes/${id}`);
   return res.data;
 };
 
 // Delete note
 export const deleteNote = async (id: string): Promise<void> => {
-  await axios.delete(`${API_URL}/${id}`);
+  await api.delete(`/notes/${id}`);
 };

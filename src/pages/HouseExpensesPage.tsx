@@ -10,6 +10,8 @@ import type { HouseExpense } from "../types/houseExpense.type";
 import { TrashIcon, HomeIcon, PaperAirplaneIcon, UserIcon } from "@heroicons/react/24/solid";
 
 import Modal from "../components/Modal";
+import { useAuthStore } from "@/stores/auth.store";
+import { readUserItem, writeUserItem } from "@/lib/userStorage";
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
 import { SkeletonBlock, SkeletonCards } from "../components/Skeleton";
@@ -22,6 +24,8 @@ const formatPeso = (n: number) => `${n < 0 ? "-" : ""}₱${Math.abs(n).toLocaleS
 
 const HouseExpensesPage: React.FC = () => {
   const showToast = useToast();
+  // Budgets are kept in this browser, so they're stored under the user's id.
+  const userId = useAuthStore((s) => s.user?.id ?? "");
 
   const [expenses, setExpenses] = useState<HouseExpense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +65,7 @@ const HouseExpensesPage: React.FC = () => {
 
   const [monthlyBudgets, setMonthlyBudgets] = useState<Record<string, number>>(() => {
     try {
-      const saved = localStorage.getItem(BUDGET_STORAGE_KEY);
+      const saved = readUserItem(BUDGET_STORAGE_KEY, userId);
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -196,7 +200,7 @@ const HouseExpensesPage: React.FC = () => {
 
     const updated = { ...monthlyBudgets, [month]: budget };
     setMonthlyBudgets(updated);
-    localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(updated));
+    writeUserItem(BUDGET_STORAGE_KEY, userId, JSON.stringify(updated));
     setEditingBudgetMonth(null);
     setBudgetInput("");
     showToast("Budget updated!", "success");

@@ -1,27 +1,22 @@
-import axios from "axios";
-
-const BASE_URL =
-  import.meta.env.NODE_ENV === "production"
-    ? `${import.meta.env.VITE_PROD_API_URL}/api/subscription`
-    : `${import.meta.env.VITE_DEV_API_URL}/api/subscription`;
+import { api } from "@/api/client";
 
 export const getSubscriptions = async () => {
-  const res = await axios.get(BASE_URL);
+  const res = await api.get("/subscription");
   return res.data;
 };
 
 export const createSubscription = async (data: unknown) => {
-  const res = await axios.post(BASE_URL, data);
+  const res = await api.post("/subscription", data);
   return res.data;
 };
 
 export const updateSubscription = async (id: string, data: unknown) => {
-  const res = await axios.put(`${BASE_URL}/${id}`, data);
+  const res = await api.put(`/subscription/${id}`, data);
   return res.data;
 };
 
 export const deleteSubscription = async (id: string) => {
-  const res = await axios.delete(`${BASE_URL}/${id}`);
+  const res = await api.delete(`/subscription/${id}`);
   return res.data;
 };
 
@@ -29,7 +24,7 @@ export const deleteSubscription = async (id: string) => {
  * ✅ CREATE PAYMENT (NEW - THIS FIXES YOUR + BUTTON)
  */
 export const createPayment = async (subId: string, data: unknown) => {
-  const res = await axios.post(`${BASE_URL}/${subId}/payment`, data);
+  const res = await api.post(`/subscription/${subId}/payment`, data);
   return res.data;
 };
 
@@ -46,6 +41,6 @@ export const updatePayment = async (data: {
     throw new Error("Missing subId or paymentId");
   }
 
-  const res = await axios.patch(`${BASE_URL}/payment`, data);
+  const res = await api.patch("/subscription/payment", data);
   return res.data;
 };

@@ -1,15 +1,9 @@
-import axios from "axios";
+import { api } from "@/api/client";
 import type { BillsEntry } from "../types/bills.type";
-
-
-const API_URL = import.meta.env.NODE_ENV === 'production'
-  ? `${import.meta.env.VITE_PROD_API_URL}/api/bills` // actual site
-  : `${import.meta.env.VITE_DEV_API_URL}/api/bills` ; // local/dev
-
 
 // ✅ GET ALL
 export const fetchBills = async (): Promise<BillsEntry[]> => {
-  const res = await axios.get(API_URL);
+  const res = await api.get("/bills");
   return res.data;
 };
 
@@ -17,7 +11,7 @@ export const fetchBills = async (): Promise<BillsEntry[]> => {
 export const createBill = async (
   data: Partial<BillsEntry>
 ): Promise<BillsEntry> => {
-  const res = await axios.post(API_URL, data);
+  const res = await api.post("/bills", data);
   return res.data;
 };
 
@@ -26,6 +20,6 @@ export const updateBill = async (
   id: string,
   data: Partial<BillsEntry>
 ): Promise<BillsEntry> => {
-  const res = await axios.put(`${API_URL}/${id}`, data);
+  const res = await api.put(`/bills/${id}`, data);
   return res.data;
 };

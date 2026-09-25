@@ -14,6 +14,8 @@ import {
   EllipsisHorizontalIcon,
   CalculatorIcon,
   CalendarIcon,
+  UserCircleIcon,
+  ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -32,12 +34,16 @@ import CalculatorModal from "@/components/CalculatorModal";
 import CalendarModal from "@/components/CalendarModal";
 import WaterModal from "@/components/WaterModal";
 import DropletSolidIcon from "@/components/icons/DropletSolidIcon";
+import { useAuthStore } from "@/stores/auth.store";
+import { useLogout } from "@/hooks/useLogout";
 
 export default function BottomNavBar() {
   const { theme, toggleTheme } = useTheme();
   const isLight = theme === "light";
 
   const { pathname } = useLocation();
+  const username = useAuthStore((s) => s.user?.username);
+  const logout = useLogout();
   const [moreOpen, setMoreOpen] = useState(false);
   const [calculatorOpen, setCalculatorOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -221,6 +227,12 @@ export default function BottomNavBar() {
                 role="menu"
                 className="absolute bottom-full right-0 mb-3 w-44 rounded-xl bg-[var(--bg-input)] border border-[var(--border-subtle)] shadow-2xl py-1"
               >
+                {username && (
+                  <p className="px-4 pt-2 pb-1 text-xs text-[var(--text-secondary)] truncate">
+                    Signed in as <span className="font-semibold text-[var(--text-primary)]">{username}</span>
+                  </p>
+                )}
+
                 {moreItems.map((item) => (
                   <NavLink
                     key={item.name}
@@ -279,6 +291,32 @@ export default function BottomNavBar() {
                 >
                   <DropletSolidIcon className="w-5 h-5" />
                   Water
+                </button>
+
+                <NavLink
+                  to="/account"
+                  role="menuitem"
+                  onClick={() => setMoreOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-3 text-sm font-semibold ${
+                      isActive ? "text-[var(--accent)]" : "text-[var(--text-primary)]"
+                    }`
+                  }
+                >
+                  <UserCircleIcon className="w-5 h-5" />
+                  Account
+                </NavLink>
+
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setMoreOpen(false);
+                    logout();
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--danger)]"
+                >
+                  <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
+                  Log out
                 </button>
               </div>
             )}

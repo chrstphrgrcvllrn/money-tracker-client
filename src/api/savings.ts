@@ -1,19 +1,9 @@
-import axios from "axios";
+import { api } from "@/api/client";
 import type { Savings, SavingsTransaction } from "../types/savings.type";
-
-const BASE_URL =
-  import.meta.env.NODE_ENV === "production"
-    ? `${import.meta.env.VITE_PROD_API_URL}/api/savings`
-    : `${import.meta.env.VITE_DEV_API_URL}/api/savings`;
-
-// Create axios instance (optional but cleaner)
-const api = axios.create({
-  baseURL: BASE_URL,
-});
 
 // ✅ Get all savings
 export const getSavings = async (): Promise<Savings[]> => {
-  const res = await api.get("/");
+  const res = await api.get("/savings");
   return res.data;
 };
 
@@ -21,7 +11,7 @@ export const getSavings = async (): Promise<Savings[]> => {
 export const createSavings = async (
   savings: Omit<Savings, "_id">
 ): Promise<Savings> => {
-  const res = await api.post("/", savings);
+  const res = await api.post("/savings", savings);
   return res.data;
 };
 
@@ -30,11 +20,11 @@ export const addSavingsTransaction = async (
   savingsId: string,
   transaction: SavingsTransaction
 ): Promise<Savings> => {
-  const res = await api.post(`/${savingsId}/transactions`, transaction);
+  const res = await api.post(`/savings/${savingsId}/transactions`, transaction);
   return res.data;
 };
 
 // ✅ Delete savings
 export const deleteSavings = async (savingsId: string): Promise<void> => {
-  await api.delete(`/${savingsId}`);
+  await api.delete(`/savings/${savingsId}`);
 };

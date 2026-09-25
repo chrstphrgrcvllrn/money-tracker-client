@@ -1,13 +1,5 @@
-import axios from "axios";
+import { api } from "@/api/client";
 import type { SalaryEntry } from "../types/salary.type";
-
-// API URL config
-const API_URL =
-  import.meta.env.NODE_ENV === "production"
-    ? `${import.meta.env.VITE_PROD_API_URL}/api/salary`
-    : `${import.meta.env.VITE_DEV_API_URL}/api/salary`;
-
-console.log("API_URL:", API_URL);
 
 //
 // SALARY
@@ -15,13 +7,13 @@ console.log("API_URL:", API_URL);
 
 // GET
 export const fetchSalaries = async (): Promise<SalaryEntry[]> => {
-  const res = await axios.get(API_URL);
+  const res = await api.get("/salary");
   return res.data;
 };
 
 // CREATE
 export const createSalary = async (data: Partial<SalaryEntry>) => {
-  const res = await axios.post(API_URL, data);
+  const res = await api.post("/salary", data);
   return res.data;
 };
 
@@ -30,13 +22,13 @@ export const updateSalary = async (
   id: string,
   data: Partial<SalaryEntry>
 ) => {
-  const res = await axios.put(`${API_URL}/${id}`, data);
+  const res = await api.put(`/salary/${id}`, data);
   return res.data;
 };
 
 // DELETE
 export const deleteSalary = async (id: string) => {
-  const res = await axios.delete(`${API_URL}/${id}`);
+  const res = await api.delete(`/salary/${id}`);
   return res.data;
 };
 
@@ -49,10 +41,7 @@ export const addExpense = async (
   salaryId: string,
   data: { name: string; amount: number }
 ) => {
-  const res = await axios.post(
-    `${API_URL}/${salaryId}/expense`,
-    data
-  );
+  const res = await api.post(`/salary/${salaryId}/expense`, data);
   return res.data;
 };
 
@@ -62,10 +51,7 @@ export const updateExpense = async (
   expenseId: string,
   data: Partial<{ name: string; amount: number; paid: boolean }>
 ) => {
-  const res = await axios.put(
-    `${API_URL}/${salaryId}/expense/${expenseId}`,
-    data
-  );
+  const res = await api.put(`/salary/${salaryId}/expense/${expenseId}`, data);
   return res.data;
 };
 
@@ -74,8 +60,6 @@ export const deleteExpense = async (
   salaryId: string,
   expenseId: string
 ) => {
-  const res = await axios.delete(
-    `${API_URL}/${salaryId}/expense/${expenseId}`
-  );
+  const res = await api.delete(`/salary/${salaryId}/expense/${expenseId}`);
   return res.data;
 };
