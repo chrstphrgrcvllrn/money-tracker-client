@@ -16,9 +16,6 @@ import { SkeletonBlock, SkeletonCards } from "../components/Skeleton";
 
 const BUDGET_STORAGE_KEY = "houseExpenseBudgets";
 
-// People who can borrow from the house budget. Add a name here to add a button.
-const BORROWERS = ["Mokz", "Shanen"];
-
 const isBorrowed = (e: HouseExpense) => !!e.borrowedBy;
 
 const formatPeso = (n: number) => `${n < 0 ? "-" : ""}₱${Math.abs(n).toLocaleString()}`;
@@ -36,13 +33,27 @@ const HouseExpensesPage: React.FC = () => {
   const [newText, setNewText] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [newCategory, setNewCategory] = useState("");
-  const [newBorrower, setNewBorrower] = useState(""); // "" = a normal expense
+  const [newIsBorrow, setNewIsBorrow] = useState(false); // false = a normal expense
+  const [newBorrower, setNewBorrower] = useState("");
   const [adding, setAdding] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [editBorrower, setEditBorrower] = useState(""); // borrower of the entry being edited
+  const [editIsBorrowed, setEditIsBorrowed] = useState(false); // the entry being edited is a borrow
+  const [editBorrower, setEditBorrower] = useState("");
+
+  // Names already used for borrows, offered as suggestions. A typed name that
+  // matches one case-insensitively reuses its spelling, so "mokz" and "Mokz"
+  // are counted as the same person.
+  const borrowerNames = Array.from(
+    new Set(expenses.map((e) => e.borrowedBy).filter((n): n is string => !!n))
+  ).sort((a, b) => a.localeCompare(b));
+
+  const canonicalBorrower = (name: string) => {
+    const trimmed = name.trim();
+    return borrowerNames.find((n) => n.toLowerCase() === trimmed.toLowerCase()) ?? trimmed;
+  };
 
   const [activeTab, setActiveTab] = useState<
     "monthly" | "pending" | "biggest" | "graph"
@@ -88,18 +99,19 @@ const HouseExpensesPage: React.FC = () => {
   // ADD (composer)
   // =========================
   const handleAdd = async () => {
-    // A borrowed entry only needs an amount; the note is optional.
-    if (!newAmount || adding || (!newBorrower && !newText.trim())) return;
+    // A borrow needs a name and an amount (the note is optional); an expense needs a name and an amount.
+    const borrower = newIsBorrow ? canonicalBorrower(newBorrower) : "";
+    if (!newAmount || adding || (newIsBorrow ? !borrower : !newText.trim())) return;
 
     setAdding(true);
     try {
       await createHouseExpense({
-        text: newText.trim() || `Borrowed by ${newBorrower}`,
+        text: newText.trim() || `Borrowed by ${borrower}`,
         amount: Number(newAmount),
-        category: newBorrower ? "Borrowed" : newCategory,
-        borrowedBy: newBorrower,
+        category: newIsBorrow ? "Borrowed" : newCategory,
+        borrowedBy: borrower,
       });
-      showToast(newBorrower ? "Borrowed amount added!" : "Expense added!", "success");
+      showToast(newIsBorrow ? "Borrowed amount added!" : "Expense added!", "success");
       setNewText("");
       setNewAmount("");
       setNewCategory("");
@@ -117,13 +129,14 @@ const HouseExpensesPage: React.FC = () => {
   // =========================
   const handleSave = async () => {
     if (!editingId || !text.trim() || !amount) return;
+    if (editIsBorrowed && !editBorrower.trim()) return;
 
     try {
       await updateHouseExpense(editingId, {
         text: text.trim(),
         amount: Number(amount),
         category,
-        borrowedBy: editBorrower,
+        borrowedBy: editIsBorrowed ? canonicalBorrower(editBorrower) : "",
       });
       showToast("Expense updated!", "success");
 
@@ -139,6 +152,7 @@ const HouseExpensesPage: React.FC = () => {
     setText("");
     setAmount("");
     setCategory("");
+    setEditIsBorrowed(false);
     setEditBorrower("");
     setEditingId(null);
     setShowModal(false);
@@ -148,6 +162,7 @@ const HouseExpensesPage: React.FC = () => {
     setText(exp.text);
     setAmount(String(exp.amount));
     setCategory(exp.category || "");
+    setEditIsBorrowed(isBorrowed(exp));
     setEditBorrower(exp.borrowedBy || "");
     setEditingId(exp._id);
     setShowModal(true);
@@ -767,7 +782,7 @@ const HouseExpensesPage: React.FC = () => {
         <Modal
           open={showModal}
           onClose={resetForm}
-          title={editBorrower ? "Edit Borrowed" : "Edit Expense"}
+          title={editIsBorrowed ? "Edit Borrowed" : "Edit Expense"}
         >
           <input
             className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
@@ -784,21 +799,15 @@ const HouseExpensesPage: React.FC = () => {
             onChange={(e) => setAmount(e.target.value)}
           />
 
-          {editBorrower ? (
-            <select
-              aria-label="Borrowed by"
+          {editIsBorrowed ? (
+            <input
               className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+              placeholder="Who borrowed?"
+              aria-label="Borrowed by"
+              list="house-borrowers"
               value={editBorrower}
               onChange={(e) => setEditBorrower(e.target.value)}
-            >
-              {(BORROWERS.includes(editBorrower) ? BORROWERS : [...BORROWERS, editBorrower]).map(
-                (name) => (
-                  <option key={name} value={name}>
-                    Borrowed by {name}
-                  </option>
-                )
-              )}
-            </select>
+            />
           ) : (
             <input
               className="w-full px-3 py-2 bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
@@ -840,13 +849,16 @@ const HouseExpensesPage: React.FC = () => {
       {/* COMPOSER */}
       <div className="shrink-0 space-y-2 px-4 py-3 border-t border-[var(--border-subtle)]">
         <div className="flex items-center gap-2" role="group" aria-label="Entry type">
-          {["", ...BORROWERS].map((who) => {
-            const active = newBorrower === who;
+          {[
+            { borrow: false, label: "Expense" },
+            { borrow: true, label: "Borrowed" },
+          ].map(({ borrow, label }) => {
+            const active = newIsBorrow === borrow;
 
             return (
               <button
-                key={who || "expense"}
-                onClick={() => setNewBorrower(who)}
+                key={label}
+                onClick={() => setNewIsBorrow(borrow)}
                 aria-pressed={active}
                 className={`px-3 py-1 rounded-full border text-xs font-semibold ${
                   active
@@ -854,19 +866,28 @@ const HouseExpensesPage: React.FC = () => {
                     : "border-[var(--border-strong)] text-[var(--text-primary)]"
                 }`}
               >
-                {who ? `${who} borrowed` : "Expense"}
+                {label}
               </button>
             );
           })}
         </div>
 
-        {newBorrower && (
+        {newIsBorrow && (
           <p className="text-[10px] text-[var(--text-secondary)] px-1">
-            Money {newBorrower} borrowed from the house budget. Enter a negative amount if it was paid back.
+            Money borrowed from the house budget. Enter a negative amount if it was paid back.
           </p>
         )}
 
-        {!newBorrower && (
+        {newIsBorrow ? (
+          <input
+            value={newBorrower}
+            onChange={(e) => setNewBorrower(e.target.value)}
+            placeholder="Who borrowed?"
+            aria-label="Who borrowed"
+            list="house-borrowers"
+            className="w-full bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
+          />
+        ) : (
           <input
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
@@ -883,7 +904,7 @@ const HouseExpensesPage: React.FC = () => {
             onKeyDown={(e) => {
               if (e.key === "Enter") handleAdd();
             }}
-            placeholder={newBorrower ? "Note (optional)" : "Add an expense..."}
+            placeholder={newIsBorrow ? "Note (optional)" : "Add an expense..."}
             className="flex-1 min-w-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
           />
           <input
@@ -894,14 +915,16 @@ const HouseExpensesPage: React.FC = () => {
             }}
             placeholder="Amount"
             type="number"
-            inputMode={newBorrower ? undefined : "decimal"}
+            inputMode={newIsBorrow ? undefined : "decimal"}
             className="w-24 shrink-0 bg-[var(--bg-input)] px-4 py-2.5 rounded-full text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
           />
 
           <button
             onClick={handleAdd}
-            disabled={!newAmount || (!newBorrower && !newText.trim()) || adding}
-            aria-label={newBorrower ? `Add amount borrowed by ${newBorrower}` : "Add expense"}
+            disabled={
+              !newAmount || (newIsBorrow ? !newBorrower.trim() : !newText.trim()) || adding
+            }
+            aria-label={newIsBorrow ? "Add borrowed amount" : "Add expense"}
             className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-[var(--btn-bg)] text-[var(--btn-text)] disabled:opacity-40"
           >
             <PaperAirplaneIcon className="w-4 h-4" />
@@ -912,6 +935,12 @@ const HouseExpensesPage: React.FC = () => {
       <datalist id="house-expense-categories">
         {existingCategories.map((cat) => (
           <option key={cat} value={cat} />
+        ))}
+      </datalist>
+
+      <datalist id="house-borrowers">
+        {borrowerNames.map((name) => (
+          <option key={name} value={name} />
         ))}
       </datalist>
     </div>
