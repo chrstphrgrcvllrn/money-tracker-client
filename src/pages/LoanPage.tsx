@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Loan } from "../types/loans.type";
 import { getLoans, createLoan, addTransaction, updateLoan } from "../api/loan";
 
-import { UserIcon } from "@heroicons/react/24/solid";
+import { UserIcon, CreditCardIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
+import MotorcycleSolidIcon from "../components/icons/MotorcycleSolidIcon";
 import { useToast } from "../components/useToast";
 import { useAmountsVisibility } from "../components/useAmountsVisibility";
 import SlidingTabs from "../components/SlidingTabs";
@@ -41,6 +42,22 @@ const AVATAR_COLORS = [
   "bg-[#394146]", // anchor
   "bg-[#D13438]", // red
 ];
+
+type LoanIcon = React.ComponentType<{ className?: string }>;
+
+// A loan whose name contains the keyword gets that icon; everyone else is
+// shown as a person. First match wins.
+const LOAN_ICON_RULES: { keyword: string; icon: LoanIcon }[] = [
+  { keyword: "v4", icon: MotorcycleSolidIcon },
+  { keyword: "credit card", icon: CreditCardIcon },
+  { keyword: "icct", icon: AcademicCapIcon },
+];
+
+const getLoanIcon = (name: string): LoanIcon => {
+  const lower = (name || "").toLowerCase();
+  const rule = LOAN_ICON_RULES.find((r) => lower.includes(r.keyword));
+  return rule ? rule.icon : UserIcon;
+};
 
 export default function LoanPage() {
   const showToast = useToast();
@@ -330,6 +347,7 @@ export default function LoanPage() {
           const loanTransactions = loan.transactions || [];
           const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
           const remaining = Number(loan.initialAmount) + loanSum;
+          const LoanAvatarIcon = getLoanIcon(loan.name);
 
           return (
             <div
@@ -344,7 +362,7 @@ export default function LoanPage() {
                   <div
                     className={`shrink-0 w-11 h-11 rounded-full flex items-center justify-center ${avatarColors.get(loan._id) ?? AVATAR_COLORS[0]}`}
                   >
-                    <UserIcon className="w-6 h-6 text-white/90" />
+                    <LoanAvatarIcon className="w-6 h-6 text-white/90" />
                   </div>
 
                   <div>
