@@ -145,7 +145,7 @@ export default function BottomNavBar() {
       <nav
         className={`fixed bottom-0 left-0 w-full z-50 px-4 py-2 backdrop-blur-xl border-t ${
           isLight
-            ? "bg-[rgba(245,245,245,0.85)] border-black/10"
+            ? "bg-[rgba(248,250,252,0.85)] border-black/10"
             : "bg-[rgba(20,20,20,0.85)] border-white/10"
         }`}
       >
