@@ -167,7 +167,7 @@ export default function BottomNavBar() {
               to={item.path}
               className={({ isActive }) =>
                 `flex flex-col items-center justify-center text-xs ${
-                  isActive ? "text-[var(--accent)]" : "text-[var(--text-secondary)]"
+                  isActive ? "text-[var(--accent)]" : "text-[var(--nav-inactive)]"
                 }`
               }
             >
@@ -190,7 +190,7 @@ export default function BottomNavBar() {
           {/* THEME TOGGLE */}
           <button
             onClick={toggleTheme}
-            className="flex flex-col items-center justify-center text-xs text-[var(--text-secondary)]"
+            className="flex flex-col items-center justify-center text-xs text-[var(--nav-inactive)]"
           >
             {isLight ? (
               <MoonIcon key="theme-dark" className="w-6 h-6 mb-1 nav-icon-active" />
@@ -209,7 +209,7 @@ export default function BottomNavBar() {
               aria-haspopup="menu"
               aria-expanded={moreOpen}
               className={`flex-1 flex flex-col items-center justify-center text-xs ${
-                moreActive || moreOpen ? "text-[var(--accent)]" : "text-[var(--text-secondary)]"
+                moreActive || moreOpen ? "text-[var(--accent)]" : "text-[var(--nav-inactive)]"
               }`}
             >
               <EllipsisHorizontalIcon className="w-6 h-6 mb-1" />

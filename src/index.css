@@ -13,6 +13,7 @@ body {
   --bg-input: #1f1f1f;
   --text-primary: rgba(255, 255, 255, 0.87);
   --text-secondary: #a6a6a6;
+  --nav-inactive: #a6a6a6;
   --border-subtle: #2a2a2a;
   --border-strong: #4a4a4a;
   --accent: #7f85f5;
@@ -35,6 +36,7 @@ body {
   --bg-input: #f1f5f9;
   --text-primary: #0f172a;
   --text-secondary: #64748b;
+  --nav-inactive: #475569;
   --border-subtle: #e2e8f0;
   --border-strong: #cbd5e1;
   --accent: #2563eb;
