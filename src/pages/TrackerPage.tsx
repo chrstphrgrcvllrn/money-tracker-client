@@ -192,7 +192,7 @@ const TrackerPage: React.FC = () => {
         .tracker-cat-scroll { scrollbar-width: none; -ms-overflow-style: none; }
       `}</style>
 
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md md:max-w-5xl mx-auto">
         {/* HEADER */}
         <div className="mb-4">
           <h1 className="text-lg font-semibold text-[var(--text-primary)]">Tracker</h1>
@@ -350,7 +350,7 @@ const TrackerPage: React.FC = () => {
         </Modal>
 
         {/* ENTRIES LIST */}
-        <div className="space-y-2">
+        <div className="space-y-2 md:space-y-0 md:columns-2 lg:columns-3 md:gap-4">
           {loading ? (
             <SkeletonRows count={4} withValue={false} />
           ) : filteredEntries.length === 0 ? (
@@ -362,8 +362,8 @@ const TrackerPage: React.FC = () => {
               <button
                 key={entry._id}
                 onClick={() => openEditModal(entry)}
-                className={`w-full flex items-center gap-3 py-3 text-left transition hover:bg-[var(--btn-bg)]/[0.03] ${
-                  idx !== filteredEntries.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+                className={`w-full flex items-center gap-3 py-3 text-left transition hover:bg-[var(--btn-bg)]/[0.03] md:break-inside-avoid md:mb-2 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
+                  idx !== filteredEntries.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
                 }`}
               >
                 <span className="flex-1 min-w-0 truncate text-[var(--text-primary)] font-medium text-sm">

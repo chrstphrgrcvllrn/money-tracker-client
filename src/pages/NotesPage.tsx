@@ -147,7 +147,7 @@ const highlightText = (text: string, done: boolean) => {
   return (
     <div className="h-full flex flex-col bg-[var(--bg-page)] text-xs">
       {/* HEADER + TABS */}
-      <div className="px-6 pt-6 pb-3 shrink-0">
+      <div className="px-6 md:max-w-2xl md:mx-auto md:w-full pt-6 pb-3 shrink-0">
         <h1 className="text-lg font-semibold text-[var(--text-primary)] mb-3">Notes</h1>
 
         <div className="flex gap-2 flex-wrap">
@@ -168,7 +168,7 @@ const highlightText = (text: string, done: boolean) => {
       </div>
 
       {/* LIST */}
-      <ul className="flex-1 min-h-0 overflow-y-auto px-6 text-sm">
+      <ul className="flex-1 min-h-0 overflow-y-auto px-6 md:max-w-2xl md:mx-auto md:w-full text-sm">
         {loading ? (
           <SkeletonRows count={6} withValue={false} />
         ) : (
@@ -209,7 +209,7 @@ const highlightText = (text: string, done: boolean) => {
       </ul>
 
       {/* COMPOSER */}
-      <div className="shrink-0 flex items-center gap-2 px-4 py-3 border-t border-[var(--border-subtle)]">
+      <div className="shrink-0 flex items-center gap-2 px-4 py-3 md:max-w-2xl md:mx-auto md:w-full border-t border-[var(--border-subtle)]">
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as Note["category"])}

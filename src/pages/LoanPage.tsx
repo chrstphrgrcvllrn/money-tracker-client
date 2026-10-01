@@ -257,7 +257,7 @@ export default function LoanPage() {
 
   if (loading) {
     return (
-      <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[var(--bg-page)]">
+      <div className="px-6 pb-6 mt-8 max-w-md md:max-w-5xl mx-auto font-sans bg-[var(--bg-page)]">
         <SkeletonBlock className="h-8 w-full mb-6 rounded-xl" />
         <SkeletonRows count={5} />
       </div>
@@ -265,7 +265,7 @@ export default function LoanPage() {
   }
 
   return (
-    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[var(--bg-page)]">
+    <div className="px-6 pb-6 mt-8 max-w-md md:max-w-5xl mx-auto font-sans bg-[var(--bg-page)]">
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
         <SlidingTabs
@@ -341,8 +341,9 @@ export default function LoanPage() {
         </p>
       </div>
 
-      {/* LIST */}
-      <div>
+      {/* LIST — single column on mobile; a masonry of cards on desktop, since
+          each loan's accordion expands to a different height. */}
+      <div className="md:columns-2 lg:columns-3 md:gap-4">
         {sortedLoans.map((loan, index, arr) => {
           const loanTransactions = loan.transactions || [];
           const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
@@ -352,7 +353,9 @@ export default function LoanPage() {
           return (
             <div
               key={loan._id || index}
-              className={index !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""}
+              className={`md:break-inside-avoid md:mb-3 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
+                index !== arr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
+              }`}
             >
               <button
                 className="w-full flex justify-between items-center py-4"

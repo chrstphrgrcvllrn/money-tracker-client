@@ -240,7 +240,7 @@ export default function SubscriptionPage() {
 
   if (loading) {
     return (
-      <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[var(--bg-page)]">
+      <div className="px-6 pb-6 mt-8 max-w-md md:max-w-5xl mx-auto font-sans bg-[var(--bg-page)]">
         <SkeletonBlock className="h-8 w-full mb-4" />
         <SkeletonBlock className="h-8 w-40 mb-4 rounded-full" />
         <SkeletonBlock className="h-24 w-full mb-6 rounded-xl" />
@@ -250,7 +250,7 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="px-6 pb-6 mt-8 max-w-md mx-auto font-sans bg-[var(--bg-page)]">
+    <div className="px-6 pb-6 mt-8 max-w-md md:max-w-5xl mx-auto font-sans bg-[var(--bg-page)]">
 
       {/* HEADER */}
       <div className="mb-4 flex justify-between items-center">
@@ -294,7 +294,7 @@ export default function SubscriptionPage() {
       </div>
 
       {/* LIST */}
-      <div>
+      <div className="md:columns-2 lg:columns-3 md:gap-4">
         {filteredItems.length === 0 ? (
           <div className="text-center py-12 text-[var(--text-secondary)]">
             {tab === "completed" ? "No completed items yet." : "No items yet. Add one to get started!"}
@@ -306,8 +306,8 @@ export default function SubscriptionPage() {
             return (
             <div
               key={item._id}
-              className={`w-full flex items-center gap-3 py-3 ${
-                idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+              className={`w-full flex items-center gap-3 py-3 md:break-inside-avoid md:mb-3 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
+                idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
               }`}
             >
               <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">

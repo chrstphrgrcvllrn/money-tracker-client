@@ -303,7 +303,7 @@ const graphData = Object.values(
   // =========================
   if (loading) {
     return (
-      <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6">
+      <div className="text-xs max-w-md md:max-w-5xl mx-auto mt-8 px-6 pb-6">
         <SkeletonBlock className="h-16 w-full mb-4" />
         <SkeletonBlock className="h-8 w-full mb-4" />
         <SkeletonRows count={5} />
@@ -312,7 +312,7 @@ const graphData = Object.values(
   }
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6">
+    <div className="text-xs max-w-md md:max-w-5xl mx-auto mt-8 px-6 pb-6">
 
       {/* TOTALS */}
       <div className="mb-4 grid grid-cols-3 gap-2 text-lg">
@@ -354,30 +354,33 @@ const graphData = Object.values(
       {/* ========================= */}
       {/* BIGGEST */}
       {/* ========================= */}
-      {activeTab === "biggest" &&
-        sortedBiggest.map((m) => (
-          <div key={m.label} className="mb-4">
-            <div className="text-[var(--text-secondary)] text-[10px] mb-2">{m.label}</div>
+      {activeTab === "biggest" && (
+        <div className="md:columns-2 lg:columns-3 md:gap-4">
+          {sortedBiggest.map((m) => (
+            <div key={m.label} className="mb-4 md:break-inside-avoid md:bg-[var(--bg-surface)] md:rounded-xl md:p-3">
+              <div className="text-[var(--text-secondary)] text-[10px] mb-2">{m.label}</div>
 
-            {m.data.map((item, idx, arr) => (
-              <div
-                key={item.name}
-                className={`flex justify-between py-2.5 text-[var(--text-primary)] ${
-                  idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
-                }`}
-              >
-                <span>{item.name}</span>
-                <span>₱{item.total.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        ))}
+              {m.data.map((item, idx, arr) => (
+                <div
+                  key={item.name}
+                  className={`flex justify-between py-2.5 text-[var(--text-primary)] ${
+                    idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+                  }`}
+                >
+                  <span>{item.name}</span>
+                  <span>₱{item.total.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ========================= */}
       {/* GRAPH */}
       {/* ========================= */}
       {activeTab === "graph" && (
-        <div className="space-y-3">
+        <div className="space-y-3 md:max-w-sm md:mx-auto">
 
           <div className="flex justify-center">
             <div
@@ -429,36 +432,40 @@ const graphData = Object.values(
       {/* ========================= */}
       {/* MONTHLY */}
       {/* ========================= */}
-      {activeTab === "monthly" &&
-        sortedMonths.map((key, idx, arr) => {
-          const list = monthly[key];
-          const total = list.reduce((s, e) => s + e.amount, 0);
-          const date = new Date(list[0].createdAt);
+      {activeTab === "monthly" && (
+        <div className="md:columns-2 lg:columns-3 md:gap-4">
+          {sortedMonths.map((key, idx, arr) => {
+            const list = monthly[key];
+            const total = list.reduce((s, e) => s + e.amount, 0);
+            const date = new Date(list[0].createdAt);
 
-          return (
-            <div
-              key={key}
-              className={`flex justify-between py-3 text-[var(--text-primary)] ${
-                idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
-              }`}
-            >
-              <span>
-                {date.toLocaleDateString(undefined, {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </span>
-              <span>₱{total.toLocaleString()}</span>
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={key}
+                className={`flex justify-between py-3 text-[var(--text-primary)] md:break-inside-avoid md:mb-2 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
+                  idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
+                }`}
+              >
+                <span>
+                  {date.toLocaleDateString(undefined, {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+                <span>₱{total.toLocaleString()}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* ========================= */}
       {/* PENDING */}
       {/* ========================= */}
-      {activeTab === "pending" &&
-        sortedDates.map((date) => (
-          <div key={date} className="mb-4">
+      {activeTab === "pending" && (
+        <div className="md:columns-2 lg:columns-3 md:gap-4">
+        {sortedDates.map((date) => (
+          <div key={date} className="mb-4 md:break-inside-avoid md:bg-[var(--bg-surface)] md:rounded-xl md:p-3">
             <div className="text-[var(--text-secondary)] text-[10px] mb-1">
               {date === today.toDateString()
                 ? "Today"
@@ -500,6 +507,8 @@ const graphData = Object.values(
             })}
           </div>
         ))}
+        </div>
+      )}
 
       {/* ========================= */}
       {/* MODAL */}

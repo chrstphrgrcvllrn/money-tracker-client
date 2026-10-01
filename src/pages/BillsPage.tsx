@@ -250,7 +250,7 @@ export default function BillsPage() {
 
   if (loading) {
     return (
-      <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
+      <div className="text-xs max-w-md md:max-w-5xl mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
         <SkeletonBlock className="h-8 w-48 mb-6" />
         <SkeletonCards count={2} className="h-56" />
       </div>
@@ -258,7 +258,7 @@ export default function BillsPage() {
   }
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
+    <div className="text-xs max-w-md md:max-w-5xl mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
       {/* TABS */}
       <div className="flex items-center gap-2 mb-4 justify-between">
         <SlidingTabs
@@ -360,6 +360,7 @@ export default function BillsPage() {
       </Modal>
 
       {/* LIST */}
+      <div className="md:columns-2 lg:columns-3 md:gap-4">
       {filteredData.map((entry, entryIdx, entryArr) => {
         const isEditing = editingId === entry._id;
 
@@ -377,7 +378,9 @@ export default function BillsPage() {
         return (
           <div
             key={entry._id}
-            className={`py-4 ${entryIdx !== entryArr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""}`}
+            className={`py-4 md:break-inside-avoid md:mb-3 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
+              entryIdx !== entryArr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
+            }`}
           >
             <div className="flex justify-between items-center pb-3 mb-2">
               <div className="flex items-center gap-3">
@@ -536,6 +539,7 @@ export default function BillsPage() {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

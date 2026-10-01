@@ -322,7 +322,7 @@ export default function SalaryPage() {
 
   if (loading) {
     return (
-      <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
+      <div className="text-xs max-w-md md:max-w-5xl mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
         <SkeletonBlock className="h-8 w-48 mb-4" />
         <SkeletonCards count={3} className="h-32" />
       </div>
@@ -330,7 +330,7 @@ export default function SalaryPage() {
   }
 
   return (
-    <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
+    <div className="text-xs max-w-md md:max-w-5xl mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
 
       {/* ADD SALARY MODAL */}
       <Modal open={showForm} onClose={() => setShowForm(false)} title="Add Salary">
@@ -444,28 +444,31 @@ export default function SalaryPage() {
           {totals.length === 0 ? (
             <div className="text-[var(--text-secondary)] text-center py-8">No expenses to show</div>
           ) : (
-            totals.map((item, idx, arr) => (
+            <div className="md:columns-2 lg:columns-3 md:gap-4">
+            {totals.map((item, idx, arr) => (
               <div
                 key={idx}
-                className={`flex justify-between items-center py-3 ${
-                  idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+                className={`flex justify-between items-center py-3 md:break-inside-avoid md:mb-2 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
+                  idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
                 }`}
               >
                 <span className="text-[var(--text-primary)] font-semibold">{item.name}</span>
                 <span className="text-[var(--accent)] font-bold">{format(item.total)}</span>
               </div>
-            ))
+            ))}
+            </div>
           )}
         </div>
       ) : (
-        displayedSalaries.map((entry) => {
+        <div className="md:columns-2 lg:columns-3 md:gap-4">
+        {displayedSalaries.map((entry) => {
           const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
           const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
           const remaining = Number(entry.salary || 0) - totalExpenses;
           const isEditingAll = editingAllEntryId === entry._id;
 
           return (
-            <div key={entry._id} className="mb-6 bg-[var(--bg-surface)] shadow rounded-xl p-4">
+            <div key={entry._id} className="mb-6 bg-[var(--bg-surface)] shadow rounded-xl p-4 md:break-inside-avoid">
               <div className="flex justify-between items-center mb-2">
                 <button onClick={() => handleEditSalaryName(entry._id)} className="flex items-center gap-3">
                   <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
@@ -631,7 +634,8 @@ export default function SalaryPage() {
               </div>
             </div>
           );
-        })
+        })}
+        </div>
       )}
     </div>
   );

@@ -409,7 +409,7 @@ const HouseExpensesPage: React.FC = () => {
   // =========================
   if (loading) {
     return (
-      <div className="text-xs max-w-md mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)] text-[var(--text-primary)]">
+      <div className="text-xs max-w-md md:max-w-4xl mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)] text-[var(--text-primary)]">
         <SkeletonBlock className="h-8 w-full mb-4" />
         <SkeletonCards count={2} className="h-56" />
       </div>
@@ -417,7 +417,7 @@ const HouseExpensesPage: React.FC = () => {
   }
 
   return (
-    <div className="h-full max-w-md mx-auto flex flex-col bg-[var(--bg-page)] text-[var(--text-primary)] text-xs">
+    <div className="h-full max-w-md md:max-w-4xl mx-auto flex flex-col bg-[var(--bg-page)] text-[var(--text-primary)] text-xs">
       <div className="flex-1 min-h-0 overflow-y-auto px-6 pt-8 pb-3">
 
         {/* TABS */}
@@ -438,7 +438,7 @@ const HouseExpensesPage: React.FC = () => {
         {/* MONTHLY (with BUDGET + REMAINING) */}
         {/* ========================= */}
         {activeTab === "monthly" && (
-          <div className="space-y-4">
+          <div className="space-y-4 md:space-y-0 md:columns-2 md:gap-4">
             {sortedMonths.length === 0 ? (
               <div className="text-[var(--text-secondary)] text-center py-8">No expenses yet</div>
             ) : (
@@ -467,7 +467,7 @@ const HouseExpensesPage: React.FC = () => {
                 const isCurrentCycle = month === getCycleKey(today);
 
                 return (
-                  <div key={month} className="bg-[var(--bg-surface)] rounded-xl p-4">
+                  <div key={month} className="bg-[var(--bg-surface)] rounded-xl p-4 md:mb-4 md:break-inside-avoid">
                     <button
                       onClick={() => toggleMonth(month)}
                       className="w-full flex items-center gap-3 text-left"
@@ -652,9 +652,10 @@ const HouseExpensesPage: React.FC = () => {
         {/* ========================= */}
         {/* BIGGEST */}
         {/* ========================= */}
-        {activeTab === "biggest" &&
-          sortedBiggest.map((m) => (
-            <div key={m.label} className="mb-4">
+        {activeTab === "biggest" && (
+          <div className="md:columns-2 md:gap-4">
+          {sortedBiggest.map((m) => (
+            <div key={m.label} className="mb-4 md:break-inside-avoid md:bg-[var(--bg-surface)] md:rounded-xl md:p-3">
               <div className="text-[var(--text-secondary)] text-[10px] mb-2">{m.label}</div>
 
               {m.data.map((item, idx, arr) => (
@@ -670,12 +671,14 @@ const HouseExpensesPage: React.FC = () => {
               ))}
             </div>
           ))}
+          </div>
+        )}
 
         {/* ========================= */}
         {/* GRAPH */}
         {/* ========================= */}
         {activeTab === "graph" && (
-          <div className="space-y-3">
+          <div className="space-y-3 md:max-w-sm md:mx-auto">
 
             <div className="flex justify-center">
               <div
@@ -727,9 +730,10 @@ const HouseExpensesPage: React.FC = () => {
         {/* ========================= */}
         {/* PENDING */}
         {/* ========================= */}
-        {activeTab === "pending" &&
-          sortedDates.map((date) => (
-            <div key={date} className="mb-4">
+        {activeTab === "pending" && (
+          <div className="md:columns-2 md:gap-4">
+          {sortedDates.map((date) => (
+            <div key={date} className="mb-4 md:break-inside-avoid md:bg-[var(--bg-surface)] md:rounded-xl md:p-3">
               <div className="text-[var(--text-secondary)] text-[10px] mb-1">
                 {date === today.toDateString()
                   ? "Today"
@@ -779,6 +783,8 @@ const HouseExpensesPage: React.FC = () => {
               })}
             </div>
           ))}
+          </div>
+        )}
 
         {/* ========================= */}
         {/* MODAL */}
@@ -851,7 +857,7 @@ const HouseExpensesPage: React.FC = () => {
       </div>
 
       {/* COMPOSER */}
-      <div className="shrink-0 space-y-2 px-4 py-3 border-t border-[var(--border-subtle)]">
+      <div className="shrink-0 space-y-2 px-4 py-3 md:max-w-xl md:mx-auto md:w-full border-t border-[var(--border-subtle)]">
         <div className="flex items-center gap-2" role="group" aria-label="Entry type">
           {[
             { borrow: false, label: "Expense" },

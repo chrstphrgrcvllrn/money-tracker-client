@@ -78,12 +78,12 @@ const ThoughtsPage: React.FC = () => {
   return (
     <div className="h-full flex flex-col bg-[var(--bg-page)]">
       {/* HEADER */}
-      <div className="px-6 pt-6 pb-3 shrink-0">
+      <div className="px-6 md:max-w-2xl md:mx-auto md:w-full pt-6 pb-3 shrink-0">
         <h1 className="text-lg font-semibold text-[var(--text-primary)]">Thoughts</h1>
       </div>
 
       {/* MESSAGE LIST */}
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 pb-3">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 md:max-w-2xl md:mx-auto md:w-full pb-3">
         {loading ? (
           <SkeletonBubbles />
         ) : sortedThoughts.length === 0 ? (
@@ -136,7 +136,7 @@ const ThoughtsPage: React.FC = () => {
       </div>
 
       {/* COMPOSER */}
-      <div className="shrink-0 flex items-center gap-2 px-4 py-3 border-t border-[var(--border-subtle)]">
+      <div className="shrink-0 flex items-center gap-2 px-4 py-3 md:max-w-2xl md:mx-auto md:w-full border-t border-[var(--border-subtle)]">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}

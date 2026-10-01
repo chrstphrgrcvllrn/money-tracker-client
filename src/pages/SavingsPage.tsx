@@ -246,7 +246,7 @@ export default function SavingsPage() {
   if (loading) {
     return (
       <div className="pb-6 pt-8 font-sans bg-[var(--bg-page)] h-full flex flex-col">
-        <div className="px-6 max-w-md mx-auto w-full shrink-0 space-y-4 mb-6">
+        <div className="px-6 max-w-md md:max-w-xl mx-auto w-full shrink-0 space-y-4 mb-6">
           <SkeletonBlock className="h-8 w-full" />
           <SkeletonBlock className="h-24 w-full rounded-xl" />
         </div>
@@ -262,7 +262,7 @@ export default function SavingsPage() {
         .savings-scroll { scrollbar-width: none; -ms-overflow-style: none; }
       `}</style>
 
-      <div className="px-6 max-w-md mx-auto w-full shrink-0">
+      <div className="px-6 max-w-md md:max-w-xl mx-auto w-full shrink-0">
         {/* HEADER */}
         <div className="mb-4 flex justify-between items-start">
           <div className="flex w-full items-center justify-between gap-3">
@@ -337,12 +337,12 @@ export default function SavingsPage() {
 
       {/* TINDER-STYLE CARD STACK (rotates infinitely — a swiped card goes to the back) */}
       {savings.length === 0 ? (
-        <p className="px-6 max-w-md mx-auto text-[var(--text-secondary)] text-sm text-center py-8 shrink-0">
+        <p className="px-6 max-w-md md:max-w-xl mx-auto text-[var(--text-secondary)] text-sm text-center py-8 shrink-0">
           No savings yet. Add one to get started!
         </p>
       ) : (
         <div className="flex-1 min-h-0 flex flex-col items-center px-6">
-          <div className="relative flex-1 min-h-0 w-full max-w-[220px] flex items-center justify-center">
+          <div className="relative flex-1 min-h-0 w-full max-w-[220px] md:max-w-[260px] flex items-center justify-center">
             {(() => {
               // Only stack as many layers as there are distinct cards, so a
               // list of 1-2 items never wraps around onto itself mid-stack.

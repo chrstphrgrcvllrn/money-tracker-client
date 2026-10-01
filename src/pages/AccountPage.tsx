@@ -49,7 +49,7 @@ export default function AccountPage() {
   if (!user) return null;
 
   return (
-    <div className="max-w-md mx-auto px-6 pt-8 pb-10 space-y-8 text-[var(--text-primary)]">
+    <div className="max-w-md md:max-w-xl mx-auto px-6 pt-8 pb-10 space-y-8 text-[var(--text-primary)]">
       <h1 className="text-lg font-semibold">Account</h1>
 
       <section aria-labelledby="profile-heading" className="bg-[var(--bg-surface)] rounded-xl p-4 space-y-3">
