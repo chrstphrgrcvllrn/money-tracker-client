@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Modal from "./Modal";
+import Drawer from "./Drawer";
 import { useAuthStore } from "@/stores/auth.store";
 import { readUserItem, writeUserItem } from "@/lib/userStorage";
 
@@ -140,7 +140,7 @@ export default function CalculatorModal({ open, onClose }: CalculatorModalProps)
   }, [open, display, onClose]);
 
   return (
-    <Modal open={open} onClose={onClose} title="Calculator">
+    <Drawer open={open} onClose={onClose} title="Calculator">
       <div className="bg-[var(--bg-page)] p-4 rounded-xl text-right">
         <p
           aria-live="polite"
@@ -176,6 +176,6 @@ export default function CalculatorModal({ open, onClose }: CalculatorModalProps)
           );
         })}
       </div>
-    </Modal>
+    </Drawer>
   );
 }

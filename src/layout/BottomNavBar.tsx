@@ -117,6 +117,15 @@ export default function BottomNavBar() {
             </span>
           </button>
 
+          {/* WATER — quick access directly on the bar, not tucked in More */}
+          <button
+            onClick={openWater}
+            className="flex flex-col items-center justify-center text-xs text-[var(--nav-inactive)]"
+          >
+            <DropletSolidIcon className="w-6 h-6 mb-1" />
+            <span className="font-semibold text-center">Water</span>
+          </button>
+
           {/* MORE — Buy List + Tracker */}
           <div ref={moreRef} className="relative flex">
             <button
@@ -188,18 +197,6 @@ export default function BottomNavBar() {
                 >
                   <CalendarIcon className="w-5 h-5" />
                   Calendar
-                </button>
-
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setMoreOpen(false);
-                    openWater();
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--text-primary)]"
-                >
-                  <DropletSolidIcon className="w-5 h-5" />
-                  Water
                 </button>
 
                 <NavLink
