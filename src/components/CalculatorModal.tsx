@@ -97,6 +97,48 @@ export default function CalculatorModal({ open, onClose }: CalculatorModalProps)
     return handleClick(btn);
   };
 
+  // Physical keyboard support (digits, operators, Enter/Backspace/Escape, etc.),
+  // so laptop users don't have to click the on-screen buttons. Re-attached on
+  // every keystroke so handleAction always sees the latest `display`.
+  useEffect(() => {
+    if (!open) return;
+
+    const KEY_TO_BUTTON: Record<string, string> = {
+      "+": "+",
+      "-": "-",
+      "*": "*",
+      "/": "/",
+      ".": ".",
+      Enter: "=",
+      "=": "=",
+      Backspace: "DEL",
+      Delete: "DEL",
+      c: "C",
+      C: "C",
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      const btn = /^[0-9]$/.test(e.key) ? e.key : KEY_TO_BUTTON[e.key];
+      if (!btn) return;
+
+      // Stops the browser's own shortcuts for these keys (e.g. "/" opening
+      // Firefox's quick find) from firing alongside the calculator action.
+      e.preventDefault();
+      handleAction(btn);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // handleAction is intentionally omitted: it's recreated every render, and
+    // this effect already re-subscribes on every `display` change to stay current.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, display, onClose]);
+
   return (
     <Modal open={open} onClose={onClose} title="Calculator">
       <div className="bg-[var(--bg-page)] p-4 rounded-xl text-right">
