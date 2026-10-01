@@ -9,6 +9,7 @@ import {
   createNotebookNote,
   updateNotebookNote,
   toggleNotebookNoteStatus,
+  toggleNotebookNotePinned,
   deleteNotebookNote,
 } from "../api/notebook";
 
@@ -18,11 +19,17 @@ import {
   CheckIcon,
   XMarkIcon,
   PencilIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
 import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
 import { SkeletonCard } from "../components/Skeleton";
+import PinSolidIcon from "../components/icons/PinSolidIcon";
+
+// For searching: strips HTML tags from Quill's saved content so a search
+// matches the text the user actually sees, not markup.
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, " ");
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error && typeof error === "object") {
@@ -40,6 +47,7 @@ const NotebookPage: React.FC = () => {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
+  const [search, setSearch] = useState("");
 
   const [activeTab, setActiveTab] = useState<
     "all" | "open" | "closed"
@@ -287,6 +295,36 @@ const NotebookPage: React.FC = () => {
   };
 
   // --------------------------------
+  // Toggle pinned
+  // --------------------------------
+
+  // Takes an id (rather than always using selectedNoteId) so it can be
+  // called from a note's card, with the note still closed.
+  const togglePinned = async (id: string, event?: React.MouseEvent) => {
+    event?.stopPropagation();
+
+    try {
+      const updatedNote = await toggleNotebookNotePinned(id);
+
+      setNotes((prev) =>
+        prev.map((note) =>
+          note._id === updatedNote._id
+            ? updatedNote
+            : note
+        )
+      );
+
+      showToast(updatedNote.pinned ? "Note pinned" : "Note unpinned", "success");
+    } catch (error: unknown) {
+      console.error("Toggle pinned error:", error);
+
+      const message = getErrorMessage(error, "Failed to update pin");
+
+      showToast(message, "error");
+    }
+  };
+
+  // --------------------------------
   // Delete note
   // --------------------------------
 
@@ -325,14 +363,27 @@ const NotebookPage: React.FC = () => {
   // --------------------------------
 
   const filteredNotes = useMemo(() => {
-    if (activeTab === "all") {
-      return notes;
-    }
+    const byStatus =
+      activeTab === "all"
+        ? notes
+        : notes.filter((note) => note.status === activeTab);
 
-    return notes.filter(
-      (note) => note.status === activeTab
-    );
-  }, [notes, activeTab]);
+    const query = search.trim().toLowerCase();
+    const bySearch = !query
+      ? byStatus
+      : byStatus.filter(
+          (note) =>
+            note.title.toLowerCase().includes(query) ||
+            stripHtml(note.content).toLowerCase().includes(query)
+        );
+
+    // Pinned first (matches the server's own sort), so this still holds
+    // after an optimistic pin/unpin update re-orders the raw `notes` state.
+    return [...bySearch].sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+    });
+  }, [notes, activeTab, search]);
 
   // --------------------------------
   // Render
@@ -424,8 +475,8 @@ const NotebookPage: React.FC = () => {
 
       </div>
 
-      {/* TABS */}
-      <div className="px-5 pb-5">
+      {/* TABS + SEARCH */}
+      <div className="px-5 pb-5 flex flex-wrap items-center gap-3">
         <SlidingTabs
           tabs={[
             { value: "open", label: "Open" },
@@ -435,6 +486,17 @@ const NotebookPage: React.FC = () => {
           active={activeTab}
           onChange={setActiveTab}
         />
+
+        <div className="relative flex-1 min-w-[160px] md:max-w-xs">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search notes..."
+            aria-label="Search notes"
+            className="w-full pl-9 pr-3 py-2 rounded-lg bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
+          />
+        </div>
       </div>
 
       {/* NOTE LIST */}
@@ -448,19 +510,42 @@ const NotebookPage: React.FC = () => {
           </div>
         ) : filteredNotes.length === 0 ? (
           <div className="text-[var(--text-secondary)] text-center py-16">
-            No notes
+            {search.trim() ? "No notes match your search" : "No notes"}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
 
             {filteredNotes.map((note) => (
-              <button
+              <div
                 key={note._id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open note: ${note.title}`}
                 onClick={() => openNote(note)}
-                className="text-left p-4 bg-[var(--bg-surface)] hover:bg-[var(--bg-input)] rounded-xl transition"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openNote(note);
+                  }
+                }}
+                className={`relative text-left p-4 bg-[var(--bg-surface)] hover:bg-[var(--bg-input)] rounded-xl transition cursor-pointer ${
+                  note.pinned ? "ring-1 ring-[var(--accent)]/40" : ""
+                }`}
               >
 
-                <div className="flex items-start justify-between gap-3">
+                <button
+                  onClick={(e) => togglePinned(note._id, e)}
+                  title={note.pinned ? "Unpin" : "Pin"}
+                  aria-label={note.pinned ? "Unpin note" : "Pin note"}
+                  aria-pressed={note.pinned}
+                  className={`absolute top-3 right-3 p-1 rounded-md hover:bg-[var(--border-subtle)] ${
+                    note.pinned ? "text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  <PinSolidIcon className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-start justify-between gap-3 pr-6">
 
                   <h2
                     className={`font-semibold text-sm truncate ${
@@ -500,7 +585,7 @@ const NotebookPage: React.FC = () => {
                   ).toLocaleDateString()}
                 </div>
 
-              </button>
+              </div>
             ))}
 
           </div>
@@ -564,6 +649,20 @@ const NotebookPage: React.FC = () => {
             <div className="flex items-center justify-between px-5 py-4 border-t border-white/10">
 
               <div className="flex items-center gap-2">
+
+                <button
+                  onClick={() => togglePinned(selectedNote._id)}
+                  title={selectedNote.pinned ? "Unpin" : "Pin"}
+                  aria-label={selectedNote.pinned ? "Unpin note" : "Pin note"}
+                  aria-pressed={selectedNote.pinned}
+                  className={`flex items-center justify-center p-2.5 rounded-lg hover:bg-[var(--border-subtle)] ${
+                    selectedNote.pinned
+                      ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                      : "bg-[var(--bg-input)] text-[var(--text-primary)]"
+                  }`}
+                >
+                  <PinSolidIcon className="w-4 h-4" />
+                </button>
 
                 <button
                   onClick={toggleStatus}

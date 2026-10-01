@@ -28,6 +28,13 @@ export const toggleNotebookNoteStatus = async (
   return res.data;
 };
 
+export const toggleNotebookNotePinned = async (
+  id: string
+): Promise<NotebookNote> => {
+  const res = await api.patch(`/notebook/${id}/pin`);
+  return res.data;
+};
+
 export const deleteNotebookNote = async (
   id: string
 ): Promise<void> => {
