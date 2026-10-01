@@ -26,8 +26,15 @@ export const updateLoan = async (
   return res.data;
 };
 
-// ADD transaction
-export const addTransaction = async (id: string, data: unknown) => {
+// ADD transaction — returns the whole updated loan (so the new entry's real
+// _id, needed to delete it later, is available).
+export const addTransaction = async (id: string, data: unknown): Promise<Loan> => {
   const res = await api.post(`/loans/${id}/transactions`, data);
+  return res.data;
+};
+
+// DELETE transaction (e.g. a mis-entered payment)
+export const deleteTransaction = async (id: string, transactionId: string): Promise<Loan> => {
+  const res = await api.delete(`/loans/${id}/transactions/${transactionId}`);
   return res.data;
 };

@@ -293,61 +293,118 @@ export default function SubscriptionPage() {
         </p>
       </div>
 
-      {/* LIST */}
-      <div className="md:columns-2 lg:columns-3 md:gap-4">
-        {filteredItems.length === 0 ? (
-          <div className="text-center py-12 text-[var(--text-secondary)]">
-            {tab === "completed" ? "No completed items yet." : "No items yet. Add one to get started!"}
-          </div>
-        ) : (
-          filteredItems.map((item, idx, arr) => {
-            const Icon = getItemIcon(item.name);
+      {/* LIST — card rows on mobile, a real table on desktop */}
+      {filteredItems.length === 0 ? (
+        <div className="text-center py-12 text-[var(--text-secondary)]">
+          {tab === "completed" ? "No completed items yet." : "No items yet. Add one to get started!"}
+        </div>
+      ) : (
+        <>
+          <div className="md:hidden">
+            {filteredItems.map((item, idx, arr) => {
+              const Icon = getItemIcon(item.name);
 
-            return (
-            <div
-              key={item._id}
-              className={`w-full flex items-center gap-3 py-3 md:break-inside-avoid md:mb-3 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
-                idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
-              }`}
-            >
-              <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
-                <Icon className="w-5 h-5 text-[var(--avatar-fg)]" />
-              </div>
-
-              <button
-                onClick={() => openEditModal(item)}
-                className="flex-1 min-w-0 flex items-center gap-2 text-left"
-              >
-                <span
-                  className={`truncate font-medium text-sm ${
-                    item.completed ? "text-[var(--text-secondary)] line-through" : "text-[var(--text-primary)]"
+              return (
+                <div
+                  key={item._id}
+                  className={`w-full flex items-center gap-3 py-3 ${
+                    idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
                   }`}
                 >
-                  {item.name}
-                </span>
-                {Number(item.quantity || 1) > 1 && (
-                  <span className="shrink-0 text-xs text-[var(--text-secondary)]">
-                    x{item.quantity}
-                  </span>
-                )}
-                {!!item.notes && (
-                  <LinkIcon className="shrink-0 w-3 h-3 text-[var(--text-secondary)]" />
-                )}
-              </button>
+                  <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                    <Icon className="w-5 h-5 text-[var(--avatar-fg)]" />
+                  </div>
 
-              <button
-                onClick={() => openEditModal(item)}
-                className={`shrink-0 text-sm font-bold ${
-                  item.completed ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)]"
-                }`}
-              >
-                ₱{showAmounts ? itemTotal(item).toLocaleString() : mask(itemTotal(item))}
-              </button>
-            </div>
-            );
-          })
-        )}
-      </div>
+                  <button
+                    onClick={() => openEditModal(item)}
+                    className="flex-1 min-w-0 flex items-center gap-2 text-left"
+                  >
+                    <span
+                      className={`truncate font-medium text-sm ${
+                        item.completed ? "text-[var(--text-secondary)] line-through" : "text-[var(--text-primary)]"
+                      }`}
+                    >
+                      {item.name}
+                    </span>
+                    {Number(item.quantity || 1) > 1 && (
+                      <span className="shrink-0 text-xs text-[var(--text-secondary)]">
+                        x{item.quantity}
+                      </span>
+                    )}
+                    {!!item.notes && (
+                      <LinkIcon className="shrink-0 w-3 h-3 text-[var(--text-secondary)]" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => openEditModal(item)}
+                    className={`shrink-0 text-sm font-bold ${
+                      item.completed ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)]"
+                    }`}
+                  >
+                    ₱{showAmounts ? itemTotal(item).toLocaleString() : mask(itemTotal(item))}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <table className="hidden md:table w-full text-sm border-separate border-spacing-y-1">
+            <thead>
+              <tr className="text-left text-[var(--text-secondary)]">
+                <th className="font-medium pb-2 pl-1">Item</th>
+                <th className="font-medium pb-2 text-right">Qty</th>
+                <th className="font-medium pb-2 text-right">Price</th>
+                <th className="font-medium pb-2 text-right pr-1">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map((item) => {
+                const Icon = getItemIcon(item.name);
+
+                return (
+                  <tr
+                    key={item._id}
+                    onClick={() => openEditModal(item)}
+                    className="cursor-pointer bg-[var(--bg-surface)] hover:bg-[var(--bg-input)]"
+                  >
+                    <td className="py-2.5 pl-3 rounded-l-xl">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                          <Icon className="w-4 h-4 text-[var(--avatar-fg)]" />
+                        </div>
+                        <span
+                          className={`truncate font-medium ${
+                            item.completed ? "text-[var(--text-secondary)] line-through" : "text-[var(--text-primary)]"
+                          }`}
+                        >
+                          {item.name}
+                        </span>
+                        {!!item.notes && (
+                          <LinkIcon className="shrink-0 w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-2.5 text-right text-[var(--text-secondary)]">
+                      {item.quantity || 1}
+                    </td>
+                    <td className="py-2.5 text-right text-[var(--text-secondary)]">
+                      ₱{showAmounts ? Number(item.amount || 0).toLocaleString() : mask(Number(item.amount || 0))}
+                    </td>
+                    <td
+                      className={`py-2.5 pr-3 rounded-r-xl text-right font-bold ${
+                        item.completed ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)]"
+                      }`}
+                    >
+                      ₱{showAmounts ? itemTotal(item).toLocaleString() : mask(itemTotal(item))}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </>
+      )}
 
       {/* ADD / EDIT MODAL */}
       <Modal

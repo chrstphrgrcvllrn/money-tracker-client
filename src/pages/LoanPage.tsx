@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Loan } from "../types/loans.type";
-import { getLoans, createLoan, addTransaction, updateLoan } from "../api/loan";
+import type { Loan, Transaction } from "../types/loans.type";
+import { getLoans, createLoan, addTransaction, deleteTransaction, updateLoan } from "../api/loan";
 
-import { UserIcon, CreditCardIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
+import { UserIcon, CreditCardIcon, AcademicCapIcon, TrashIcon } from "@heroicons/react/24/solid";
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -73,6 +73,12 @@ export default function LoanPage() {
   const [paymentInputs, setPaymentInputs] = useState<{ [key: number]: string }>({});
   const [paymentDates, setPaymentDates] = useState<{ [key: number]: string }>({});
   const [transactionTypes, setTransactionTypes] = useState<{ [key: number]: "+" | "-" }>({});
+  // Desktop only: which loan's details are open in a modal (the mobile
+  // accordion uses `expanded` instead; see the table's row onClick).
+  // Keyed by loan id, not array position: sortedLoans re-sorts by remaining
+  // amount, so adding a payment can move a loan to a different index —
+  // an index-based key would then silently show the wrong loan.
+  const [desktopLoanId, setDesktopLoanId] = useState<string | null>(null);
 
   const { showAmounts, toggleShowAmounts } = useAmountsVisibility();
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
@@ -193,7 +199,10 @@ export default function LoanPage() {
     );
 
     try {
-      await addTransaction(loanId, transaction);
+      // Replace with the server's copy: it has the new entry's real _id
+      // (needed to delete it later), which the optimistic version above lacks.
+      const updatedLoan = await addTransaction(loanId, transaction);
+      setLoans((prev) => prev.map((loan) => (loan._id === loanId ? updatedLoan : loan)));
       showToast("Payment added!", "success");
     } catch (err) {
       console.error(err);
@@ -217,6 +226,20 @@ export default function LoanPage() {
     setPaymentInputs((prev) => ({ ...prev, [index]: "" }));
     setPaymentDates((prev) => ({ ...prev, [index]: "" }));
     setTransactionTypes((prev) => ({ ...prev, [index]: "+" }));
+  };
+
+  // Delete a mis-entered payment/transaction.
+  const handleDeleteTransaction = async (loanId: string, transactionId: string) => {
+    if (!confirm("Delete this entry?")) return;
+
+    try {
+      const updatedLoan = await deleteTransaction(loanId, transactionId);
+      setLoans((prev) => prev.map((loan) => (loan._id === loanId ? updatedLoan : loan)));
+      showToast("Entry deleted!", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to delete entry", "error");
+    }
   };
 
   // Keyed by _id and ordered by it (ids are creation-ordered) so a loan keeps
@@ -254,6 +277,151 @@ export default function LoanPage() {
     );
     return sum + Number(loan.initialAmount) + transactionsSum;
   }, 0);
+
+  // Payment history + add-payment form + archive menu for one loan. Shared by
+  // the mobile accordion (expands in place) and the desktop table (opens in a
+  // Modal) so the two don't drift apart.
+  const renderLoanDetails = (loan: Loan, index: number, loanTransactions: Transaction[]) => (
+    <>
+      {loanTransactions.length === 0 ? (
+        <p className="text-xs text-[var(--text-primary)]">No payments yet</p>
+      ) : (
+        <ul className="text-xs text-[var(--text-primary)] space-y-1">
+          {loanTransactions.map((t, i) => (
+            <li key={t._id ?? `${t.date}-${t.amount}-${t.type}-${i}`} className="flex items-center justify-between gap-2">
+              <span>
+                {new Date(t.date).toLocaleDateString("en-PH", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+
+              <span className="flex items-center gap-2">
+                <span
+                  className={`${
+                    Number(t.amount) < 0 ? "text-[var(--negative)]" : "text-[var(--text-primary)]"
+                  }`}
+                >
+                  {Number(t.amount).toLocaleString("en-PH")}
+                </span>
+
+                {t._id && (
+                  <button
+                    onClick={() => handleDeleteTransaction(loan._id, t._id as string)}
+                    title="Delete entry"
+                    aria-label="Delete entry"
+                    className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--danger)]"
+                  >
+                    <TrashIcon className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-3 space-y-2 flex flex-col gap-2">
+        <input
+          type="date"
+          value={paymentDates[index] || ""}
+          onChange={(e) =>
+            setPaymentDates((prev) => ({
+              ...prev,
+              [index]: e.target.value,
+            }))
+          }
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+        />
+
+        <div className="flex gap-2">
+          <select
+            value={transactionTypes[index] || "+"}
+            onChange={(e) =>
+              setTransactionTypes((prev) => ({
+                ...prev,
+                [index]: e.target.value as "+" | "-",
+              }))
+            }
+            className="px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
+          >
+            <option value="+">+</option>
+            <option value="-">-</option>
+          </select>
+
+          <input
+            type="number"
+            placeholder="Enter amount"
+            value={paymentInputs[index] || ""}
+            onChange={(e) =>
+              setPaymentInputs((prev) => ({
+                ...prev,
+                [index]: e.target.value,
+              }))
+            }
+            className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const type = transactionTypes[index] || "+";
+              const rawValue = paymentInputs[index] || "0";
+              const value = Number(rawValue) * (type === "-" ? -1 : 1);
+
+              if (isNaN(value) || !paymentDates[index]) return;
+
+              handleAddPayment(loan._id, index, value);
+            }}
+            className="flex-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold py-2 rounded-lg text-sm"
+          >
+            Add Payment
+          </button>
+
+          <div className="relative shrink-0">
+            <button
+              onClick={() => setMenuOpenFor((prev) => (prev === index ? null : index))}
+              className="flex items-center justify-center w-9 h-9 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+              aria-label="More actions"
+            >
+              <EllipsisVerticalIcon className="w-5 h-5" />
+            </button>
+
+            {menuOpenFor === index && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setMenuOpenFor(null)} />
+                <div className="absolute right-0 bottom-full mb-1 z-20 w-40 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-lg overflow-hidden">
+                  {activeTab === "active" ? (
+                    <button
+                      onClick={() => {
+                        handleArchiveLoan(loan._id);
+                        setMenuOpenFor(null);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-[var(--danger)] hover:bg-[var(--bg-input)]"
+                    >
+                      Archive Loan
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        handleUnarchiveLoan(loan._id);
+                        setMenuOpenFor(null);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+                    >
+                      Unarchive Loan
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
 
   if (loading) {
     return (
@@ -341,9 +509,8 @@ export default function LoanPage() {
         </p>
       </div>
 
-      {/* LIST — single column on mobile; a masonry of cards on desktop, since
-          each loan's accordion expands to a different height. */}
-      <div className="md:columns-2 lg:columns-3 md:gap-4">
+      {/* LIST — accordion rows on mobile; a sortable-looking table on desktop. */}
+      <div className="md:hidden">
         {sortedLoans.map((loan, index, arr) => {
           const loanTransactions = loan.transactions || [];
           const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
@@ -353,9 +520,7 @@ export default function LoanPage() {
           return (
             <div
               key={loan._id || index}
-              className={`md:break-inside-avoid md:mb-3 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
-                index !== arr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
-              }`}
+              className={index !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""}
             >
               <button
                 className="w-full flex justify-between items-center py-4"
@@ -398,146 +563,77 @@ export default function LoanPage() {
                 style={{ gridTemplateRows: expanded === index ? "1fr" : "0fr" }}
               >
                 <div className="overflow-hidden">
-                  <div className="pb-4">
-                    {loanTransactions.length === 0 ? (
-                      <p className="text-xs text-[var(--text-primary)]">No payments yet</p>
-                    ) : (
-                     <ul className="text-xs text-[var(--text-primary)] space-y-1">
-                    {loanTransactions.map((t, i) => (
-                      <li
-                        key={`${t.date}-${t.amount}-${t.type}-${i}`}
-                        className="flex justify-between"
-                      >
-                        <span>
-                          {new Date(t.date).toLocaleDateString("en-PH", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </span>
-
-                        <span
-                          className={`${
-                            Number(t.amount) < 0 ? "text-[var(--negative)]" : "text-[var(--text-primary)]"
-                          }`}
-                        >
-                          {Number(t.amount).toLocaleString("en-PH")}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                    )}
-
-                    <div className="mt-3 space-y-2 flex flex-col gap-2">
-                      <input
-                        type="date"
-                        value={paymentDates[index] || ""}
-                        onChange={(e) =>
-                          setPaymentDates((prev) => ({
-                            ...prev,
-                            [index]: e.target.value,
-                          }))
-                        }
-                        className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
-                      />
-
-                      <div className="flex gap-2">
-                        <select
-                          value={transactionTypes[index] || "+"}
-                          onChange={(e) =>
-                            setTransactionTypes((prev) => ({
-                              ...prev,
-                              [index]: e.target.value as "+" | "-",
-                            }))
-                          }
-                          className="px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
-                        >
-                          <option value="+">+</option>
-                          <option value="-">-</option>
-                        </select>
-
-                        <input
-                          type="number"
-                          placeholder="Enter amount"
-                          value={paymentInputs[index] || ""}
-                          onChange={(e) =>
-                            setPaymentInputs((prev) => ({
-                              ...prev,
-                              [index]: e.target.value,
-                            }))
-                          }
-                          className="flex-1 px-3 py-2 bg-[var(--bg-input)] rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] focus:border-[var(--accent)]/50 outline-none"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            const type = transactionTypes[index] || "+";
-                            const rawValue = paymentInputs[index] || "0";
-                            const value = Number(rawValue) * (type === "-" ? -1 : 1);
-
-                            if (isNaN(value) || !paymentDates[index]) return;
-
-                            handleAddPayment(loan._id, index, value);
-                          }}
-                          className="flex-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold py-2 rounded-lg text-sm"
-                        >
-                          Add Payment
-                        </button>
-
-                        <div className="relative shrink-0">
-                          <button
-                            onClick={() =>
-                              setMenuOpenFor((prev) => (prev === index ? null : index))
-                            }
-                            className="flex items-center justify-center w-9 h-9 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
-                            aria-label="More actions"
-                          >
-                            <EllipsisVerticalIcon className="w-5 h-5" />
-                          </button>
-
-                          {menuOpenFor === index && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-10"
-                                onClick={() => setMenuOpenFor(null)}
-                              />
-                              <div className="absolute right-0 bottom-full mb-1 z-20 w-40 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg shadow-lg overflow-hidden">
-                                {activeTab === "active" ? (
-                                  <button
-                                    onClick={() => {
-                                      handleArchiveLoan(loan._id);
-                                      setMenuOpenFor(null);
-                                    }}
-                                    className="w-full text-left px-3 py-2 text-sm text-[var(--danger)] hover:bg-[var(--bg-input)]"
-                                  >
-                                    Archive Loan
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => {
-                                      handleUnarchiveLoan(loan._id);
-                                      setMenuOpenFor(null);
-                                    }}
-                                    className="w-full text-left px-3 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
-                                  >
-                                    Unarchive Loan
-                                  </button>
-                                )}
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <div className="pb-4">{renderLoanDetails(loan, index, loanTransactions)}</div>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      <table className="hidden md:table w-full text-sm border-separate border-spacing-y-1">
+        <thead>
+          <tr className="text-left text-[var(--text-secondary)]">
+            <th className="font-medium pb-2 pl-1">Loan</th>
+            <th className="font-medium pb-2 text-right">Paid</th>
+            <th className="font-medium pb-2 text-right pr-1">Remaining</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedLoans.map((loan, index) => {
+            const loanTransactions = loan.transactions || [];
+            const loanSum = loanTransactions.reduce((s, t) => s + Number(t.amount), 0);
+            const remaining = Number(loan.initialAmount) + loanSum;
+            const paid = loanTransactions
+              .filter((t) => t.amount < 0)
+              .reduce((s, t) => s + Math.abs(Number(t.amount)), 0);
+            const LoanAvatarIcon = getLoanIcon(loan.name);
+
+            return (
+              <tr
+                key={loan._id || index}
+                onClick={() => setDesktopLoanId(loan._id)}
+                className="cursor-pointer bg-[var(--bg-surface)] hover:bg-[var(--bg-input)]"
+              >
+                <td className="py-2.5 pl-3 rounded-l-xl">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${avatarColors.get(loan._id) ?? AVATAR_COLORS[0]}`}
+                    >
+                      <LoanAvatarIcon className="w-4 h-4 text-white/90" />
+                    </div>
+                    <span className="font-medium text-[var(--text-primary)]">{loan.name}</span>
+                  </div>
+                </td>
+                <td className="py-2.5 text-right text-[var(--text-secondary)]">
+                  {showAmounts ? paid.toLocaleString() : mask(paid)}
+                </td>
+                <td className="py-2.5 pr-3 rounded-r-xl text-right font-bold text-[var(--danger)]">
+                  {showAmounts ? remaining.toLocaleString() : mask(remaining)}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {/* Desktop only: the mobile accordion expands in place; here the same
+          payment history/add-payment/archive content opens in a modal.
+          Looked up by id each render, since sortedLoans re-sorts by remaining
+          amount whenever a payment is added or removed. */}
+      {(() => {
+        const desktopIndex = desktopLoanId
+          ? sortedLoans.findIndex((loan) => loan._id === desktopLoanId)
+          : -1;
+        const desktopLoan = desktopIndex >= 0 ? sortedLoans[desktopIndex] : null;
+        if (!desktopLoan) return null;
+
+        return (
+          <Modal open onClose={() => setDesktopLoanId(null)} title={desktopLoan.name}>
+            {renderLoanDetails(desktopLoan, desktopIndex, desktopLoan.transactions || [])}
+          </Modal>
+        );
+      })()}
     </div>
   );
 }
