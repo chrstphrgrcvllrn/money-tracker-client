@@ -1,7 +1,7 @@
 export type TrackerCategory =
+  | "motorcycle"
   | "medical"
   | "dental"
-  | "motorcycle"
   | "crypto"
   | "digital"
   | "amilyar";

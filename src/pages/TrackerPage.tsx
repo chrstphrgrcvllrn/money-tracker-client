@@ -47,27 +47,27 @@ const TrackerPage: React.FC = () => {
   const [formData, setFormData] = useState(emptyForm);
 
   const categories: Record<TrackerCategory, string> = {
+    motorcycle: "Motorcycle",
     medical: "Medical",
     dental: "Dental",
-    motorcycle: "Motorcycle",
     crypto: "Crypto",
     digital: "Digital",
     amilyar: "Amilyar",
   };
 
   const categoryExamples: Record<TrackerCategory, string> = {
+    motorcycle: "e.g. Changed oil",
     medical: "e.g. Annual physical exam",
     dental: "e.g. Tooth cleaning",
-    motorcycle: "e.g. Changed oil",
     crypto: "e.g. Bought XRP",
     digital: "e.g. Netflix subscription",
     amilyar: "e.g. Amilyar payment",
   };
 
   const categoryIcons: Record<TrackerCategory, (props: { className?: string }) => React.ReactElement> = {
+    motorcycle: MotorcycleIcon,
     medical: MedicalIcon,
     dental: DentalIcon,
-    motorcycle: MotorcycleIcon,
     crypto: CryptoIcon,
     digital: DigitalIcon,
     amilyar: AmilyarIcon,
