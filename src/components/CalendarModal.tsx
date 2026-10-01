@@ -275,7 +275,8 @@ function CalendarBody() {
       {tab === "past" && renderAgenda(pastGroups, "No past events")}
 
       {tab === "month" && (
-        <>
+        <div className="md:grid md:grid-cols-[1fr_260px] md:gap-6 md:items-start">
+        <div className="space-y-4">
           {/* MONTH NAV */}
           <div className="flex items-center justify-between">
             <button
@@ -427,7 +428,15 @@ function CalendarBody() {
               <PaperAirplaneIcon className="w-4 h-4" />
             </button>
           </div>
-        </>
+        </div>
+
+        {/* Desktop only: Upcoming beside the grid instead of a tab switch —
+            there's free space next to the month view on a wide screen. */}
+        <div className="hidden md:block md:border-l md:border-[var(--border-subtle)] md:pl-6 md:max-h-[520px] md:overflow-y-auto">
+          <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Upcoming</h4>
+          {renderAgenda(upcomingGroups, "No upcoming events")}
+        </div>
+        </div>
       )}
     </div>
   );
@@ -442,7 +451,7 @@ interface CalendarModalProps {
 // today's month with a fresh fetch.
 export default function CalendarModal({ open, onClose }: CalendarModalProps) {
   return (
-    <Modal open={open} onClose={onClose} title="Calendar" maxWidth="max-w-md">
+    <Modal open={open} onClose={onClose} title="Calendar" maxWidth="max-w-md md:max-w-3xl">
       <CalendarBody />
     </Modal>
   );
