@@ -91,6 +91,7 @@ const TrackerPage: React.FC = () => {
   }, []);
 
   const filteredEntries = entries.filter((entry) => entry.category === activeTab);
+  const categoryTotal = filteredEntries.reduce((sum, entry) => sum + (entry.amount || 0), 0);
 
   const closeModal = () => {
     setShowForm(false);
@@ -233,6 +234,16 @@ const TrackerPage: React.FC = () => {
             }
           )}
         </div>
+
+        {/* TOTAL for the active category */}
+        {!loading && filteredEntries.length > 0 && (
+          <div className="mb-6 p-4 bg-[var(--bg-surface)] rounded-xl text-center">
+            <p className="text-[var(--text-secondary)] text-sm">Total {categories[activeTab]}</p>
+            <p className="text-[2rem] font-bold text-[var(--text-primary)]">
+              {categoryTotal.toLocaleString()}
+            </p>
+          </div>
+        )}
 
         {/* ADD BUTTON */}
         <button

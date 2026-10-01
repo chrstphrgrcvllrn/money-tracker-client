@@ -529,7 +529,7 @@ const NotebookPage: React.FC = () => {
                   }
                 }}
                 className={`relative text-left p-4 bg-[var(--bg-surface)] hover:bg-[var(--bg-input)] rounded-xl transition cursor-pointer ${
-                  note.pinned ? "ring-1 ring-[var(--accent)]/40" : ""
+                  note.pinned ? "ring-1 ring-[var(--danger)]/40" : ""
                 }`}
               >
 
@@ -539,7 +539,7 @@ const NotebookPage: React.FC = () => {
                   aria-label={note.pinned ? "Unpin note" : "Pin note"}
                   aria-pressed={note.pinned}
                   className={`absolute top-3 right-3 p-1 rounded-md hover:bg-[var(--border-subtle)] ${
-                    note.pinned ? "text-[var(--accent)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    note.pinned ? "text-[var(--danger)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   <PinSolidIcon className="w-4 h-4" />
@@ -657,7 +657,7 @@ const NotebookPage: React.FC = () => {
                   aria-pressed={selectedNote.pinned}
                   className={`flex items-center justify-center p-2.5 rounded-lg hover:bg-[var(--border-subtle)] ${
                     selectedNote.pinned
-                      ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                      ? "bg-[var(--danger)]/15 text-[var(--danger)]"
                       : "bg-[var(--bg-input)] text-[var(--text-primary)]"
                   }`}
                 >
