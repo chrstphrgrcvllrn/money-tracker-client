@@ -1,14 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  BanknotesIcon as BanknotesOutline,
-  BuildingLibraryIcon as BuildingLibraryOutline,
-  CurrencyDollarIcon as CurrencyDollarOutline,
-  ReceiptPercentIcon as ReceiptPercentOutline,
-  DocumentTextIcon as DocumentTextOutline,
-  CalendarDaysIcon as CalendarDaysOutline,
-  BookOpenIcon as BookOpenOutline,
-  CheckCircleIcon as CheckCircleOutline,
   SunIcon,
   MoonIcon,
   EllipsisHorizontalIcon,
@@ -18,24 +10,12 @@ import {
   ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 
-import {
-  BanknotesIcon as BanknotesSolid,
-  BuildingLibraryIcon as BuildingLibrarySolid,
-  CurrencyDollarIcon as CurrencyDollarSolid,
-  ReceiptPercentIcon as ReceiptPercentSolid,
-  DocumentTextIcon as DocumentTextSolid,
-  CalendarDaysIcon as CalendarDaysSolid,
-  BookOpenIcon as BookOpenSolid,
-  CheckCircleIcon as CheckCircleSolid,
-} from "@heroicons/react/24/solid";
-
 import { useTheme } from "@/components/useTheme";
-import CalculatorModal from "@/components/CalculatorModal";
-import CalendarModal from "@/components/CalendarModal";
-import WaterModal from "@/components/WaterModal";
 import DropletSolidIcon from "@/components/icons/DropletSolidIcon";
 import { useAuthStore } from "@/stores/auth.store";
 import { useLogout } from "@/hooks/useLogout";
+import { primaryNavItems, secondaryNavItems } from "@/layout/navConfig";
+import { useQuickActionModals } from "@/layout/useQuickActionModals";
 
 export default function BottomNavBar() {
   const { theme, toggleTheme } = useTheme();
@@ -44,10 +24,8 @@ export default function BottomNavBar() {
   const { pathname } = useLocation();
   const username = useAuthStore((s) => s.user?.username);
   const logout = useLogout();
+  const { openCalculator, openCalendar, openWater, modals } = useQuickActionModals();
   const [moreOpen, setMoreOpen] = useState(false);
-  const [calculatorOpen, setCalculatorOpen] = useState(false);
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [waterOpen, setWaterOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
   // Close the menu on an outside tap or Escape.
@@ -72,84 +50,15 @@ export default function BottomNavBar() {
   }, [moreOpen]);
 
   // Less-used pages live behind the "More" (…) button instead of the main grid.
-  const moreItems = [
-    {
-      name: "Buy List",
-      path: "/subscription",
-      icon: CalendarDaysOutline,
-      activeIcon: CalendarDaysSolid,
-    },
-    {
-      name: "Tracker",
-      path: "/tracker",
-      icon: CheckCircleOutline,
-      activeIcon: CheckCircleSolid,
-    },
-  ];
-
+  // (Shared with SidebarNav via navConfig, so the two lists can't drift apart.)
+  const moreItems = secondaryNavItems;
   const moreActive = moreItems.some((item) => pathname.startsWith(item.path));
-
-  const navItems = [
-    {
-      name: "Loans",
-      path: "/loans",
-      icon: BanknotesOutline,
-      activeIcon: BanknotesSolid,
-    },
-    {
-      name: "Savings",
-      path: "/savings",
-      icon: BuildingLibraryOutline,
-      activeIcon: BuildingLibrarySolid,
-    },
-    {
-      name: "Salary",
-      path: "/salary",
-      icon: CurrencyDollarOutline,
-      activeIcon: CurrencyDollarSolid,
-    },
-    {
-      name: "Expenses",
-      path: "/expenses",
-      icon: ReceiptPercentOutline,
-      activeIcon: ReceiptPercentSolid,
-    },
-    {
-      name: "Bills",
-      path: "/bills",
-      icon: ReceiptPercentOutline,
-      activeIcon: ReceiptPercentSolid,
-    },
-    {
-      name: "Notes",
-      path: "/notes",
-      icon: DocumentTextOutline,
-      activeIcon: DocumentTextSolid,
-    },
-    {
-      name: "Thoughts",
-      path: "/thoughts",
-      icon: DocumentTextOutline,
-      activeIcon: DocumentTextSolid,
-    },
-    {
-      name: "House",
-      path: "/house-expenses",
-      icon: CalendarDaysOutline,
-      activeIcon: CalendarDaysSolid,
-    },
-    {
-      name: "Notebook",
-      path: "/notebook",
-      icon: BookOpenOutline,
-      activeIcon: BookOpenSolid,
-    },
-  ];
+  const navItems = primaryNavItems;
 
   return (
     <>
       <nav
-        className={`fixed bottom-0 left-0 w-full z-50 px-4 py-2 backdrop-blur-xl border-t ${
+        className={`md:hidden fixed bottom-0 left-0 w-full z-50 px-4 py-2 backdrop-blur-xl border-t ${
           isLight
             ? "bg-[rgba(248,250,252,0.85)] border-black/10"
             : "bg-[rgba(20,20,20,0.85)] border-white/10"
@@ -261,7 +170,7 @@ export default function BottomNavBar() {
                   role="menuitem"
                   onClick={() => {
                     setMoreOpen(false);
-                    setCalculatorOpen(true);
+                    openCalculator();
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--text-primary)]"
                 >
@@ -273,7 +182,7 @@ export default function BottomNavBar() {
                   role="menuitem"
                   onClick={() => {
                     setMoreOpen(false);
-                    setCalendarOpen(true);
+                    openCalendar();
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--text-primary)]"
                 >
@@ -285,7 +194,7 @@ export default function BottomNavBar() {
                   role="menuitem"
                   onClick={() => {
                     setMoreOpen(false);
-                    setWaterOpen(true);
+                    openWater();
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--text-primary)]"
                 >
@@ -326,9 +235,7 @@ export default function BottomNavBar() {
 
       {/* Rendered outside the <nav>: its backdrop-blur would otherwise become the
           containing block for the modal's fixed overlay. */}
-      <CalculatorModal open={calculatorOpen} onClose={() => setCalculatorOpen(false)} />
-      <CalendarModal open={calendarOpen} onClose={() => setCalendarOpen(false)} />
-      <WaterModal open={waterOpen} onClose={() => setWaterOpen(false)} />
+      {modals}
     </>
   );
 }
