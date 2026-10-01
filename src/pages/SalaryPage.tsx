@@ -27,6 +27,7 @@ export default function SalaryPage() {
   const [showForm, setShowForm] = useState(false);
   const [newSalaryDate, setNewSalaryDate] = useState("");
   const [newSalaryAmount, setNewSalaryAmount] = useState("");
+  const [newSalaryOvertime, setNewSalaryOvertime] = useState("");
 
   // ✅ EXPENSE MODAL STATE
   const [showExpenseForm, setShowExpenseForm] = useState(false);
@@ -52,6 +53,7 @@ export default function SalaryPage() {
           ...entry,
           expenses: Array.isArray(entry.expenses) ? entry.expenses : [],
           salary: entry.salary ?? 0,
+          overtime: entry.overtime ?? 0,
         }));
 
         setSalaryData(normalized);
@@ -77,6 +79,7 @@ export default function SalaryPage() {
       const newEntry = await createSalary({
         date: newSalaryDate,
         salary,
+        overtime: Number(newSalaryOvertime) || 0,
         expenses: [],
       });
 
@@ -90,6 +93,7 @@ export default function SalaryPage() {
 
       setNewSalaryDate("");
       setNewSalaryAmount("");
+      setNewSalaryOvertime("");
       setShowForm(false);
       showToast("Salary added successfully!", "success");
     } catch (error) {
@@ -103,6 +107,7 @@ export default function SalaryPage() {
       const duplicateEntry = await createSalary({
         date: entry.date + " (Copy)",
         salary: entry.salary,
+        overtime: entry.overtime ?? 0,
         expenses: [...(entry.expenses ?? [])],
       });
 
@@ -140,6 +145,30 @@ export default function SalaryPage() {
       } catch (error) {
         console.error("Failed to update salary:", error);
         showToast("Failed to update salary", "error");
+      }
+    }
+  };
+
+  const handleEditOvertime = async (id: string) => {
+    const entry = salaryData.find((s) => s._id === id);
+    if (!entry) return;
+
+    const newOvertime = Number(prompt("Update overtime", String(entry.overtime || 0)));
+    if (!isNaN(newOvertime)) {
+      try {
+        const updated = await updateSalary(id, { overtime: newOvertime });
+
+        setSalaryData((prev) =>
+          prev.map((s) =>
+            s._id === id
+              ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+              : s
+          )
+        );
+        showToast("Overtime updated!", "success");
+      } catch (error) {
+        console.error("Failed to update overtime:", error);
+        showToast("Failed to update overtime", "error");
       }
     }
   };
@@ -348,6 +377,13 @@ export default function SalaryPage() {
           onChange={(e) => setNewSalaryAmount(e.target.value)}
           className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
         />
+        <input
+          type="number"
+          placeholder="Overtime (optional)"
+          value={newSalaryOvertime}
+          onChange={(e) => setNewSalaryOvertime(e.target.value)}
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+        />
         <div className="flex justify-end space-x-2 pt-2">
           <button
             onClick={() => setShowForm(false)}
@@ -464,7 +500,8 @@ export default function SalaryPage() {
         {displayedSalaries.map((entry) => {
           const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
           const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
-          const remaining = Number(entry.salary || 0) - totalExpenses;
+          const budget = Number(entry.salary || 0) + Number(entry.overtime || 0);
+          const remaining = budget - totalExpenses;
           const isEditingAll = editingAllEntryId === entry._id;
 
           return (
@@ -541,6 +578,22 @@ export default function SalaryPage() {
                   <span className="font-semibold text-[var(--accent)]">{format(entry.salary)}</span>
                 </button>
               </div>
+
+              <div className="flex justify-between text-[var(--text-primary)] mb-2">
+                <span>Overtime</span>
+                <button onClick={() => handleEditOvertime(entry._id)}>
+                  <span className="font-semibold text-[var(--accent)]">
+                    {entry.overtime ? format(entry.overtime) : "Add"}
+                  </span>
+                </button>
+              </div>
+
+              {!!entry.overtime && (
+                <div className="flex justify-between text-[var(--text-primary)] mb-2 pb-2 border-b border-[var(--border-subtle)]">
+                  <span>Budget</span>
+                  <span className="font-semibold">{format(budget)}</span>
+                </div>
+              )}
 
               <ul className="border border-[var(--border-subtle)] rounded divide-y divide-mist-900 text-xs">
                 {expenses.map((expense, idx) => (

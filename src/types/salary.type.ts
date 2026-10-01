@@ -9,5 +9,6 @@ export type SalaryEntry = {
   _id: string;
   date: string; // frontend uses "date"
   salary: number;
+  overtime?: number;
   expenses: Expense[];
 };
