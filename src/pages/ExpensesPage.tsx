@@ -355,25 +355,50 @@ const graphData = Object.values(
       {/* BIGGEST */}
       {/* ========================= */}
       {activeTab === "biggest" && (
-        <div className="md:columns-2 lg:columns-3 md:gap-4">
-          {sortedBiggest.map((m) => (
-            <div key={m.label} className="mb-4 md:break-inside-avoid md:bg-[var(--bg-surface)] md:rounded-xl md:p-3">
-              <div className="text-[var(--text-secondary)] text-[10px] mb-2">{m.label}</div>
+        <>
+          <div className="md:hidden">
+            {sortedBiggest.map((m) => (
+              <div key={m.label} className="mb-4">
+                <div className="text-[var(--text-secondary)] text-[10px] mb-2">{m.label}</div>
 
-              {m.data.map((item, idx, arr) => (
-                <div
-                  key={item.name}
-                  className={`flex justify-between py-2.5 text-[var(--text-primary)] ${
-                    idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
-                  }`}
-                >
-                  <span>{item.name}</span>
-                  <span>₱{item.total.toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
+                {m.data.map((item, idx, arr) => (
+                  <div
+                    key={item.name}
+                    className={`flex justify-between py-2.5 text-[var(--text-primary)] ${
+                      idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+                    }`}
+                  >
+                    <span>{item.name}</span>
+                    <span>₱{item.total.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+
+          <table className="hidden md:table w-full text-sm border-separate border-spacing-y-1">
+            <thead>
+              <tr className="text-left text-[var(--text-secondary)]">
+                <th className="font-medium pb-2 pl-1">Month</th>
+                <th className="font-medium pb-2">Category</th>
+                <th className="font-medium pb-2 text-right pr-1">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedBiggest.flatMap((m) =>
+                m.data.map((item) => (
+                  <tr key={`${m.label}-${item.name}`} className="bg-[var(--bg-surface)]">
+                    <td className="py-2 pl-3 rounded-l-xl text-[var(--text-secondary)]">{m.label}</td>
+                    <td className="py-2 text-[var(--text-primary)]">{item.name}</td>
+                    <td className="py-2 pr-3 rounded-r-xl text-right font-semibold text-[var(--text-primary)]">
+                      ₱{item.total.toLocaleString()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </>
       )}
 
       {/* ========================= */}
@@ -433,81 +458,160 @@ const graphData = Object.values(
       {/* MONTHLY */}
       {/* ========================= */}
       {activeTab === "monthly" && (
-        <div className="md:columns-2 lg:columns-3 md:gap-4">
-          {sortedMonths.map((key, idx, arr) => {
-            const list = monthly[key];
-            const total = list.reduce((s, e) => s + e.amount, 0);
-            const date = new Date(list[0].createdAt);
+        <>
+          <div className="md:hidden">
+            {sortedMonths.map((key, idx, arr) => {
+              const list = monthly[key];
+              const total = list.reduce((s, e) => s + e.amount, 0);
+              const date = new Date(list[0].createdAt);
 
-            return (
-              <div
-                key={key}
-                className={`flex justify-between py-3 text-[var(--text-primary)] md:break-inside-avoid md:mb-2 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
-                  idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
-                }`}
-              >
-                <span>
-                  {date.toLocaleDateString(undefined, {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </span>
-                <span>₱{total.toLocaleString()}</span>
-              </div>
-            );
-          })}
-        </div>
+              return (
+                <div
+                  key={key}
+                  className={`flex justify-between py-3 text-[var(--text-primary)] ${
+                    idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+                  }`}
+                >
+                  <span>
+                    {date.toLocaleDateString(undefined, {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                  <span>₱{total.toLocaleString()}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <table className="hidden md:table w-full text-sm border-separate border-spacing-y-1">
+            <thead>
+              <tr className="text-left text-[var(--text-secondary)]">
+                <th className="font-medium pb-2 pl-1">Month</th>
+                <th className="font-medium pb-2 text-right pr-1">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedMonths.map((key) => {
+                const list = monthly[key];
+                const total = list.reduce((s, e) => s + e.amount, 0);
+                const date = new Date(list[0].createdAt);
+
+                return (
+                  <tr key={key} className="bg-[var(--bg-surface)]">
+                    <td className="py-2.5 pl-3 rounded-l-xl text-[var(--text-primary)]">
+                      {date.toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+                    </td>
+                    <td className="py-2.5 pr-3 rounded-r-xl text-right font-semibold text-[var(--text-primary)]">
+                      ₱{total.toLocaleString()}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </>
       )}
 
       {/* ========================= */}
       {/* PENDING */}
       {/* ========================= */}
       {activeTab === "pending" && (
-        <div className="md:columns-2 lg:columns-3 md:gap-4">
-        {sortedDates.map((date) => (
-          <div key={date} className="mb-4 md:break-inside-avoid md:bg-[var(--bg-surface)] md:rounded-xl md:p-3">
-            <div className="text-[var(--text-secondary)] text-[10px] mb-1">
-              {date === today.toDateString()
-                ? "Today"
-                : date === yesterday.toDateString()
-                ? "Yesterday"
-                : new Date(date).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                  })}
-            </div>
+        <>
+          <div className="md:hidden">
+            {sortedDates.map((date) => (
+              <div key={date} className="mb-4">
+                <div className="text-[var(--text-secondary)] text-[10px] mb-1">
+                  {date === today.toDateString()
+                    ? "Today"
+                    : date === yesterday.toDateString()
+                    ? "Yesterday"
+                    : new Date(date).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                </div>
 
-            {grouped[date].map((exp, idx, arr) => {
-              const ExpenseIcon = getCategoryIcon(exp.category, exp.text);
+                {grouped[date].map((exp, idx, arr) => {
+                  const ExpenseIcon = getCategoryIcon(exp.category, exp.text);
 
-              return (
-                <button
-                  key={exp._id}
-                  onClick={() => handleEdit(exp)}
-                  className={`w-full flex items-center gap-3 py-3 text-left ${
-                    idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
-                  }`}
-                >
-                  <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
-                    <ExpenseIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
-                  </div>
+                  return (
+                    <button
+                      key={exp._id}
+                      onClick={() => handleEdit(exp)}
+                      className={`w-full flex items-center gap-3 py-3 text-left ${
+                        idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+                      }`}
+                    >
+                      <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                        <ExpenseIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
+                      </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[var(--text-primary)] truncate">
-                      {exp.text} •{" "}
-                      <span className="text-[var(--text-secondary)] text-[10px]">{exp.category}</span>
-                    </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[var(--text-primary)] truncate">
+                          {exp.text} •{" "}
+                          <span className="text-[var(--text-secondary)] text-[10px]">{exp.category}</span>
+                        </div>
 
-                    <div className="text-[var(--negative)] text-xs">
-                      ₱{exp.amount.toLocaleString()}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+                        <div className="text-[var(--negative)] text-xs">
+                          ₱{exp.amount.toLocaleString()}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
-        ))}
-        </div>
+
+          <table className="hidden md:table w-full text-sm border-separate border-spacing-y-1">
+            <thead>
+              <tr className="text-left text-[var(--text-secondary)]">
+                <th className="font-medium pb-2 pl-1">Date</th>
+                <th className="font-medium pb-2">Expense</th>
+                <th className="font-medium pb-2">Category</th>
+                <th className="font-medium pb-2 text-right pr-1">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedDates.flatMap((date) =>
+                grouped[date].map((exp) => {
+                  const ExpenseIcon = getCategoryIcon(exp.category, exp.text);
+                  const dateLabel =
+                    date === today.toDateString()
+                      ? "Today"
+                      : date === yesterday.toDateString()
+                      ? "Yesterday"
+                      : new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+
+                  return (
+                    <tr
+                      key={exp._id}
+                      onClick={() => handleEdit(exp)}
+                      className="cursor-pointer bg-[var(--bg-surface)] hover:bg-[var(--bg-input)]"
+                    >
+                      <td className="py-2.5 pl-3 rounded-l-xl text-[var(--text-secondary)] whitespace-nowrap">
+                        {dateLabel}
+                      </td>
+                      <td className="py-2.5">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
+                            <ExpenseIcon className="w-3.5 h-3.5 text-[var(--avatar-fg)]" />
+                          </div>
+                          <span className="truncate text-[var(--text-primary)]">{exp.text}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 text-[var(--text-secondary)]">{exp.category}</td>
+                      <td className="py-2.5 pr-3 rounded-r-xl text-right font-semibold text-[var(--negative)]">
+                        ₱{exp.amount.toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </>
       )}
 
       {/* ========================= */}

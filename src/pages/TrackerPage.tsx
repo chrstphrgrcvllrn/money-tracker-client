@@ -360,43 +360,82 @@ const TrackerPage: React.FC = () => {
           </div>
         </Modal>
 
-        {/* ENTRIES LIST */}
-        <div className="space-y-2 md:space-y-0 md:columns-2 lg:columns-3 md:gap-4">
-          {loading ? (
+        {/* ENTRIES LIST — card rows on mobile, a real table on desktop */}
+        {loading ? (
+          <div className="space-y-2">
             <SkeletonRows count={4} withValue={false} />
-          ) : filteredEntries.length === 0 ? (
-            <div className="text-center py-12 text-[var(--text-secondary)]">
-              No entries yet. Add one to get started!
-            </div>
-          ) : (
-            filteredEntries.map((entry, idx) => (
-              <button
-                key={entry._id}
-                onClick={() => openEditModal(entry)}
-                className={`w-full flex items-center gap-3 py-3 text-left transition hover:bg-[var(--btn-bg)]/[0.03] md:break-inside-avoid md:mb-2 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
-                  idx !== filteredEntries.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
-                }`}
-              >
-                <span className="flex-1 min-w-0 truncate text-[var(--text-primary)] font-medium text-sm">
-                  {entry.name}
-                </span>
-                <span className="shrink-0 text-xs text-[var(--text-secondary)]">
-                  {new Date(entry.date).toLocaleDateString()}
-                </span>
-                {!!entry.price && entry.price > 0 && (
+          </div>
+        ) : filteredEntries.length === 0 ? (
+          <div className="text-center py-12 text-[var(--text-secondary)]">
+            No entries yet. Add one to get started!
+          </div>
+        ) : (
+          <>
+            <div className="md:hidden space-y-2">
+              {filteredEntries.map((entry, idx) => (
+                <button
+                  key={entry._id}
+                  onClick={() => openEditModal(entry)}
+                  className={`w-full flex items-center gap-3 py-3 text-left transition hover:bg-[var(--btn-bg)]/[0.03] ${
+                    idx !== filteredEntries.length - 1 ? "border-b border-[var(--border-subtle)]" : ""
+                  }`}
+                >
+                  <span className="flex-1 min-w-0 truncate text-[var(--text-primary)] font-medium text-sm">
+                    {entry.name}
+                  </span>
                   <span className="shrink-0 text-xs text-[var(--text-secondary)]">
-                    {entry.price.toLocaleString()}
+                    {new Date(entry.date).toLocaleDateString()}
                   </span>
-                )}
-                {!!entry.amount && entry.amount > 0 && (
-                  <span className="shrink-0 text-xs text-[var(--accent)] font-semibold">
-                    {entry.amount.toLocaleString()}
-                  </span>
-                )}
-              </button>
-            ))
-          )}
-        </div>
+                  {!!entry.price && entry.price > 0 && (
+                    <span className="shrink-0 text-xs text-[var(--text-secondary)]">
+                      {entry.price.toLocaleString()}
+                    </span>
+                  )}
+                  {!!entry.amount && entry.amount > 0 && (
+                    <span className="shrink-0 text-xs text-[var(--accent)] font-semibold">
+                      {entry.amount.toLocaleString()}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <table className="hidden md:table w-full text-sm border-separate border-spacing-y-1">
+              <thead>
+                <tr className="text-left text-[var(--text-secondary)]">
+                  <th className="font-medium pb-2 pl-1">Name</th>
+                  <th className="font-medium pb-2 text-right">Date</th>
+                  {activeTab === "crypto" && <th className="font-medium pb-2 text-right">Price</th>}
+                  <th className="font-medium pb-2 text-right pr-1">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEntries.map((entry) => (
+                  <tr
+                    key={entry._id}
+                    onClick={() => openEditModal(entry)}
+                    className="cursor-pointer bg-[var(--bg-surface)] hover:bg-[var(--bg-input)]"
+                  >
+                    <td className="py-2.5 pl-3 rounded-l-xl font-medium text-[var(--text-primary)]">
+                      {entry.name}
+                    </td>
+                    <td className="py-2.5 text-right text-[var(--text-secondary)]">
+                      {new Date(entry.date).toLocaleDateString()}
+                    </td>
+                    {activeTab === "crypto" && (
+                      <td className="py-2.5 text-right text-[var(--text-secondary)]">
+                        {entry.price ? entry.price.toLocaleString() : ""}
+                      </td>
+                    )}
+                    <td className="py-2.5 pr-3 rounded-r-xl text-right font-semibold text-[var(--accent)]">
+                      {entry.amount ? entry.amount.toLocaleString() : ""}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
     </div>
   );
