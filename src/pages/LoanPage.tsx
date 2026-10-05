@@ -722,11 +722,13 @@ export default function LoanPage() {
                       {m.items.map((item, i) => (
                         <li key={i} className="flex justify-between gap-3 text-xs">
                           <div className="min-w-0">
-                            <p className="text-[var(--text-primary)] truncate">{item.loan}</p>
-                            <p className="text-[var(--text-secondary)]">
-                              {item.date.toLocaleDateString("en-PH", { month: "short", day: "numeric" })}
-                              {item.notes ? ` · ${item.notes}` : ""}
+                            <p className="flex items-baseline gap-2 min-w-0">
+                              <span className="text-[var(--text-primary)] truncate">{item.loan}</span>
+                              <span className="shrink-0 text-[var(--text-secondary)]">
+                                {item.date.toLocaleDateString("en-PH", { month: "short", day: "numeric" })}
+                              </span>
                             </p>
+                            {item.notes && <p className="text-[var(--text-secondary)] truncate">{item.notes}</p>}
                           </div>
                           <span className="font-semibold text-[var(--text-primary)] shrink-0">
                             {showAmounts ? item.amount.toLocaleString() : mask(item.amount)}
