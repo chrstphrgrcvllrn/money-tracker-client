@@ -207,7 +207,7 @@ export type CutoffSummary = {
   estimatedTax: number;
   estimatedNet: number;
   actualPaid: number;
-  variance: number; // actualPaid − estimatedNet; negative = underpaid
+  variance: number; // actualPaid − expectedGross (spec definition); negative = underpaid
 };
 
 export const summarizeCutoff = (
@@ -226,7 +226,7 @@ export const summarizeCutoff = (
       estimatedTax: tax,
       estimatedNet: net,
       actualPaid,
-      variance: round2(actualPaid - net),
+      variance: round2(actualPaid - expectedGross),
     },
   };
 };
