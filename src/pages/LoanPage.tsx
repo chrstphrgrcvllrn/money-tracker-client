@@ -325,7 +325,7 @@ export default function LoanPage() {
     });
 
   // Sum of every payment made (negative transactions) on the loans in view.
-  const totalPaid = filteredLoans.reduce(
+  const totalPaid = loans.reduce(
     (sum, loan) =>
       sum +
       (loan.transactions || [])
@@ -334,7 +334,7 @@ export default function LoanPage() {
     0
   );
 
-  const totalRemaining = filteredLoans.reduce((sum, loan) => {
+  const totalRemaining = loans.reduce((sum, loan) => {
     const transactionsSum = (loan.transactions || []).reduce(
       (s, t) => s + Number(t.amount),
       0
@@ -553,17 +553,8 @@ export default function LoanPage() {
   return (
     <div className="px-6 pb-6 mt-8 max-w-md md:max-w-5xl mx-auto font-sans bg-[var(--bg-page)]">
       {/* HEADER */}
-      <div className="mb-4 flex justify-between items-center">
-        <SlidingTabs
-          tabs={[
-            { value: "active", label: "Active" },
-            { value: "archived", label: "Archive" },
-          ]}
-          active={activeTab}
-          onChange={setActiveTab}
-        />
-
-        <div className="flex w-full items-center justify-end gap-3">
+      <div className="mb-4 flex justify-end items-center">
+        <div className="flex items-center justify-end gap-3">
           <button
             onClick={toggleShowAmounts}
             className="text-[var(--text-secondary)]"
@@ -631,6 +622,17 @@ export default function LoanPage() {
             {showAmounts ? totalPaid.toLocaleString() : mask(totalPaid)}
           </span>
         </p>
+      </div>
+
+      <div className="mb-4">
+        <SlidingTabs
+          tabs={[
+            { value: "active", label: "Active" },
+            { value: "archived", label: "Archive" },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
       </div>
 
       <div className="flex justify-end mb-2">
