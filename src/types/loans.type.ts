@@ -3,6 +3,7 @@ export type Transaction = {
   date: string;
   amount: number;
   type: string;
+  notes?: string;
 };
 
 export type Loan = {

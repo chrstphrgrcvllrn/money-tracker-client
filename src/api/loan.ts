@@ -33,6 +33,16 @@ export const addTransaction = async (id: string, data: unknown): Promise<Loan> =
   return res.data;
 };
 
+// UPDATE the notes on one entry. Returns the whole updated loan.
+export const updateTransactionNotes = async (
+  id: string,
+  transactionId: string,
+  notes: string
+): Promise<Loan> => {
+  const res = await api.patch(`/loans/${id}/transactions/${transactionId}`, { notes });
+  return res.data;
+};
+
 // DELETE transaction (e.g. a mis-entered payment)
 export const deleteTransaction = async (id: string, transactionId: string): Promise<Loan> => {
   const res = await api.delete(`/loans/${id}/transactions/${transactionId}`);

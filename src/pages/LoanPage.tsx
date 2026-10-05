@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Loan, Transaction } from "../types/loans.type";
-import { getLoans, createLoan, addTransaction, deleteTransaction, updateLoan, deleteLoan } from "../api/loan";
+import { getLoans, createLoan, addTransaction, deleteTransaction, updateLoan, deleteLoan, updateTransactionNotes } from "../api/loan";
 
 import { UserIcon, CreditCardIcon, AcademicCapIcon, TrashIcon } from "@heroicons/react/24/solid";
 import {
@@ -72,6 +72,7 @@ export default function LoanPage() {
 
   const [paymentInputs, setPaymentInputs] = useState<{ [key: number]: string }>({});
   const [paymentDates, setPaymentDates] = useState<{ [key: number]: string }>({});
+  const [paymentNotes, setPaymentNotes] = useState<{ [key: number]: string }>({});
   const [transactionTypes, setTransactionTypes] = useState<{ [key: number]: "+" | "-" }>({});
   // Desktop only: which loan's details are open in a modal (the mobile
   // accordion uses `expanded` instead; see the table's row onClick).
@@ -187,7 +188,8 @@ export default function LoanPage() {
     const date = paymentDates[index];
     if (!amount || !date) return;
 
-    const transaction = { date, amount, type: "payment" };
+    const notes = (paymentNotes[index] || "").trim();
+    const transaction = { date, amount, type: "payment", notes };
 
     // Optimistic UI update
     setLoans((prev) =>
@@ -203,6 +205,7 @@ export default function LoanPage() {
       // (needed to delete it later), which the optimistic version above lacks.
       const updatedLoan = await addTransaction(loanId, transaction);
       setLoans((prev) => prev.map((loan) => (loan._id === loanId ? updatedLoan : loan)));
+      setPaymentNotes((prev) => ({ ...prev, [index]: "" }));
       showToast("Payment added!", "success");
     } catch (err) {
       console.error(err);
@@ -239,6 +242,21 @@ export default function LoanPage() {
     } catch (error) {
       console.error("Failed to delete loan:", error);
       showToast("Failed to delete loan", "error");
+    }
+  };
+
+  // Add or change the reminder note on an existing entry.
+  const handleEditNotes = async (loanId: string, transactionId: string, current: string) => {
+    const next = prompt("Note for this entry (leave empty to clear)", current);
+    if (next === null) return;
+
+    try {
+      const updatedLoan = await updateTransactionNotes(loanId, transactionId, next.trim());
+      setLoans((prev) => prev.map((loan) => (loan._id === loanId ? updatedLoan : loan)));
+      showToast("Note saved!", "success");
+    } catch (error) {
+      console.error("Failed to save note:", error);
+      showToast("Failed to save note", "error");
     }
   };
 
@@ -312,7 +330,7 @@ export default function LoanPage() {
       ) : (
         <ul className="text-xs text-[var(--text-primary)] space-y-1">
           {loanTransactions.map((t, i) => (
-            <li key={t._id ?? `${t.date}-${t.amount}-${t.type}-${i}`} className="flex items-center justify-between gap-2">
+            <li key={t._id ?? `${t.date}-${t.amount}-${t.type}-${i}`} className="flex flex-wrap items-center justify-between gap-2">
               <span>
                 {new Date(t.date).toLocaleDateString("en-PH", {
                   month: "short",
@@ -332,6 +350,17 @@ export default function LoanPage() {
 
                 {t._id && (
                   <button
+                    onClick={() => handleEditNotes(loan._id, t._id as string, t.notes ?? "")}
+                    title="Edit note"
+                    aria-label="Edit note"
+                    className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[11px]"
+                  >
+                    ✎
+                  </button>
+                )}
+
+                {t._id && (
+                  <button
                     onClick={() => handleDeleteTransaction(loan._id, t._id as string)}
                     title="Delete entry"
                     aria-label="Delete entry"
@@ -341,12 +370,25 @@ export default function LoanPage() {
                   </button>
                 )}
               </span>
+
+              {t.notes && (
+                <p className="w-full text-[11px] italic text-[var(--text-secondary)] pl-0.5">{t.notes}</p>
+              )}
             </li>
           ))}
         </ul>
       )}
 
       <div className="mt-3 space-y-2 flex flex-col gap-2">
+        <input
+          type="text"
+          maxLength={500}
+          placeholder="Note (optional)"
+          value={paymentNotes[index] || ""}
+          onChange={(e) => setPaymentNotes((prev) => ({ ...prev, [index]: e.target.value }))}
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+        />
+
         <input
           type="date"
           value={paymentDates[index] || ""}
