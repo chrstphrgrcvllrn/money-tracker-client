@@ -284,6 +284,16 @@ export default function LoanPage() {
       return bRemaining - aRemaining; // highest first
     });
 
+  // Sum of every payment made (negative transactions) on the loans in view.
+  const totalPaid = filteredLoans.reduce(
+    (sum, loan) =>
+      sum +
+      (loan.transactions || [])
+        .filter((t) => t.amount < 0)
+        .reduce((s, t) => s + Math.abs(Number(t.amount)), 0),
+    0
+  );
+
   const totalRemaining = filteredLoans.reduce((sum, loan) => {
     const transactionsSum = (loan.transactions || []).reduce(
       (s, t) => s + Number(t.amount),
@@ -527,11 +537,19 @@ export default function LoanPage() {
       </Modal>
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-[var(--bg-surface)] rounded-xl text-center">
-        <p className="text-[var(--text-secondary)] text-sm">Total Remaining</p>
-        <p className="text-[2.5rem] font-bold text-[var(--text-primary)]">
-          {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
-        </p>
+      <div className="mb-6 p-4 bg-[var(--bg-surface)] rounded-xl grid grid-cols-2 gap-4 text-center">
+        <div>
+          <p className="text-[var(--text-secondary)] text-sm">Total Remaining</p>
+          <p className="text-[2rem] font-bold text-[var(--text-primary)]">
+            {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
+          </p>
+        </div>
+        <div>
+          <p className="text-[var(--text-secondary)] text-sm">Total Paid</p>
+          <p className="text-[2rem] font-bold text-[var(--text-primary)]">
+            {showAmounts ? totalPaid.toLocaleString() : mask(totalPaid)}
+          </p>
+        </div>
       </div>
 
       {/* LIST — accordion rows on mobile; a sortable-looking table on desktop. */}
