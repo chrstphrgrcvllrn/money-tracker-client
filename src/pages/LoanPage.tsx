@@ -337,26 +337,30 @@ export default function LoanPage() {
 
   // Payments grouped by calendar month (all loans, archived included).
   const monthlyPaid = useMemo(() => {
-    const months = new Map<string, { total: number; items: { loan: string; date: Date; amount: number; notes?: string }[] }>();
+    type Item = { loan: string; date: Date; amount: number; notes?: string };
+    const months = new Map<string, { paid: number; added: number; items: Item[] }>();
     loans.forEach((loan) =>
       (loan.transactions || []).forEach((t) => {
-        if (t.amount >= 0) return;
         const d = new Date(t.date);
         if (Number.isNaN(d.getTime())) return;
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-        const bucket = months.get(key) ?? { total: 0, items: [] };
-        bucket.total += Math.abs(Number(t.amount));
-        bucket.items.push({ loan: loan.name, date: d, amount: Math.abs(Number(t.amount)), notes: t.notes });
+        const bucket = months.get(key) ?? { paid: 0, added: 0, items: [] };
+        const amount = Number(t.amount);
+        if (amount < 0) bucket.paid += Math.abs(amount);
+        else bucket.added += amount;
+        bucket.items.push({ loan: loan.name, date: d, amount, notes: t.notes });
         months.set(key, bucket);
       })
     );
     return [...months.entries()]
       .sort(([a], [b]) => b.localeCompare(a))
-      .map(([key, { total, items }]) => {
+      .map(([key, { paid, added, items }]) => {
         const [y, m] = key.split("-").map(Number);
         return {
           key,
-          total,
+          total: paid,
+          added,
+          net: paid - added,
           items: items.sort((a, b) => b.date.getTime() - a.date.getTime()),
           label: new Date(y, m - 1, 1).toLocaleDateString("en-PH", { month: "long", year: "numeric" }),
         };
@@ -709,6 +713,11 @@ export default function LoanPage() {
                       {showAmounts ? m.total.toLocaleString() : mask(m.total)}
                     </span>
                   </div>
+                  <p className="text-[11px] text-[var(--text-secondary)]">
+                    {showAmounts
+                      ? `Added +${m.added.toLocaleString()} · Net ${m.net.toLocaleString()}`
+                      : `Added ${mask(m.added)} · Net ${mask(m.net)}`}
+                  </p>
                   <div className="h-2 rounded-full bg-[var(--bg-input)] overflow-hidden">
                     <div
                       className="h-full rounded-full bg-[var(--accent)]"
@@ -732,8 +741,14 @@ export default function LoanPage() {
                               )}
                             </p>
                           </div>
-                          <span className="font-semibold text-[var(--text-primary)] shrink-0">
-                            {showAmounts ? item.amount.toLocaleString() : mask(item.amount)}
+                          <span
+                            className={`font-semibold shrink-0 ${
+                              item.amount < 0 ? "text-[var(--text-primary)]" : "text-[var(--accent)]"
+                            }`}
+                          >
+                            {showAmounts
+                              ? `${item.amount > 0 ? "+" : ""}${item.amount.toLocaleString()}`
+                              : mask(item.amount)}
                           </span>
                         </li>
                       ))}
