@@ -52,6 +52,7 @@ export const primaryNavItems: NavItem[] = [
   { name: "Thoughts", path: "/thoughts", icon: DocumentTextOutline, activeIcon: DocumentTextSolid },
   { name: "Notebook", path: "/notebook", icon: BookOpenOutline, activeIcon: BookOpenSolid },
   { name: "Water", path: "/water", icon: DropletSolidIcon, activeIcon: DropletSolidIcon },
+  { name: "Calendar", path: "/calendar", icon: CalendarOutline, activeIcon: CalendarSolid },
 ];
 
 // On mobile these live behind the bottom nav's "More" menu to save space; the
@@ -59,7 +60,6 @@ export const primaryNavItems: NavItem[] = [
 export const secondaryNavItems: NavItem[] = [
   { name: "Buy List", path: "/subscription", icon: CalendarDaysOutline, activeIcon: CalendarDaysSolid },
   { name: "Tracker", path: "/tracker", icon: CheckCircleOutline, activeIcon: CheckCircleSolid },
-  { name: "Calendar", path: "/calendar", icon: CalendarOutline, activeIcon: CalendarSolid },
   { name: "OT Pay", path: "/ot-pay", icon: ClockOutline, activeIcon: ClockSolid },
   { name: "Profile", path: "/account", icon: UserCircleOutline, activeIcon: UserCircleSolid },
 ];
