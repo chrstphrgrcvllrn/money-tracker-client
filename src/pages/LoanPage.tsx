@@ -84,7 +84,7 @@ export default function LoanPage() {
   const [desktopLoanId, setDesktopLoanId] = useState<string | null>(null);
 
   const { showAmounts, toggleShowAmounts } = useAmountsVisibility();
-  const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
+  const [activeTab, setActiveTab] = useState<"active" | "archived" | "monthly">("active");
   const [menuOpenFor, setMenuOpenFor] = useState<number | null>(null);
 
   useEffect(() => {
@@ -333,6 +333,35 @@ export default function LoanPage() {
         .reduce((s, t) => s + Math.abs(Number(t.amount)), 0),
     0
   );
+
+  // Payments grouped by calendar month (all loans, archived included).
+  const monthlyPaid = useMemo(() => {
+    const totals = new Map<string, number>();
+    loans.forEach((loan) =>
+      (loan.transactions || []).forEach((t) => {
+        if (t.amount >= 0) return;
+        const d = new Date(t.date);
+        if (Number.isNaN(d.getTime())) return;
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        totals.set(key, (totals.get(key) ?? 0) + Math.abs(Number(t.amount)));
+      })
+    );
+    return [...totals.entries()]
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([key, total]) => {
+        const [y, m] = key.split("-").map(Number);
+        return {
+          key,
+          total,
+          label: new Date(y, m - 1, 1).toLocaleDateString("en-PH", { month: "long", year: "numeric" }),
+        };
+      });
+  }, [loans]);
+
+  const monthlyAverage = monthlyPaid.length
+    ? monthlyPaid.reduce((s, m) => s + m.total, 0) / monthlyPaid.length
+    : 0;
+  const monthlyMax = monthlyPaid.reduce((mx, m) => Math.max(mx, m.total), 0);
 
   const totalRemaining = loans.reduce((sum, loan) => {
     const transactionsSum = (loan.transactions || []).reduce(
@@ -629,6 +658,7 @@ export default function LoanPage() {
           tabs={[
             { value: "active", label: "Active" },
             { value: "archived", label: "Archive" },
+            { value: "monthly", label: "Monthly" },
           ]}
           active={activeTab}
           onChange={setActiveTab}
@@ -648,6 +678,47 @@ export default function LoanPage() {
         </button>
       </div>
 
+      {activeTab === "monthly" ? (
+        <div className="bg-[var(--bg-surface)] rounded-xl p-4 space-y-4">
+          <div className="flex justify-between text-xs text-[var(--text-secondary)]">
+            <span>Average per month</span>
+            <span className="font-semibold text-[var(--text-primary)]">
+              {showAmounts ? monthlyAverage.toLocaleString(undefined, { maximumFractionDigits: 0 }) : mask(monthlyAverage)}
+            </span>
+          </div>
+
+          {monthlyPaid.length === 0 ? (
+            <p className="text-xs text-[var(--text-secondary)] text-center py-4">No payments yet.</p>
+          ) : (
+            monthlyPaid.map((m) => {
+              const diff = m.total - monthlyAverage;
+              const under = diff < 0;
+              return (
+                <div key={m.key} className="space-y-1">
+                  <div className="flex justify-between items-baseline text-sm">
+                    <span className="text-[var(--text-primary)]">{m.label}</span>
+                    <span className="font-semibold text-[var(--text-primary)]">
+                      {showAmounts ? m.total.toLocaleString() : mask(m.total)}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-[var(--bg-input)] overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[var(--accent)]"
+                      style={{ width: `${monthlyMax ? (m.total / monthlyMax) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <p className={`text-[11px] ${under ? "text-[var(--danger)]" : "text-[var(--text-secondary)]"}`}>
+                    {showAmounts
+                      ? `${under ? "" : "+"}${Math.round(diff).toLocaleString()} vs average${under ? " (not enough)" : ""}`
+                      : mask(Math.round(Math.abs(diff)))}
+                  </p>
+                </div>
+              );
+            })
+          )}
+        </div>
+      ) : (
+      <>
       {/* LIST — accordion rows on mobile; a sortable-looking table on desktop. */}
       <div className="md:hidden">
         {sortedLoans.map((loan, index, arr) => {
@@ -755,6 +826,9 @@ export default function LoanPage() {
           })}
         </tbody>
       </table>
+
+      </>
+      )}
 
       {/* Desktop only: the mobile accordion expands in place; here the same
           payment history/add-payment/archive content opens in a modal.
