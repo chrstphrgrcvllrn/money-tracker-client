@@ -15,6 +15,10 @@ import { useToast } from "../components/useToast";
 import SlidingTabs from "../components/SlidingTabs";
 import { SkeletonBlock, SkeletonCards } from "../components/Skeleton";
 
+// Specific expense rows (e.g. "baon 2", "Baon 3") are tucked behind the card's
+// ellipsis. They still count toward the totals; everything else always shows.
+const isHiddenBaon = (name: string | undefined) => /^baon\s*\d+$/i.test((name ?? "").trim());
+
 export default function SalaryPage() {
   const showToast = useToast();
 
@@ -23,7 +27,7 @@ export default function SalaryPage() {
   const [editingAllEntryId, setEditingAllEntryId] = useState<string | null>(null);
   const [editedExpenses, setEditedExpenses] = useState<Expense[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  // The expenses list stays hidden until the card's ellipsis is tapped. Its amounts still count toward the totals.
+  // Baon items stay hidden until the card's ellipsis is tapped.
   const [revealedExpenses, setRevealedExpenses] = useState<Set<string>>(new Set());
 
   // ✅ MODAL STATE
@@ -631,10 +635,11 @@ export default function SalaryPage() {
                 </div>
               )}
 
+              {expenses.some((e) => isHiddenBaon(e.name)) && (
               <div className="flex justify-end mb-1">
                 <button
                   type="button"
-                  aria-label={revealedExpenses.has(entry._id) ? "Hide expenses" : "Show expenses"}
+                  aria-label={revealedExpenses.has(entry._id) ? "Hide baon items" : "Show baon items"}
                   aria-expanded={revealedExpenses.has(entry._id)}
                   onClick={() =>
                     setRevealedExpenses((prev) => {
@@ -649,10 +654,11 @@ export default function SalaryPage() {
                   <EllipsisHorizontalIcon className="w-4 h-4" />
                 </button>
               </div>
+              )}
 
-              {(isEditingAll || revealedExpenses.has(entry._id)) && (
               <ul className="border border-[var(--border-subtle)] rounded divide-y divide-mist-900 text-xs">
-                {expenses.map((expense, idx) => (
+                {expenses.map((expense, idx) =>
+                  isHiddenBaon(expense.name) && !isEditingAll && !revealedExpenses.has(entry._id) ? null : (
                   <li key={idx} className="flex justify-between items-center gap-2 m-2">
                     {isEditingAll ? (
                       <input
@@ -710,9 +716,9 @@ export default function SalaryPage() {
                       </button>
                     )}
                   </li>
-                ))}
+                )
+                )}
               </ul>
-              )}
 
               {isEditingAll && (
                 <div className="flex gap-2 mt-2">

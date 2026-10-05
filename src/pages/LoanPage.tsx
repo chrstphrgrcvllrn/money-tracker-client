@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Loan, Transaction } from "../types/loans.type";
-import { getLoans, createLoan, addTransaction, deleteTransaction, updateLoan } from "../api/loan";
+import { getLoans, createLoan, addTransaction, deleteTransaction, updateLoan, deleteLoan } from "../api/loan";
 
 import { UserIcon, CreditCardIcon, AcademicCapIcon, TrashIcon } from "@heroicons/react/24/solid";
 import {
@@ -228,6 +228,20 @@ export default function LoanPage() {
     setTransactionTypes((prev) => ({ ...prev, [index]: "+" }));
   };
 
+  // Permanently delete a whole loan (and its payments). Confirmed first.
+  const handleDeleteLoan = async (loan: Loan) => {
+    if (!confirm(`Delete "${loan.name}" permanently? All of its payments will be lost. This can't be undone.`)) return;
+
+    try {
+      await deleteLoan(loan._id);
+      setLoans((prev) => prev.filter((l) => l._id !== loan._id));
+      showToast("Loan deleted!", "success");
+    } catch (error) {
+      console.error("Failed to delete loan:", error);
+      showToast("Failed to delete loan", "error");
+    }
+  };
+
   // Delete a mis-entered payment/transaction.
   const handleDeleteTransaction = async (loanId: string, transactionId: string) => {
     if (!confirm("Delete this entry?")) return;
@@ -415,6 +429,16 @@ export default function LoanPage() {
                       Unarchive Loan
                     </button>
                   )}
+
+                  <button
+                    onClick={() => {
+                      setMenuOpenFor(null);
+                      handleDeleteLoan(loan);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-[var(--danger)] hover:bg-[var(--bg-input)] border-t border-[var(--border-subtle)]"
+                  >
+                    Delete Loan
+                  </button>
                 </div>
               </>
             )}

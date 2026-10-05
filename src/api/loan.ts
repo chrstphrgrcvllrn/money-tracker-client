@@ -38,3 +38,8 @@ export const deleteTransaction = async (id: string, transactionId: string): Prom
   const res = await api.delete(`/loans/${id}/transactions/${transactionId}`);
   return res.data;
 };
+
+// DELETE a whole loan, with all of its payments. Irreversible.
+export const deleteLoan = async (id: string): Promise<void> => {
+  await api.delete(`/loans/${id}`);
+};
