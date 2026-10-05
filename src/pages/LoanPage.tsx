@@ -396,8 +396,9 @@ export default function LoanPage() {
                   {activeTab === "active" ? (
                     <button
                       onClick={() => {
-                        handleArchiveLoan(loan._id);
                         setMenuOpenFor(null);
+                        if (!confirm(`Archive "${loan.name}"? You can unarchive it later.`)) return;
+                        handleArchiveLoan(loan._id);
                       }}
                       className="w-full text-left px-3 py-2 text-sm text-[var(--danger)] hover:bg-[var(--bg-input)]"
                     >
