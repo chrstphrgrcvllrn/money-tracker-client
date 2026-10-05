@@ -10,5 +10,6 @@ export type SalaryEntry = {
   date: string; // frontend uses "date"
   salary: number;
   overtime?: number;
+  adjustment?: number;
   expenses: Expense[];
 };

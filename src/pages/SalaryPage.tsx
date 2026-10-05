@@ -149,6 +149,30 @@ export default function SalaryPage() {
     }
   };
 
+  const handleEditAdjustment = async (id: string) => {
+    const entry = salaryData.find((s) => s._id === id);
+    if (!entry) return;
+
+    const newAdjustment = Number(prompt("Update adjustment (reimbursement)", String(entry.adjustment || 0)));
+    if (!isNaN(newAdjustment)) {
+      try {
+        const updated = await updateSalary(id, { adjustment: newAdjustment });
+
+        setSalaryData((prev) =>
+          prev.map((s) =>
+            s._id === id
+              ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+              : s
+          )
+        );
+        showToast("Adjustment updated!", "success");
+      } catch (error) {
+        console.error("Failed to update adjustment:", error);
+        showToast("Failed to update adjustment", "error");
+      }
+    }
+  };
+
   const handleEditOvertime = async (id: string) => {
     const entry = salaryData.find((s) => s._id === id);
     if (!entry) return;
@@ -500,7 +524,7 @@ export default function SalaryPage() {
         {displayedSalaries.map((entry) => {
           const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
           const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
-          const budget = Number(entry.salary || 0) + Number(entry.overtime || 0);
+          const budget = Number(entry.salary || 0) + Number(entry.overtime || 0) + Number(entry.adjustment || 0);
           const remaining = budget - totalExpenses;
           const isEditingAll = editingAllEntryId === entry._id;
 
@@ -588,7 +612,16 @@ export default function SalaryPage() {
                 </button>
               </div>
 
-              {!!entry.overtime && (
+              <div className="flex justify-between text-[var(--text-primary)] mb-2">
+                <span>Adjustment</span>
+                <button onClick={() => handleEditAdjustment(entry._id)}>
+                  <span className="font-semibold text-[var(--accent)]">
+                    {entry.adjustment ? format(entry.adjustment) : "Add"}
+                  </span>
+                </button>
+              </div>
+
+              {(!!entry.overtime || !!entry.adjustment) && (
                 <div className="flex justify-between text-[var(--text-primary)] mb-2 pb-2 border-b border-[var(--border-subtle)]">
                   <span>Budget</span>
                   <span className="font-semibold">{format(budget)}</span>
