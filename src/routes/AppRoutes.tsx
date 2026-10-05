@@ -5,6 +5,7 @@ import PublicOnlyRoute from "@/routes/PublicOnlyRoute";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import AccountPage from "@/pages/AccountPage";
+import Dashboard from "@/pages/Dashboard";
 import SalaryPage from "@/pages/SalaryPage";
 import LoansPage from "@/pages/LoanPage";
 import BillsPage from "@/pages/BillsPage";
@@ -30,7 +31,8 @@ export default function AppRoutes() {
       {/* Everything else needs a session */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Navigate to="/loans" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="loans" element={<LoansPage />} />
           <Route path="salary" element={<SalaryPage/>} />
           <Route path="bills" element={<BillsPage/>} />
