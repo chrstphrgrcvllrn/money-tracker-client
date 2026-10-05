@@ -696,8 +696,6 @@ export default function LoanPage() {
             <p className="text-xs text-[var(--text-secondary)] text-center py-4">No payments yet.</p>
           ) : (
             monthlyPaid.map((m) => {
-              const diff = m.total - monthlyAverage;
-              const under = diff < 0;
               return (
                 <div key={m.key} className="space-y-1">
                   <button
@@ -717,11 +715,6 @@ export default function LoanPage() {
                       style={{ width: `${monthlyMax ? (m.total / monthlyMax) * 100 : 0}%` }}
                     />
                   </div>
-                  <p className={`text-[11px] ${under ? "text-[var(--danger)]" : "text-[var(--text-secondary)]"}`}>
-                    {showAmounts
-                      ? `${under ? "" : "+"}${Math.round(diff).toLocaleString()} vs average${under ? " (not enough)" : ""}`
-                      : mask(Math.round(Math.abs(diff)))}
-                  </p>
                   </button>
 
                   {expandedMonth === m.key && (
