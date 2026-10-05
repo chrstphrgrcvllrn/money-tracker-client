@@ -8,6 +8,7 @@ import {
 } from "../api/salary";
 
 import { TrashIcon, CurrencyDollarIcon } from "@heroicons/react/24/solid";
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -22,6 +23,8 @@ export default function SalaryPage() {
   const [editingAllEntryId, setEditingAllEntryId] = useState<string | null>(null);
   const [editedExpenses, setEditedExpenses] = useState<Expense[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  // The expenses list stays hidden until the card's ellipsis is tapped. Its amounts still count toward the totals.
+  const [revealedExpenses, setRevealedExpenses] = useState<Set<string>>(new Set());
 
   // ✅ MODAL STATE
   const [showForm, setShowForm] = useState(false);
@@ -628,6 +631,26 @@ export default function SalaryPage() {
                 </div>
               )}
 
+              <div className="flex justify-end mb-1">
+                <button
+                  type="button"
+                  aria-label={revealedExpenses.has(entry._id) ? "Hide expenses" : "Show expenses"}
+                  aria-expanded={revealedExpenses.has(entry._id)}
+                  onClick={() =>
+                    setRevealedExpenses((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(entry._id)) next.delete(entry._id);
+                      else next.add(entry._id);
+                      return next;
+                    })
+                  }
+                  className="p-1 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  <EllipsisHorizontalIcon className="w-4 h-4" />
+                </button>
+              </div>
+
+              {(isEditingAll || revealedExpenses.has(entry._id)) && (
               <ul className="border border-[var(--border-subtle)] rounded divide-y divide-mist-900 text-xs">
                 {expenses.map((expense, idx) => (
                   <li key={idx} className="flex justify-between items-center gap-2 m-2">
@@ -689,6 +712,7 @@ export default function SalaryPage() {
                   </li>
                 ))}
               </ul>
+              )}
 
               {isEditingAll && (
                 <div className="flex gap-2 mt-2">

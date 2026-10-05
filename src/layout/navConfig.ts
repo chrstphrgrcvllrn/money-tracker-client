@@ -22,10 +22,12 @@ import {
 import {
   CalendarIcon as CalendarOutline,
   UserCircleIcon as UserCircleOutline,
+  ClockIcon as ClockOutline,
 } from "@heroicons/react/24/outline";
 import {
   CalendarIcon as CalendarSolid,
   UserCircleIcon as UserCircleSolid,
+  ClockIcon as ClockSolid,
 } from "@heroicons/react/24/solid";
 import DropletSolidIcon from "@/components/icons/DropletSolidIcon";
 
@@ -58,5 +60,6 @@ export const secondaryNavItems: NavItem[] = [
   { name: "Buy List", path: "/subscription", icon: CalendarDaysOutline, activeIcon: CalendarDaysSolid },
   { name: "Tracker", path: "/tracker", icon: CheckCircleOutline, activeIcon: CheckCircleSolid },
   { name: "Calendar", path: "/calendar", icon: CalendarOutline, activeIcon: CalendarSolid },
+  { name: "OT Pay", path: "/ot-pay", icon: ClockOutline, activeIcon: ClockSolid },
   { name: "Profile", path: "/account", icon: UserCircleOutline, activeIcon: UserCircleSolid },
 ];
