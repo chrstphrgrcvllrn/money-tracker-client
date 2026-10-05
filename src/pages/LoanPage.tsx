@@ -85,6 +85,7 @@ export default function LoanPage() {
 
   const { showAmounts, toggleShowAmounts } = useAmountsVisibility();
   const [activeTab, setActiveTab] = useState<"active" | "archived" | "monthly">("active");
+  const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
   const [menuOpenFor, setMenuOpenFor] = useState<number | null>(null);
 
   useEffect(() => {
@@ -336,23 +337,27 @@ export default function LoanPage() {
 
   // Payments grouped by calendar month (all loans, archived included).
   const monthlyPaid = useMemo(() => {
-    const totals = new Map<string, number>();
+    const months = new Map<string, { total: number; items: { loan: string; date: Date; amount: number; notes?: string }[] }>();
     loans.forEach((loan) =>
       (loan.transactions || []).forEach((t) => {
         if (t.amount >= 0) return;
         const d = new Date(t.date);
         if (Number.isNaN(d.getTime())) return;
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-        totals.set(key, (totals.get(key) ?? 0) + Math.abs(Number(t.amount)));
+        const bucket = months.get(key) ?? { total: 0, items: [] };
+        bucket.total += Math.abs(Number(t.amount));
+        bucket.items.push({ loan: loan.name, date: d, amount: Math.abs(Number(t.amount)), notes: t.notes });
+        months.set(key, bucket);
       })
     );
-    return [...totals.entries()]
+    return [...months.entries()]
       .sort(([a], [b]) => b.localeCompare(a))
-      .map(([key, total]) => {
+      .map(([key, { total, items }]) => {
         const [y, m] = key.split("-").map(Number);
         return {
           key,
           total,
+          items: items.sort((a, b) => b.date.getTime() - a.date.getTime()),
           label: new Date(y, m - 1, 1).toLocaleDateString("en-PH", { month: "long", year: "numeric" }),
         };
       });
@@ -695,6 +700,11 @@ export default function LoanPage() {
               const under = diff < 0;
               return (
                 <div key={m.key} className="space-y-1">
+                  <button
+                    onClick={() => setExpandedMonth((cur) => (cur === m.key ? null : m.key))}
+                    aria-expanded={expandedMonth === m.key}
+                    className="w-full text-left space-y-1"
+                  >
                   <div className="flex justify-between items-baseline text-sm">
                     <span className="text-[var(--text-primary)]">{m.label}</span>
                     <span className="font-semibold text-[var(--text-primary)]">
@@ -712,6 +722,26 @@ export default function LoanPage() {
                       ? `${under ? "" : "+"}${Math.round(diff).toLocaleString()} vs average${under ? " (not enough)" : ""}`
                       : mask(Math.round(Math.abs(diff)))}
                   </p>
+                  </button>
+
+                  {expandedMonth === m.key && (
+                    <ul className="pt-2 space-y-2 border-t border-[var(--border-subtle)]">
+                      {m.items.map((item, i) => (
+                        <li key={i} className="flex justify-between gap-3 text-xs">
+                          <div className="min-w-0">
+                            <p className="text-[var(--text-primary)] truncate">{item.loan}</p>
+                            <p className="text-[var(--text-secondary)]">
+                              {item.date.toLocaleDateString("en-PH", { month: "short", day: "numeric" })}
+                              {item.notes ? ` · ${item.notes}` : ""}
+                            </p>
+                          </div>
+                          <span className="font-semibold text-[var(--text-primary)] shrink-0">
+                            {showAmounts ? item.amount.toLocaleString() : mask(item.amount)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               );
             })
