@@ -5,15 +5,10 @@ import {
   MoonIcon,
   EllipsisHorizontalIcon,
   CalculatorIcon,
-  CalendarIcon,
-  UserCircleIcon,
-  ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 
 import { useTheme } from "@/components/useTheme";
-import DropletSolidIcon from "@/components/icons/DropletSolidIcon";
 import { useAuthStore } from "@/stores/auth.store";
-import { useLogout } from "@/hooks/useLogout";
 import { primaryNavItems, secondaryNavItems } from "@/layout/navConfig";
 import { useQuickActionModals } from "@/layout/useQuickActionModals";
 
@@ -23,8 +18,7 @@ export default function BottomNavBar() {
 
   const { pathname } = useLocation();
   const username = useAuthStore((s) => s.user?.username);
-  const logout = useLogout();
-  const { openCalculator, openCalendar, openWater, modals } = useQuickActionModals();
+  const { openCalculator, modals } = useQuickActionModals();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
@@ -49,8 +43,8 @@ export default function BottomNavBar() {
     };
   }, [moreOpen]);
 
-  // Less-used pages live behind the "More" (…) button instead of the main grid.
-  // (Shared with SidebarNav via navConfig, so the two lists can't drift apart.)
+  // Less-used pages (Buy List, Tracker, Calendar, Profile) live behind "More".
+  // Shared with SidebarNav via navConfig, so the two lists can't drift apart.
   const moreItems = secondaryNavItems;
   const moreActive = moreItems.some((item) => pathname.startsWith(item.path));
   const navItems = primaryNavItems;
@@ -117,16 +111,7 @@ export default function BottomNavBar() {
             </span>
           </button>
 
-          {/* WATER — quick access directly on the bar, not tucked in More */}
-          <button
-            onClick={openWater}
-            className="flex flex-col items-center justify-center text-xs text-[var(--nav-inactive)]"
-          >
-            <DropletSolidIcon className="w-6 h-6 mb-1" />
-            <span className="font-semibold text-center">Water</span>
-          </button>
-
-          {/* MORE — Buy List + Tracker */}
+          {/* MORE */}
           <div ref={moreRef} className="relative flex">
             <button
               onClick={() => setMoreOpen((open) => !open)}
@@ -185,44 +170,6 @@ export default function BottomNavBar() {
                 >
                   <CalculatorIcon className="w-5 h-5" />
                   Calculator
-                </button>
-
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setMoreOpen(false);
-                    openCalendar();
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--text-primary)]"
-                >
-                  <CalendarIcon className="w-5 h-5" />
-                  Calendar
-                </button>
-
-                <NavLink
-                  to="/account"
-                  role="menuitem"
-                  onClick={() => setMoreOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-3 text-sm font-semibold ${
-                      isActive ? "text-[var(--accent)]" : "text-[var(--text-primary)]"
-                    }`
-                  }
-                >
-                  <UserCircleIcon className="w-5 h-5" />
-                  Account
-                </NavLink>
-
-                <button
-                  role="menuitem"
-                  onClick={() => {
-                    setMoreOpen(false);
-                    logout();
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--danger)]"
-                >
-                  <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
-                  Log out
                 </button>
               </div>
             )}

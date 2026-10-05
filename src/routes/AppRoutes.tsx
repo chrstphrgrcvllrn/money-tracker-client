@@ -6,6 +6,8 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import AccountPage from "@/pages/AccountPage";
 import Dashboard from "@/pages/Dashboard";
+import WaterPage from "@/pages/WaterPage";
+import CalendarPage from "@/pages/CalendarPage";
 import SalaryPage from "@/pages/SalaryPage";
 import LoansPage from "@/pages/LoanPage";
 import BillsPage from "@/pages/BillsPage";
@@ -44,6 +46,8 @@ export default function AppRoutes() {
           <Route path="subscription" element={<SubscriptionPage/>} />
           <Route path="notebook" element={<NotebookPage />} />
           <Route path="tracker" element={<TrackerPage />} />
+          <Route path="water" element={<WaterPage />} />
+          <Route path="calendar" element={<CalendarPage />} />
           <Route path="account" element={<AccountPage />} />
         </Route>
       </Route>

@@ -1,18 +1,8 @@
 import { NavLink } from "react-router-dom";
 import type { NavLinkRenderProps } from "react-router-dom";
-import {
-  CalculatorIcon,
-  CalendarIcon,
-  UserCircleIcon,
-  ArrowRightStartOnRectangleIcon,
-  SunIcon,
-  MoonIcon,
-} from "@heroicons/react/24/outline";
+import { CalculatorIcon, SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
 import { useTheme } from "@/components/useTheme";
-import DropletSolidIcon from "@/components/icons/DropletSolidIcon";
-import { useAuthStore } from "@/stores/auth.store";
-import { useLogout } from "@/hooks/useLogout";
 import { primaryNavItems, secondaryNavItems } from "@/layout/navConfig";
 import { useQuickActionModals } from "@/layout/useQuickActionModals";
 
@@ -26,15 +16,12 @@ const linkClass = ({ isActive }: NavLinkRenderProps) =>
 const actionClass =
   "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-input)]";
 
-// Desktop counterpart to BottomNavBar: a persistent left column instead of a
-// fixed bottom bar, with every page listed (no "More" menu needed — there's
-// room). Hidden below the md breakpoint; BottomNavBar is hidden at and above it.
+// Desktop sidebar: every page is listed inline (no "More" menu needed).
+// Profile (account + log out) and Calendar/Water are regular pages from navConfig.
 export default function SidebarNav() {
   const { theme, toggleTheme } = useTheme();
   const isLight = theme === "light";
-  const username = useAuthStore((s) => s.user?.username);
-  const logout = useLogout();
-  const { openCalculator, openCalendar, openWater, modals } = useQuickActionModals();
+  const { openCalculator, modals } = useQuickActionModals();
 
   const pageLinks = [...primaryNavItems, ...secondaryNavItems];
 
@@ -65,37 +52,13 @@ export default function SidebarNav() {
               <CalculatorIcon className="w-5 h-5 shrink-0" />
               Calculator
             </button>
-            <button onClick={openCalendar} className={actionClass}>
-              <CalendarIcon className="w-5 h-5 shrink-0" />
-              Calendar
-            </button>
-            <button onClick={openWater} className={actionClass}>
-              <DropletSolidIcon className="w-5 h-5 shrink-0" />
-              Water
-            </button>
           </div>
         </nav>
 
         <div className="px-3 pb-4 pt-2 border-t border-[var(--border-subtle)] space-y-1 shrink-0">
-          {username && (
-            <p className="px-3 pb-1 text-xs text-[var(--text-secondary)] truncate">
-              Signed in as <span className="font-semibold text-[var(--text-primary)]">{username}</span>
-            </p>
-          )}
-
-          <NavLink to="/account" className={linkClass}>
-            <UserCircleIcon className="w-5 h-5 shrink-0" />
-            Account
-          </NavLink>
-
           <button onClick={toggleTheme} className={actionClass}>
             {isLight ? <MoonIcon className="w-5 h-5 shrink-0" /> : <SunIcon className="w-5 h-5 shrink-0" />}
             {isLight ? "Dark mode" : "Light mode"}
-          </button>
-
-          <button onClick={logout} className={`${actionClass} text-[var(--danger)]`}>
-            <ArrowRightStartOnRectangleIcon className="w-5 h-5 shrink-0" />
-            Log out
           </button>
         </div>
       </aside>

@@ -20,7 +20,7 @@ const dayLabel = (daysAgo: number, d: Date) => {
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 };
 
-function WaterBody() {
+export function WaterBody() {
   const showToast = useToast();
 
   const [logs, setLogs] = useState<WaterLog[]>([]);

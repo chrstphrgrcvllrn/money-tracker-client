@@ -50,22 +50,23 @@ export default function AccountPage() {
 
   return (
     <div className="max-w-md md:max-w-xl mx-auto px-6 pt-8 pb-10 space-y-8 text-[var(--text-primary)]">
-      <h1 className="text-lg font-semibold">Account</h1>
-
-      <section aria-labelledby="profile-heading" className="bg-[var(--bg-surface)] rounded-xl p-4 space-y-3">
-        <h2 id="profile-heading" className="sr-only">
+      {/* PROFILE HEADER */}
+      <section aria-labelledby="profile-heading" className="flex flex-col items-center text-center space-y-3 pt-4">
+        <h1 id="profile-heading" className="sr-only">
           Profile
-        </h2>
-        <dl className="space-y-3 text-sm">
-          <div className="flex justify-between gap-4">
-            <dt className="text-[var(--text-secondary)]">Username</dt>
-            <dd className="font-semibold break-all text-right">{user.username}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-[var(--text-secondary)]">Member since</dt>
-            <dd className="font-semibold text-right">{formatMemberSince(user.createdAt)}</dd>
-          </div>
-        </dl>
+        </h1>
+        <div
+          aria-hidden="true"
+          className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold bg-[var(--btn-bg)] text-[var(--btn-text)]"
+        >
+          {user.username.charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <p className="text-lg font-semibold break-all">{user.username}</p>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
+            Member since {formatMemberSince(user.createdAt)}
+          </p>
+        </div>
       </section>
 
       <section aria-labelledby="password-heading" className="space-y-4">
@@ -107,7 +108,7 @@ export default function AccountPage() {
       </section>
 
       <section aria-labelledby="session-heading" className="space-y-3">
-        <h2 id="session-heading" className="text-base font-semibold">
+        <h2 id="session-heading" className="sr-only">
           Session
         </h2>
         <button

@@ -95,7 +95,7 @@ function EventRow({ event, showDate = false }: { event: CalendarEvent; showDate?
   );
 }
 
-function CalendarBody() {
+export function CalendarBody() {
   const showToast = useToast();
 
   const today = new Date();
