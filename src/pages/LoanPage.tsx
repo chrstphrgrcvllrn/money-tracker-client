@@ -64,6 +64,8 @@ export default function LoanPage() {
 
   const [loans, setLoans] = useState<Loan[]>([]);
   const [expanded, setExpanded] = useState<number | null>(null);
+  // Edit mode reveals the per-entry pencil/delete buttons and the initial-amount editor.
+  const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [showForm, setShowForm] = useState(false);
@@ -245,6 +247,26 @@ export default function LoanPage() {
     }
   };
 
+  // Change a loan's initial amount (edit mode only).
+  const handleEditInitialAmount = async (loan: Loan) => {
+    const next = prompt("Initial amount", String(loan.initialAmount));
+    if (next === null) return;
+    const value = Number(next);
+    if (!Number.isFinite(value) || value < 0) {
+      showToast("Enter a valid amount", "error");
+      return;
+    }
+
+    try {
+      const updated = await updateLoan(loan._id, { initialAmount: value });
+      setLoans((prev) => prev.map((l) => (l._id === loan._id ? { ...l, initialAmount: updated.initialAmount } : l)));
+      showToast("Initial amount updated!", "success");
+    } catch (error) {
+      console.error("Failed to update initial amount:", error);
+      showToast("Failed to update initial amount", "error");
+    }
+  };
+
   // Add or change the reminder note on an existing entry.
   const handleEditNotes = async (loanId: string, transactionId: string, current: string) => {
     const next = prompt("Note for this entry (leave empty to clear)", current);
@@ -325,18 +347,40 @@ export default function LoanPage() {
   // Modal) so the two don't drift apart.
   const renderLoanDetails = (loan: Loan, index: number, loanTransactions: Transaction[]) => (
     <>
+      <div className="flex items-center justify-between text-xs mb-2 text-[var(--text-primary)]">
+        <span>Initial amount</span>
+        <span className="flex items-center gap-2">
+          <span className="font-semibold">{showAmounts ? Number(loan.initialAmount).toLocaleString() : mask(Number(loan.initialAmount))}</span>
+          {editMode && (
+            <button
+              onClick={() => handleEditInitialAmount(loan)}
+              title="Edit initial amount"
+              aria-label="Edit initial amount"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[11px]"
+            >
+              ✎
+            </button>
+          )}
+        </span>
+      </div>
+
       {loanTransactions.length === 0 ? (
         <p className="text-xs text-[var(--text-primary)]">No payments yet</p>
       ) : (
         <ul className="text-xs text-[var(--text-primary)] space-y-1">
           {loanTransactions.map((t, i) => (
-            <li key={t._id ?? `${t.date}-${t.amount}-${t.type}-${i}`} className="flex flex-wrap items-center justify-between gap-2">
-              <span>
-                {new Date(t.date).toLocaleDateString("en-PH", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+            <li key={t._id ?? `${t.date}-${t.amount}-${t.type}-${i}`} className="flex items-center justify-between gap-2">
+              <span className="flex items-baseline gap-2 min-w-0">
+                <span className="shrink-0">
+                  {new Date(t.date).toLocaleDateString("en-PH", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
+                {t.notes && (
+                  <span className="truncate text-[11px] italic text-[var(--text-secondary)]">{t.notes}</span>
+                )}
               </span>
 
               <span className="flex items-center gap-2">
@@ -348,7 +392,7 @@ export default function LoanPage() {
                   {Number(t.amount).toLocaleString("en-PH")}
                 </span>
 
-                {t._id && (
+                {editMode && t._id && (
                   <button
                     onClick={() => handleEditNotes(loan._id, t._id as string, t.notes ?? "")}
                     title="Edit note"
@@ -359,7 +403,7 @@ export default function LoanPage() {
                   </button>
                 )}
 
-                {t._id && (
+                {editMode && t._id && (
                   <button
                     onClick={() => handleDeleteTransaction(loan._id, t._id as string)}
                     title="Delete entry"
@@ -371,9 +415,6 @@ export default function LoanPage() {
                 )}
               </span>
 
-              {t.notes && (
-                <p className="w-full text-[11px] italic text-[var(--text-secondary)] pl-0.5">{t.notes}</p>
-              )}
             </li>
           ))}
         </ul>
@@ -579,19 +620,30 @@ export default function LoanPage() {
       </Modal>
 
       {/* SUMMARY */}
-      <div className="mb-6 p-4 bg-[var(--bg-surface)] rounded-xl grid grid-cols-2 gap-4 text-center">
-        <div>
-          <p className="text-[var(--text-secondary)] text-sm">Total Remaining</p>
-          <p className="text-[2rem] font-bold text-[var(--text-primary)]">
-            {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
-          </p>
-        </div>
-        <div>
-          <p className="text-[var(--text-secondary)] text-sm">Total Paid</p>
-          <p className="text-[2rem] font-bold text-[var(--text-primary)]">
+      <div className="mb-6 p-4 bg-[var(--bg-surface)] rounded-xl text-center">
+        <p className="text-[var(--text-secondary)] text-sm">Total Remaining</p>
+        <p className="text-[2.5rem] font-bold text-[var(--text-primary)]">
+          {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
+        </p>
+        <p className="text-xs text-[var(--text-secondary)] mt-1">
+          Total paid{" "}
+          <span className="font-semibold text-[var(--text-primary)]">
             {showAmounts ? totalPaid.toLocaleString() : mask(totalPaid)}
-          </p>
-        </div>
+          </span>
+        </p>
+      </div>
+
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={() => setEditMode((v) => !v)}
+          className={`text-xs px-3 py-1 rounded-full border ${
+            editMode
+              ? "bg-[var(--btn-bg)] text-[var(--btn-text)] border-transparent font-semibold"
+              : "border-[var(--border-strong)] text-[var(--text-secondary)]"
+          }`}
+        >
+          {editMode ? "Done" : "Edit"}
+        </button>
       </div>
 
       {/* LIST — accordion rows on mobile; a sortable-looking table on desktop. */}
