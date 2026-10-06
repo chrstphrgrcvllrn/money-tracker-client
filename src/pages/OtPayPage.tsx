@@ -48,10 +48,13 @@ export default function OtPayPage() {
   });
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [entries, setEntries] = useState<OtEntry[]>([]);
-  const [cutoffs, setCutoffs] = useState<string[]>([]);
   const [activeCutoff, setActiveCutoff] = useState<string>("all");
-  const [formCutoff, setFormCutoff] = useState<string>("");
   const [rules, setRules] = useState<CutoffRule[]>([]);
+
+  // Cutoffs come from the date rules; each shift's cutoff is worked out from its start date.
+  const cutoffs = useMemo(() => [...new Set(rules.map((r) => r.cutoff).filter(Boolean))], [rules]);
+  const cutoffFor = (startDate: string) => rules.find((r) => startDate >= r.from && startDate <= r.to)?.cutoff;
+  const cutoffOf = (e: OtEntry) => cutoffFor(e.start.slice(0, 10));
 
   const [openId, setOpenId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -73,12 +76,10 @@ export default function OtPayPage() {
         setSettings(state.settings);
         setHolidays(state.holidays ?? []);
         setEntries(state.entries ?? []);
-        setCutoffs(state.cutoffs ?? []);
         // First visit: seed the default date rules so they apply automatically.
         const saved = state.cutoffRules ?? [];
         const seeded = saved.length > 0 ? saved : DEFAULT_RULES;
         setRules(seeded);
-        setCutoffs((prev) => [...new Set([...(state.cutoffs ?? []), ...seeded.map((r) => r.cutoff), ...prev])]);
       })
       .catch((err) => {
         console.error(err);
@@ -95,35 +96,38 @@ export default function OtPayPage() {
   // Per-entry results use every entry; the summary covers only the selected cutoff.
   const { results } = useMemo(() => summarizeCutoff(entries, settings, holidays), [entries, settings, holidays]);
   const visibleEntries = useMemo(
-    () => (activeCutoff === "all" ? entries : entries.filter((e) => (e.cutoff ?? "") === activeCutoff)),
-    [entries, activeCutoff]
+    () => (activeCutoff === "all" ? entries : entries.filter((e) => (cutoffOf(e) ?? "") === activeCutoff)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [entries, activeCutoff, rules]
   );
   const { summary } = useMemo(() => summarizeCutoff(visibleEntries, settings, holidays), [visibleEntries, settings, holidays]);
 
   // Gross, net and paid for each cutoff on its own (entries without one are "Unassigned").
   const byCutoff = useMemo(() => {
     const labels = [...cutoffs];
-    if (entries.some((e) => !e.cutoff)) labels.push("");
+    if (entries.some((e) => !cutoffOf(e))) labels.push("");
     return labels.map((label) => {
-      const group = entries.filter((e) => (e.cutoff ?? "") === label);
+      const group = entries.filter((e) => (cutoffOf(e) ?? "") === label);
       return { label, count: group.length, ...summarizeCutoff(group, settings, holidays).summary };
     });
-  }, [entries, cutoffs, settings, holidays]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entries, cutoffs, settings, holidays, rules]);
 
-  // The cutoff a shift falls into by its start date, if a rule covers it.
-  const cutoffFor = (startDate: string) => rules.find((r) => startDate >= r.from && startDate <= r.to)?.cutoff;
+  // Entries grouped under their cutoff, in rule order; unmatched shifts last.
+  const groupedEntries = useMemo(
+    () =>
+      [...cutoffs, ""]
+        .map((label) => ({
+          label,
+          items: visibleEntries
+            .filter((e) => (cutoffOf(e) ?? "") === label)
+            .sort((a, b) => a.start.localeCompare(b.start)),
+        }))
+        .filter((g) => g.items.length > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [visibleEntries, cutoffs, rules]
+  );
 
-  const applyRules = () => {
-    setEntries((prev) => prev.map((e) => (e.cutoff ? e : { ...e, cutoff: cutoffFor(e.start.slice(0, 10)) })));
-    showToast("Rules applied to unassigned entries", "success");
-  };
-
-  const addCutoff = () => {
-    const label = prompt("Cutoff name (e.g. Aug 16–31, 2026)")?.trim();
-    if (!label) return;
-    if (!cutoffs.includes(label)) setCutoffs((prev) => [...prev, label]);
-    setFormCutoff(label);
-  };
   const resultById = useMemo(() => new Map(results.map((r) => [r.id, r])), [results]);
   const paste = useMemo(() => (pasteText.trim() ? parsePastedEntries(pasteText, `p${Date.now()}`) : null), [pasteText]);
 
@@ -134,7 +138,7 @@ export default function OtPayPage() {
       showToast("The end must be after the start", "error");
       return;
     }
-    const entry: OtEntry = { id: `e${Date.now()}`, start, end, hoursFiled: hours, cutoff: formCutoff || cutoffFor(startDate) };
+    const entry: OtEntry = { id: `e${Date.now()}`, start, end, hoursFiled: hours };
     setEntries((prev) => [...prev, entry].sort((a, b) => a.start.localeCompare(b.start)));
     setOpenId(entry.id);
   };
@@ -142,7 +146,7 @@ export default function OtPayPage() {
   const addPasted = () => {
     if (!paste || paste.entries.length === 0) return;
     setEntries((prev) =>
-      [...prev, ...paste.entries.map((e) => ({ ...e, cutoff: cutoffFor(e.start.slice(0, 10)) }))].sort((a, b) =>
+      [...prev, ...paste.entries].sort((a, b) =>
         a.start.localeCompare(b.start)
       )
     );
@@ -157,11 +161,10 @@ export default function OtPayPage() {
   const save = async () => {
     setSaving(true);
     try {
-      const saved = await saveOtPay({ settings, holidays, entries, cutoffs, cutoffRules: rules });
+      const saved = await saveOtPay({ settings, holidays, entries, cutoffRules: rules });
       setSettings(saved.settings);
       setHolidays(saved.holidays ?? []);
       setEntries(saved.entries ?? []);
-      setCutoffs(saved.cutoffs ?? []);
       setRules(saved.cutoffRules ?? []);
       showToast("Saved", "success");
     } catch (err) {
@@ -257,22 +260,6 @@ export default function OtPayPage() {
       {/* ADD ENTRY — four dropdowns */}
       <section className="bg-[var(--bg-surface)] rounded-xl p-4 space-y-3">
         <p className="font-semibold">Add OT</p>
-        <div className="flex gap-2 items-end">
-          <label className="flex-1 min-w-0 text-xs text-[var(--text-secondary)]">
-            Cutoff
-            <select value={formCutoff} onChange={(e) => setFormCutoff(e.target.value)} className={`${SELECT} mt-1`}>
-              <option value="">No cutoff</option>
-              {cutoffs.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button type="button" onClick={addCutoff} className="shrink-0 text-xs text-[var(--accent)] py-2">
-            + New
-          </button>
-        </div>
         <div className="space-y-3">
           <div className="flex gap-2 items-end">
             <label className="flex-1 min-w-0 text-xs text-[var(--text-secondary)]">
@@ -348,7 +335,10 @@ export default function OtPayPage() {
       <section className="space-y-2">
         <p className="font-semibold">Entries</p>
         {visibleEntries.length === 0 && <p className="text-xs text-[var(--text-secondary)]">No OT yet.</p>}
-        {visibleEntries.map((e) => {
+        {groupedEntries.map((group) => (
+          <div key={group.label || "unassigned"} className="space-y-2">
+            <p className="text-xs font-semibold text-[var(--accent)] pt-2">{group.label || "Unassigned"}</p>
+        {group.items.map((e) => {
           const r = resultById.get(e.id);
           const open = openId === e.id;
           const [sd, st] = e.start.split("T");
@@ -361,27 +351,10 @@ export default function OtPayPage() {
                   <span className="text-[var(--text-secondary)]">
                     {st}–{et}
                     {ed !== sd ? ` (${fmtDate(ed)})` : ""} · {e.hoursFiled} h
-                    {e.cutoff ? ` · ${e.cutoff}` : ""}
                   </span>
                 </span>
                 <span className="font-semibold">{money(r?.gross ?? 0)}</span>
               </button>
-
-              <label className="mt-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                Cutoff
-                <select
-                  value={e.cutoff ?? ""}
-                  onChange={(ev) => updateEntry(e.id, { cutoff: ev.target.value || undefined })}
-                  className={`${SELECT} flex-1 min-w-0 py-1.5`}
-                >
-                  <option value="">No cutoff</option>
-                  {cutoffs.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </label>
 
               {open && r && (
                 <div className="mt-3 space-y-3 pt-3 border-t border-[var(--border-subtle)]">
@@ -425,6 +398,8 @@ export default function OtPayPage() {
             </div>
           );
         })}
+          </div>
+        ))}
       </section>
 
       {/* MORE — collapsed by default */}
@@ -566,9 +541,6 @@ export default function OtPayPage() {
                   </button>
                 </div>
               ))}
-              <button onClick={applyRules} className="text-xs text-[var(--accent)]">
-                Apply rules to unassigned entries
-              </button>
             </div>
 
             <div className="space-y-2">
