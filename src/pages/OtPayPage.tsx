@@ -17,16 +17,7 @@ const money = (n: number) => n.toLocaleString("en-PH", { minimumFractionDigits: 
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const isoOf = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const addDays = (iso: string, days: number) => {
-  const [y, m, d] = iso.split("-").map(Number);
-  return isoOf(new Date(y, m - 1, d + days));
-};
 
-// Dropdown choices, so nothing has to be typed.
-const DATE_CHOICES = (() => {
-  const today = isoOf(new Date());
-  return Array.from({ length: 105 }, (_, i) => addDays(today, 14 - i)); // 14 days ahead to ~90 back
-})();
 const TIME_CHOICES = Array.from({ length: 48 }, (_, i) => `${pad(Math.floor(i / 2))}:${i % 2 ? "30" : "00"}`);
 const HOUR_CHOICES = Array.from({ length: 32 }, (_, i) => (i + 1) / 2); // 0.5 … 16
 
@@ -54,9 +45,10 @@ export default function OtPayPage() {
   const [showPaste, setShowPaste] = useState(false);
   const [pasteText, setPasteText] = useState("");
 
-  // New-entry form (all dropdowns)
-  const [date, setDate] = useState(isoOf(new Date()));
+  // New-entry form: start and end each have their own date and time.
+  const [startDate, setStartDate] = useState(isoOf(new Date()));
   const [startTime, setStartTime] = useState("14:00");
+  const [endDate, setEndDate] = useState(isoOf(new Date()));
   const [endTime, setEndTime] = useState("23:00");
   const [hours, setHours] = useState(8);
 
@@ -85,15 +77,14 @@ export default function OtPayPage() {
   const resultById = useMemo(() => new Map(results.map((r) => [r.id, r])), [results]);
   const paste = useMemo(() => (pasteText.trim() ? parsePastedEntries(pasteText, `p${Date.now()}`) : null), [pasteText]);
 
-  // Overnight shifts: if the end time is not after the start time, it ends the next day.
   const addEntry = () => {
-    const endDate = endTime <= startTime ? addDays(date, 1) : date;
-    const entry: OtEntry = {
-      id: `e${Date.now()}`,
-      start: `${date}T${startTime}`,
-      end: `${endDate}T${endTime}`,
-      hoursFiled: hours,
-    };
+    const start = `${startDate}T${startTime}`;
+    const end = `${endDate}T${endTime}`;
+    if (end <= start) {
+      showToast("The end must be after the start", "error");
+      return;
+    }
+    const entry: OtEntry = { id: `e${Date.now()}`, start, end, hoursFiled: hours };
     setEntries((prev) => [...prev, entry].sort((a, b) => a.start.localeCompare(b.start)));
     setOpenId(entry.id);
   };
@@ -177,18 +168,20 @@ export default function OtPayPage() {
       <section className="bg-[var(--bg-surface)] rounded-xl p-4 space-y-3">
         <p className="font-semibold">Add OT</p>
         <div className="grid grid-cols-2 gap-2">
-          <label className="col-span-2 text-xs text-[var(--text-secondary)]">
-            Date
-            <select value={date} onChange={(e) => setDate(e.target.value)} className={`${SELECT} mt-1`}>
-              {DATE_CHOICES.map((d) => (
-                <option key={d} value={d}>
-                  {fmtDate(d)}
-                </option>
-              ))}
-            </select>
+          <label className="text-xs text-[var(--text-secondary)]">
+            Start date
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                if (endDate < e.target.value) setEndDate(e.target.value);
+              }}
+              className={`${SELECT} mt-1`}
+            />
           </label>
           <label className="text-xs text-[var(--text-secondary)]">
-            Start
+            Start time
             <select value={startTime} onChange={(e) => setStartTime(e.target.value)} className={`${SELECT} mt-1`}>
               {TIME_CHOICES.map((t) => (
                 <option key={t} value={t}>
@@ -198,7 +191,17 @@ export default function OtPayPage() {
             </select>
           </label>
           <label className="text-xs text-[var(--text-secondary)]">
-            End
+            End date
+            <input
+              type="date"
+              value={endDate}
+              min={startDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className={`${SELECT} mt-1`}
+            />
+          </label>
+          <label className="text-xs text-[var(--text-secondary)]">
+            End time
             <select value={endTime} onChange={(e) => setEndTime(e.target.value)} className={`${SELECT} mt-1`}>
               {TIME_CHOICES.map((t) => (
                 <option key={t} value={t}>
@@ -239,7 +242,7 @@ export default function OtPayPage() {
                   <span className="font-medium">{fmtDate(sd)}</span>{" "}
                   <span className="text-[var(--text-secondary)]">
                     {st}–{et}
-                    {ed !== sd ? " (+1)" : ""} · {e.hoursFiled} h
+                    {ed !== sd ? ` (${fmtDate(ed)})` : ""} · {e.hoursFiled} h
                   </span>
                 </span>
                 <span className="font-semibold">{money(r?.gross ?? 0)}</span>
