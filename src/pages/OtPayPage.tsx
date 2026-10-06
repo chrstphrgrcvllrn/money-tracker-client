@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getOtPay, saveOtPay, type CutoffAdjustment, type CutoffRule } from "@/api/otPay";
 import { useToast } from "@/components/useToast";
+import Modal from "@/components/Modal";
 import { SkeletonBlock, SkeletonRows } from "@/components/Skeleton";
 import { estimateNetOt, summarizeCutoff, type DayType, type Holiday, type OtEntry, type OtSettings, type Weekday } from "@/lib/otPay";
 import { parsePastedEntries } from "@/lib/otPaste";
@@ -49,6 +50,7 @@ export default function OtPayPage() {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [entries, setEntries] = useState<OtEntry[]>([]);
   const [activeCutoff, setActiveCutoff] = useState<string>("all");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [rules, setRules] = useState<CutoffRule[]>([]);
   const [adjustments, setAdjustments] = useState<CutoffAdjustment[]>([]);
 
@@ -343,7 +345,8 @@ export default function OtPayPage() {
           const [ed, et] = e.end.split("T");
           return (
             <div key={e.id} className="bg-[var(--bg-surface)] rounded-xl px-4 py-3">
-              <button onClick={() => setOpenId(open ? null : e.id)} className="w-full flex justify-between items-center text-left">
+              <div className="flex items-center gap-2">
+                <button onClick={() => setOpenId(open ? null : e.id)} className="flex-1 min-w-0 flex justify-between items-center text-left">
                 <span className="text-xs">
                   <span className="font-medium">{fmtDate(sd)}</span>{" "}
                   <span className="text-[var(--text-secondary)]">
@@ -352,44 +355,15 @@ export default function OtPayPage() {
                   </span>
                 </span>
                 <span className="font-semibold">{money(r?.gross ?? 0)}</span>
-              </button>
-
-              <label className="mt-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                Cutoff
-                <select
-                  value={e.cutoff === undefined ? "auto" : e.cutoff || "none"}
-                  onChange={(ev) => {
-                    const v = ev.target.value;
-                    updateEntry(e.id, { cutoff: v === "auto" ? undefined : v === "none" ? "" : v });
-                  }}
-                  className={`${SELECT} flex-1 min-w-0 py-1.5`}
+                </button>
+                <button
+                  onClick={() => setEditingId(e.id)}
+                  aria-label="Edit cutoff and day type"
+                  className="shrink-0 text-xs text-[var(--accent)] px-2 py-1"
                 >
-                  <option value="auto">Auto{cutoffFor(e.start.slice(0, 10)) ? ` (${cutoffFor(e.start.slice(0, 10))})` : " (none)"}</option>
-                  {cutoffs.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                  <option value="none">No cutoff</option>
-                </select>
-              </label>
-
-              <label className="mt-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                Day type
-                <select
-                  value={e.dayType ?? "auto"}
-                  onChange={(ev) => {
-                    const v = ev.target.value;
-                    updateEntry(e.id, { dayType: v === "auto" ? undefined : (v as DayType) });
-                  }}
-                  className={`${SELECT} flex-1 min-w-0 py-1.5`}
-                >
-                  <option value="auto">Auto{holidayTypeOn(e.start.slice(0, 10)) ? ` (${DAY_LABEL[holidayTypeOn(e.start.slice(0, 10))!]})` : " (regular)"}</option>
-                  <option value="regular">Regular</option>
-                  <option value="special">Special holiday</option>
-                  <option value="regular_holiday">Regular holiday</option>
-                </select>
-              </label>
+                  Edit
+                </button>
+              </div>
 
               {open && r && (
                 <div className="mt-3 space-y-3 pt-3 border-t border-[var(--border-subtle)]">
@@ -665,6 +639,83 @@ export default function OtPayPage() {
           </div>
         )}
       </section>
+
+      {/* ENTRY SETTINGS — cutoff and day type, edited in a modal */}
+      <Modal
+        open={editingId !== null}
+        onClose={() => setEditingId(null)}
+        title="Entry settings"
+      >
+        {(() => {
+          const e = entries.find((x) => x.id === editingId);
+          if (!e) return null;
+          const startDay = e.start.slice(0, 10);
+          const autoCutoff = cutoffFor(startDay);
+          const autoDay = holidayTypeOn(startDay);
+          return (
+            <div className="space-y-4 text-sm">
+              <p className="text-xs text-[var(--text-secondary)]">
+                {fmtDate(startDay)} · {e.start.slice(11)}–{e.end.slice(11)}
+              </p>
+
+              <label className="block text-xs text-[var(--text-secondary)]">
+                Cutoff
+                <select
+                  value={e.cutoff === undefined ? "auto" : e.cutoff || "none"}
+                  onChange={(ev) => {
+                    const v = ev.target.value;
+                    updateEntry(e.id, { cutoff: v === "auto" ? undefined : v === "none" ? "" : v });
+                  }}
+                  className={`${SELECT} mt-1`}
+                >
+                  <option value="auto">Auto{autoCutoff ? ` (${autoCutoff})` : " (none)"}</option>
+                  {cutoffs.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                  <option value="none">No cutoff</option>
+                </select>
+              </label>
+
+              <label className="block text-xs text-[var(--text-secondary)]">
+                Day type
+                <select
+                  value={e.dayType ?? "auto"}
+                  onChange={(ev) => {
+                    const v = ev.target.value;
+                    updateEntry(e.id, { dayType: v === "auto" ? undefined : (v as DayType) });
+                  }}
+                  className={`${SELECT} mt-1`}
+                >
+                  <option value="auto">Auto{autoDay ? ` (${DAY_LABEL[autoDay]})` : " (regular)"}</option>
+                  <option value="regular">Regular</option>
+                  <option value="special">Special holiday</option>
+                  <option value="regular_holiday">Regular holiday</option>
+                </select>
+              </label>
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  onClick={() => {
+                    removeEntry(e.id);
+                    setEditingId(null);
+                  }}
+                  className="text-xs text-[var(--danger)]"
+                >
+                  Remove entry
+                </button>
+                <button
+                  onClick={() => setEditingId(null)}
+                  className="bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold px-4 py-1.5 rounded-lg"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+      </Modal>
     </div>
   );
 }
