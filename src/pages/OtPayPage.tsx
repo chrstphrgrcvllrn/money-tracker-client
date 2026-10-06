@@ -121,16 +121,10 @@ export default function OtPayPage() {
       expectedGross,
       estimatedTax,
       estimatedNet: Math.round((expectedGross - estimatedTax) * 100) / 100,
-      variance: Math.round((base.actualPaid - expectedGross) * 100) / 100,
     };
   };
-  const summary = useMemo(
-    () => totalsOf(visibleEntries, activeCutoff === "all" ? adjustments : adjustments.filter((a) => a.cutoff === activeCutoff)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [visibleEntries, adjustments, activeCutoff, settings, holidays]
-  );
 
-  // Gross, net and paid for each cutoff on its own (entries without one are "Unassigned").
+  // Gross and net for each cutoff on its own (entries without one are "Unassigned").
   const byCutoff = useMemo(() => {
     const labels = [...cutoffs];
     if (entries.some((e) => !cutoffOf(e))) labels.push("");
@@ -260,31 +254,6 @@ export default function OtPayPage() {
           </div>
         </section>
       )}
-
-      {/* SUMMARY — compact */}
-      <section className="bg-[var(--bg-surface)] rounded-xl p-4">
-        <div className="flex justify-between items-baseline">
-          <span className="text-[var(--text-secondary)] text-xs">Expected net OT</span>
-          <span className="text-xl font-bold">{money(summary.estimatedNet)}</span>
-        </div>
-        <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
-          <div>
-            <p className="text-[var(--text-secondary)]">Gross</p>
-            <p className="font-semibold">{money(summary.expectedGross)}</p>
-          </div>
-          <div>
-            <p className="text-[var(--text-secondary)]">Paid</p>
-            <p className="font-semibold">{money(summary.actualPaid)}</p>
-          </div>
-          <div>
-            <p className="text-[var(--text-secondary)]">Variance</p>
-            <p className={`font-semibold ${summary.variance < 0 ? "text-[var(--danger)]" : ""}`}>
-              {summary.variance < 0 ? "−" : "+"}
-              {money(Math.abs(summary.variance))}
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* ADD ENTRY — four dropdowns */}
       <section className="bg-[var(--bg-surface)] rounded-xl p-4 space-y-3">
@@ -444,18 +413,6 @@ export default function OtPayPage() {
                       Worked {r.workedHours.toFixed(2)} h, but filed {e.hoursFiled} h
                     </p>
                   )}
-                  <label className="flex items-center justify-between gap-3 text-xs text-[var(--text-secondary)]">
-                    Actual paid
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      value={e.actualPaid ?? ""}
-                      onChange={(ev) =>
-                        updateEntry(e.id, { actualPaid: ev.target.value === "" ? undefined : Number(ev.target.value) })
-                      }
-                      className={`${SELECT} w-32 text-right`}
-                    />
-                  </label>
                   <button onClick={() => removeEntry(e.id)} className="text-xs text-[var(--danger)]">
                     Remove
                   </button>
