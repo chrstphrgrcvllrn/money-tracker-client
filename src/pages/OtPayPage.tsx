@@ -167,59 +167,71 @@ export default function OtPayPage() {
       {/* ADD ENTRY — four dropdowns */}
       <section className="bg-[var(--bg-surface)] rounded-xl p-4 space-y-3">
         <p className="font-semibold">Add OT</p>
-        <div className="grid grid-cols-2 gap-2">
-          <label className="text-xs text-[var(--text-secondary)]">
-            Start date
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                if (endDate < e.target.value) setEndDate(e.target.value);
-              }}
-              className={`${SELECT} mt-1`}
-            />
-          </label>
-          <label className="text-xs text-[var(--text-secondary)]">
-            Start time
-            <select value={startTime} onChange={(e) => setStartTime(e.target.value)} className={`${SELECT} mt-1`}>
+        <div className="space-y-3">
+          <div className="flex gap-2 items-end">
+            <label className="flex-1 min-w-0 text-xs text-[var(--text-secondary)]">
+              Start
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  if (endDate < e.target.value) setEndDate(e.target.value);
+                }}
+                className={`${SELECT} mt-1`}
+              />
+            </label>
+            <select
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              aria-label="Start time"
+              className={`${SELECT} w-28 shrink-0`}
+            >
               {TIME_CHOICES.map((t) => (
                 <option key={t} value={t}>
                   {t}
                 </option>
               ))}
             </select>
-          </label>
-          <label className="text-xs text-[var(--text-secondary)]">
-            End date
-            <input
-              type="date"
-              value={endDate}
-              min={startDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className={`${SELECT} mt-1`}
-            />
-          </label>
-          <label className="text-xs text-[var(--text-secondary)]">
-            End time
-            <select value={endTime} onChange={(e) => setEndTime(e.target.value)} className={`${SELECT} mt-1`}>
+          </div>
+
+          <div className="flex gap-2 items-end">
+            <label className="flex-1 min-w-0 text-xs text-[var(--text-secondary)]">
+              End
+              <input
+                type="date"
+                value={endDate}
+                min={startDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className={`${SELECT} mt-1`}
+              />
+            </label>
+            <select
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+              aria-label="End time"
+              className={`${SELECT} w-28 shrink-0`}
+            >
               {TIME_CHOICES.map((t) => (
                 <option key={t} value={t}>
                   {t}
                 </option>
               ))}
             </select>
-          </label>
-          <label className="col-span-2 text-xs text-[var(--text-secondary)]">
-            Hours filed
-            <select value={hours} onChange={(e) => setHours(Number(e.target.value))} className={`${SELECT} mt-1`}>
-              {HOUR_CHOICES.map((h) => (
-                <option key={h} value={h}>
-                  {h} h
-                </option>
-              ))}
-            </select>
-          </label>
+          </div>
+
+          <div>
+            <label className="block text-xs text-[var(--text-secondary)]">
+              Hours filed
+              <select value={hours} onChange={(e) => setHours(Number(e.target.value))} className={`${SELECT} mt-1`}>
+                {HOUR_CHOICES.map((h) => (
+                  <option key={h} value={h}>
+                    {h} h
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
         <button onClick={addEntry} className="w-full bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold py-2 rounded-lg">
           Add
