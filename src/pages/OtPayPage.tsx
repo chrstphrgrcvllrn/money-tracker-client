@@ -54,7 +54,9 @@ export default function OtPayPage() {
   // Cutoffs come from the date rules; each shift's cutoff is worked out from its start date.
   const cutoffs = useMemo(() => [...new Set(rules.map((r) => r.cutoff).filter(Boolean))], [rules]);
   const cutoffFor = (startDate: string) => rules.find((r) => startDate >= r.from && startDate <= r.to)?.cutoff;
-  const cutoffOf = (e: OtEntry) => cutoffFor(e.start.slice(0, 10));
+  // A manual cutoff on the entry wins; otherwise the rule for its start date decides.
+  // "" means the entry is deliberately unassigned.
+  const cutoffOf = (e: OtEntry) => (e.cutoff !== undefined ? e.cutoff || undefined : cutoffFor(e.start.slice(0, 10)));
 
   const [openId, setOpenId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -355,6 +357,26 @@ export default function OtPayPage() {
                 </span>
                 <span className="font-semibold">{money(r?.gross ?? 0)}</span>
               </button>
+
+              <label className="mt-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                Cutoff
+                <select
+                  value={e.cutoff === undefined ? "auto" : e.cutoff || "none"}
+                  onChange={(ev) => {
+                    const v = ev.target.value;
+                    updateEntry(e.id, { cutoff: v === "auto" ? undefined : v === "none" ? "" : v });
+                  }}
+                  className={`${SELECT} flex-1 min-w-0 py-1.5`}
+                >
+                  <option value="auto">Auto{cutoffFor(e.start.slice(0, 10)) ? ` (${cutoffFor(e.start.slice(0, 10))})` : " (none)"}</option>
+                  {cutoffs.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                  <option value="none">No cutoff</option>
+                </select>
+              </label>
 
               {open && r && (
                 <div className="mt-3 space-y-3 pt-3 border-t border-[var(--border-subtle)]">
