@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getOtPay, saveOtPay } from "@/api/otPay";
+import { getOtPay, saveOtPay, type CutoffRule } from "@/api/otPay";
 import { useToast } from "@/components/useToast";
 import { SkeletonBlock, SkeletonRows } from "@/components/Skeleton";
 import { summarizeCutoff, type DayType, type Holiday, type OtEntry, type OtSettings, type Weekday } from "@/lib/otPay";
@@ -29,6 +29,13 @@ const fmtDate = (iso: string) => {
 const FIELD = "bg-[var(--bg-input)] px-3 py-2 rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] outline-none focus:border-[var(--accent)]/50";
 const SELECT = `w-full ${FIELD}`;
 
+// The rules you described: Sep 11–25 → Oct 5 pay; Sep 26–Oct 10 → Oct 20 pay.
+// Sep 25 is in both ranges; it goes to the first (Oct 5) since that range is listed first.
+const DEFAULT_RULES: CutoffRule[] = [
+  { from: "2026-09-11", to: "2026-09-25", cutoff: "Oct 5, 2026" },
+  { from: "2026-09-26", to: "2026-10-10", cutoff: "Oct 20, 2026" },
+];
+
 export default function OtPayPage() {
   const showToast = useToast();
   const [loading, setLoading] = useState(true);
@@ -44,6 +51,8 @@ export default function OtPayPage() {
   const [cutoffs, setCutoffs] = useState<string[]>([]);
   const [activeCutoff, setActiveCutoff] = useState<string>("all");
   const [formCutoff, setFormCutoff] = useState<string>("");
+  const [rules, setRules] = useState<CutoffRule[]>([]);
+
   const [openId, setOpenId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showPaste, setShowPaste] = useState(false);
@@ -65,6 +74,11 @@ export default function OtPayPage() {
         setHolidays(state.holidays ?? []);
         setEntries(state.entries ?? []);
         setCutoffs(state.cutoffs ?? []);
+        // First visit: seed the default date rules so they apply automatically.
+        const saved = state.cutoffRules ?? [];
+        const seeded = saved.length > 0 ? saved : DEFAULT_RULES;
+        setRules(seeded);
+        setCutoffs((prev) => [...new Set([...(state.cutoffs ?? []), ...seeded.map((r) => r.cutoff), ...prev])]);
       })
       .catch((err) => {
         console.error(err);
@@ -96,6 +110,14 @@ export default function OtPayPage() {
     });
   }, [entries, cutoffs, settings, holidays]);
 
+  // The cutoff a shift falls into by its start date, if a rule covers it.
+  const cutoffFor = (startDate: string) => rules.find((r) => startDate >= r.from && startDate <= r.to)?.cutoff;
+
+  const applyRules = () => {
+    setEntries((prev) => prev.map((e) => (e.cutoff ? e : { ...e, cutoff: cutoffFor(e.start.slice(0, 10)) })));
+    showToast("Rules applied to unassigned entries", "success");
+  };
+
   const addCutoff = () => {
     const label = prompt("Cutoff name (e.g. Aug 16–31, 2026)")?.trim();
     if (!label) return;
@@ -112,14 +134,18 @@ export default function OtPayPage() {
       showToast("The end must be after the start", "error");
       return;
     }
-    const entry: OtEntry = { id: `e${Date.now()}`, start, end, hoursFiled: hours, cutoff: formCutoff || undefined };
+    const entry: OtEntry = { id: `e${Date.now()}`, start, end, hoursFiled: hours, cutoff: formCutoff || cutoffFor(startDate) };
     setEntries((prev) => [...prev, entry].sort((a, b) => a.start.localeCompare(b.start)));
     setOpenId(entry.id);
   };
 
   const addPasted = () => {
     if (!paste || paste.entries.length === 0) return;
-    setEntries((prev) => [...prev, ...paste.entries].sort((a, b) => a.start.localeCompare(b.start)));
+    setEntries((prev) =>
+      [...prev, ...paste.entries.map((e) => ({ ...e, cutoff: cutoffFor(e.start.slice(0, 10)) }))].sort((a, b) =>
+        a.start.localeCompare(b.start)
+      )
+    );
     setPasteText("");
     showToast(`Added ${paste.entries.length} entries`, "success");
   };
@@ -131,11 +157,12 @@ export default function OtPayPage() {
   const save = async () => {
     setSaving(true);
     try {
-      const saved = await saveOtPay({ settings, holidays, entries, cutoffs });
+      const saved = await saveOtPay({ settings, holidays, entries, cutoffs, cutoffRules: rules });
       setSettings(saved.settings);
       setHolidays(saved.holidays ?? []);
       setEntries(saved.entries ?? []);
       setCutoffs(saved.cutoffs ?? []);
+      setRules(saved.cutoffRules ?? []);
       showToast("Saved", "success");
     } catch (err) {
       console.error(err);
@@ -503,6 +530,46 @@ export default function OtPayPage() {
                 className={`${SELECT} mt-1`}
               />
             </label>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-[var(--text-secondary)]">Automatic cutoffs (by shift start date)</p>
+                <button
+                  onClick={() => setRules((r) => [...r, { from: isoOf(new Date()), to: isoOf(new Date()), cutoff: "" }])}
+                  className="text-xs text-[var(--accent)]"
+                >
+                  + Add
+                </button>
+              </div>
+              {rules.map((r, i) => (
+                <div key={i} className="grid grid-cols-2 gap-2">
+                  <input
+                    type="date"
+                    value={r.from}
+                    onChange={(e) => setRules((all) => all.map((x, j) => (j === i ? { ...x, from: e.target.value } : x)))}
+                    className={SELECT}
+                  />
+                  <input
+                    type="date"
+                    value={r.to}
+                    onChange={(e) => setRules((all) => all.map((x, j) => (j === i ? { ...x, to: e.target.value } : x)))}
+                    className={SELECT}
+                  />
+                  <input
+                    placeholder="Cutoff name"
+                    value={r.cutoff}
+                    onChange={(e) => setRules((all) => all.map((x, j) => (j === i ? { ...x, cutoff: e.target.value } : x)))}
+                    className={SELECT}
+                  />
+                  <button onClick={() => setRules((all) => all.filter((_, j) => j !== i))} className="text-xs text-[var(--danger)]">
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button onClick={applyRules} className="text-xs text-[var(--accent)]">
+                Apply rules to unassigned entries
+              </button>
+            </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
