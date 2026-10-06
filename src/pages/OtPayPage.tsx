@@ -366,6 +366,11 @@ export default function OtPayPage() {
                             {fmtDate(l.date)} · {DAY_LABEL[l.dayType]}
                             {l.isRestDay ? " · rest" : ""}
                             {l.kind === "OT" ? " · OT" : l.kind === "NIGHT" ? " · night" : ""}
+                            {l.ranges.length > 0 && (
+                              <span className="block text-[10px] text-[var(--text-secondary)]">
+                                {l.kind === "NIGHT" ? "night " : ""}({l.ranges.join(", ")})
+                              </span>
+                            )}
                           </td>
                           <td className="py-0.5 text-right">{l.hours.toFixed(2)} h</td>
                           <td className="py-0.5 text-right font-medium">{money(l.amount)}</td>

@@ -34,6 +34,7 @@ export type Line = {
   hours: number; // hours (not slices) covered by this line
   multiplier: number;
   amount: number; // rounded to 2 decimals
+  ranges: string[]; // clock windows this line covers, e.g. "22:00–23:00"
 };
 
 export type EntryResult = {
@@ -122,6 +123,8 @@ export const computeEntry = (
 
   // Accumulate hours per (date, dayType, isRest, kind, multiplier).
   const buckets = new Map<string, Line>();
+  // Continuous clock segments per bucket, as [startMin, endMin] on the naive clock.
+  const segments = new Map<string, [number, number][]>();
   let workedMin = 0;
 
   for (let t = start; t < end; t += SLICE_MIN) {
@@ -152,8 +155,15 @@ export const computeEntry = (
           hours,
           multiplier,
           amount: 0,
+          ranges: [],
         });
       }
+      // Extend the last segment when this slice starts where it ends.
+      const segs = segments.get(key) ?? [];
+      const last = segs[segs.length - 1];
+      if (last && last[1] === t) last[1] = t + SLICE_MIN;
+      else segs.push([t, t + SLICE_MIN]);
+      segments.set(key, segs);
     };
 
     // Base pay on the slice (only the extra premium over salary is paid).
@@ -168,11 +178,20 @@ export const computeEntry = (
     workedMin += SLICE_MIN;
   }
 
+  const clock = (min: number) => {
+    const m = min % (24 * 60);
+    return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+  };
   const lines: Line[] = [];
-  for (const line of buckets.values()) {
+  for (const [key, line] of buckets.entries()) {
     const rate = line.kind === "NIGHT" ? 0.1 : 1;
     const amount = line.hours * hourly * line.multiplier * rate;
-    lines.push({ ...line, amount: round2(amount) });
+    const ranges = (segments.get(key) ?? []).map(([a, b]) => {
+      // Midnight at the end of a window reads as 24:00, not 00:00.
+      const end = b % (24 * 60) === 0 ? "24:00" : clock(b);
+      return `${clock(a)}–${end}`;
+    });
+    lines.push({ ...line, amount: round2(amount), ranges });
   }
   lines.sort((a, b) => (a.date === b.date ? a.kind.localeCompare(b.kind) : a.date.localeCompare(b.date)));
 

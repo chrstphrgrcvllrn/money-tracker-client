@@ -180,3 +180,20 @@ describe("day-type tag on an entry", () => {
     expect(computeEntry({ ...shift, dayType: "regular_holiday" }, settings, special).lines[0].multiplier).toBe(1.0);
   });
 });
+
+describe("breakdown clock windows", () => {
+  it("ot-2 lines show which part of the shift each one covers", () => {
+    const r = computeEntry(
+      { id: "ot-2", start: "2026-08-30T14:00", end: "2026-08-31T03:00", breakStart: "2026-08-30T18:00", breakMinutes: 60, hoursFiled: 12 },
+      settings,
+      []
+    );
+    const window = (date: string, kind: string, mult: number) =>
+      r.lines.find((l) => l.date === date && l.kind === kind && l.multiplier === mult)?.ranges;
+    expect(window("2026-08-30", "NIGHT", 1.3)).toEqual(["22:00–23:00"]);
+    expect(window("2026-08-30", "OT", 1.69)).toEqual(["23:00–24:00"]);
+    expect(window("2026-08-30", "NIGHT", 1.69)).toEqual(["23:00–24:00"]);
+    expect(window("2026-08-31", "OT", 1.69)).toEqual(["00:00–03:00"]);
+    expect(window("2026-08-31", "NIGHT", 1.69)).toEqual(["00:00–03:00"]);
+  });
+});
