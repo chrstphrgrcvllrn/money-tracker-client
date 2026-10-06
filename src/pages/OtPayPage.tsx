@@ -86,6 +86,16 @@ export default function OtPayPage() {
   );
   const { summary } = useMemo(() => summarizeCutoff(visibleEntries, settings, holidays), [visibleEntries, settings, holidays]);
 
+  // Gross, net and paid for each cutoff on its own (entries without one are "Unassigned").
+  const byCutoff = useMemo(() => {
+    const labels = [...cutoffs];
+    if (entries.some((e) => !e.cutoff)) labels.push("");
+    return labels.map((label) => {
+      const group = entries.filter((e) => (e.cutoff ?? "") === label);
+      return { label, count: group.length, ...summarizeCutoff(group, settings, holidays).summary };
+    });
+  }, [entries, cutoffs, settings, holidays]);
+
   const addCutoff = () => {
     const label = prompt("Cutoff name (e.g. Aug 16–31, 2026)")?.trim();
     if (!label) return;
@@ -170,6 +180,27 @@ export default function OtPayPage() {
           ))}
         </select>
       </div>
+
+      {/* BY CUTOFF — each cutoff's own gross and net */}
+      {byCutoff.length > 0 && (
+        <section className="bg-[var(--bg-surface)] rounded-xl p-4 space-y-2">
+          <p className="font-semibold">By cutoff</p>
+          <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 gap-y-1 text-xs">
+            <span className="text-[var(--text-secondary)]">Cutoff</span>
+            <span className="text-right text-[var(--text-secondary)]">Gross</span>
+            <span className="text-right text-[var(--text-secondary)]">Net</span>
+            {byCutoff.map((c) => (
+              <div key={c.label || "unassigned"} className="contents">
+                <span className="truncate">
+                  {c.label || "Unassigned"} <span className="text-[var(--text-secondary)]">({c.count})</span>
+                </span>
+                <span className="text-right">{money(c.expectedGross)}</span>
+                <span className="text-right font-semibold">{money(c.estimatedNet)}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* SUMMARY — compact */}
       <section className="bg-[var(--bg-surface)] rounded-xl p-4">
@@ -309,6 +340,22 @@ export default function OtPayPage() {
                 <span className="font-semibold">{money(r?.gross ?? 0)}</span>
               </button>
 
+              <label className="mt-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                Cutoff
+                <select
+                  value={e.cutoff ?? ""}
+                  onChange={(ev) => updateEntry(e.id, { cutoff: ev.target.value || undefined })}
+                  className={`${SELECT} flex-1 min-w-0 py-1.5`}
+                >
+                  <option value="">No cutoff</option>
+                  {cutoffs.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
               {open && r && (
                 <div className="mt-3 space-y-3 pt-3 border-t border-[var(--border-subtle)]">
                   <table className="w-full text-xs">
@@ -331,21 +378,6 @@ export default function OtPayPage() {
                       Worked {r.workedHours.toFixed(2)} h, but filed {e.hoursFiled} h
                     </p>
                   )}
-                  <label className="flex items-center justify-between gap-3 text-xs text-[var(--text-secondary)]">
-                    Cutoff
-                    <select
-                      value={e.cutoff ?? ""}
-                      onChange={(ev) => updateEntry(e.id, { cutoff: ev.target.value || undefined })}
-                      className={`${SELECT} w-56`}
-                    >
-                      <option value="">No cutoff</option>
-                      {cutoffs.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
                   <label className="flex items-center justify-between gap-3 text-xs text-[var(--text-secondary)]">
                     Actual paid
                     <input
