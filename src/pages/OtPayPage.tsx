@@ -55,6 +55,9 @@ export default function OtPayPage() {
   // Cutoffs come from the date rules; each shift's cutoff is worked out from its start date.
   const cutoffs = useMemo(() => [...new Set(rules.map((r) => r.cutoff).filter(Boolean))], [rules]);
   const cutoffFor = (startDate: string) => rules.find((r) => startDate >= r.from && startDate <= r.to)?.cutoff;
+  // The holiday on a shift's start date, if the table has one.
+  const holidayTypeOn = (date: string): DayType | undefined => holidays.find((h) => h.date === date)?.type;
+
   // A manual cutoff on the entry wins; otherwise the rule for its start date decides.
   // "" means the entry is deliberately unassigned.
   const cutoffOf = (e: OtEntry) => (e.cutoff !== undefined ? e.cutoff || undefined : cutoffFor(e.start.slice(0, 10)));
@@ -399,6 +402,23 @@ export default function OtPayPage() {
                     </option>
                   ))}
                   <option value="none">No cutoff</option>
+                </select>
+              </label>
+
+              <label className="mt-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                Day type
+                <select
+                  value={e.dayType ?? "auto"}
+                  onChange={(ev) => {
+                    const v = ev.target.value;
+                    updateEntry(e.id, { dayType: v === "auto" ? undefined : (v as DayType) });
+                  }}
+                  className={`${SELECT} flex-1 min-w-0 py-1.5`}
+                >
+                  <option value="auto">Auto{holidayTypeOn(e.start.slice(0, 10)) ? ` (${DAY_LABEL[holidayTypeOn(e.start.slice(0, 10))!]})` : " (regular)"}</option>
+                  <option value="regular">Regular</option>
+                  <option value="special">Special holiday</option>
+                  <option value="regular_holiday">Regular holiday</option>
                 </select>
               </label>
 

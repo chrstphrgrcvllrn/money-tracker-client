@@ -23,6 +23,7 @@ export type OtEntry = {
   hoursFiled: number;
   actualPaid?: number;
   cutoff?: string; // label of the pay cutoff this shift is placed in
+  dayType?: DayType; // manual tag; absent = from the holiday table, else regular
 };
 
 export type Line = {
@@ -116,7 +117,7 @@ export const computeEntry = (
   // payslip: the Aug 30 → Aug 31 shift was paid entirely as rest-day OT, with no
   // regular-holiday line). So day type and rest-day status come from the start.
   const shiftDateKey = dateKeyOf(start);
-  const shiftDayType: DayType = holidayByDate.get(shiftDateKey) ?? "regular";
+  const shiftDayType: DayType = entry.dayType ?? holidayByDate.get(shiftDateKey) ?? "regular";
   const shiftIsRestDay = settings.restDays.includes(weekdayOf(start));
 
   // Accumulate hours per (date, dayType, isRest, kind, multiplier).

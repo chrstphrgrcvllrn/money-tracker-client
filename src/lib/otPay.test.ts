@@ -161,3 +161,22 @@ describe("estimateNetOt", () => {
     expect(net).toBe(Number((5000 - tax).toFixed(2)));
   });
 });
+
+describe("day-type tag on an entry", () => {
+  it("tagging a rest-day shift as regular holiday uses the RH rest-day row (2.6×) for its 8 hours", () => {
+    const r = computeEntry(
+      { id: "tag", start: "2026-09-05T06:00", end: "2026-09-05T15:00", breakStart: "2026-09-05T10:00", breakMinutes: 60, hoursFiled: 8, dayType: "regular_holiday" },
+      settings,
+      []
+    );
+    expect(r.lines[0]).toMatchObject({ dayType: "regular_holiday", isRestDay: true, multiplier: 2.6 });
+    expect(r.gross).toBe(11310.33);
+  });
+
+  it("the tag beats the holiday table; without a tag the table decides", () => {
+    const shift = { id: "t", start: "2026-08-21T09:00", end: "2026-08-21T18:00", breakStart: "2026-08-21T12:00", breakMinutes: 60, hoursFiled: 8 };
+    const special: Holiday[] = [{ date: "2026-08-21", name: "Ninoy", type: "special" }];
+    expect(computeEntry(shift, settings, special).gross).toBe(1305.04);
+    expect(computeEntry({ ...shift, dayType: "regular_holiday" }, settings, special).lines[0].multiplier).toBe(1.0);
+  });
+});
