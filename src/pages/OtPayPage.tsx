@@ -345,8 +345,7 @@ export default function OtPayPage() {
           const [ed, et] = e.end.split("T");
           return (
             <div key={e.id} className="bg-[var(--bg-surface)] rounded-xl px-4 py-3">
-              <div className="flex items-center gap-2">
-                <button onClick={() => setOpenId(open ? null : e.id)} className="flex-1 min-w-0 flex justify-between items-center text-left">
+              <button onClick={() => setOpenId(open ? null : e.id)} className="w-full flex justify-between items-center text-left">
                 <span className="text-xs">
                   <span className="font-medium">{fmtDate(sd)}</span>{" "}
                   <span className="text-[var(--text-secondary)]">
@@ -355,15 +354,7 @@ export default function OtPayPage() {
                   </span>
                 </span>
                 <span className="font-semibold">{money(r?.gross ?? 0)}</span>
-                </button>
-                <button
-                  onClick={() => setEditingId(e.id)}
-                  aria-label="Edit cutoff and day type"
-                  className="shrink-0 text-xs text-[var(--accent)] px-2 py-1"
-                >
-                  Edit
-                </button>
-              </div>
+              </button>
 
               {open && r && (
                 <div className="mt-3 space-y-3 pt-3 border-t border-[var(--border-subtle)]">
@@ -387,9 +378,14 @@ export default function OtPayPage() {
                       Worked {r.workedHours.toFixed(2)} h, but filed {e.hoursFiled} h
                     </p>
                   )}
-                  <button onClick={() => removeEntry(e.id)} className="text-xs text-[var(--danger)]">
-                    Remove
-                  </button>
+                  <div className="flex items-center justify-between">
+                    <button onClick={() => setEditingId(e.id)} className="text-xs text-[var(--accent)]">
+                      Edit cutoff &amp; day type
+                    </button>
+                    <button onClick={() => removeEntry(e.id)} className="text-xs text-[var(--danger)]">
+                      Remove
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
