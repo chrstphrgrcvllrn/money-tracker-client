@@ -5,6 +5,7 @@ export type OtPayState = {
   settings: OtSettings;
   holidays: Holiday[];
   entries: OtEntry[];
+  cutoffs: string[];
 };
 
 export const getOtPay = async (): Promise<OtPayState> => {

@@ -22,6 +22,7 @@ export type OtEntry = {
   breakMinutes?: number;
   hoursFiled: number;
   actualPaid?: number;
+  cutoff?: string; // label of the pay cutoff this shift is placed in
 };
 
 export type Line = {
