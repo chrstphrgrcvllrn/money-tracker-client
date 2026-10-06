@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { getOtPay, saveOtPay, type CutoffRule } from "@/api/otPay";
+import { getOtPay, saveOtPay, type CutoffAdjustment, type CutoffRule } from "@/api/otPay";
 import { useToast } from "@/components/useToast";
 import { SkeletonBlock, SkeletonRows } from "@/components/Skeleton";
-import { summarizeCutoff, type DayType, type Holiday, type OtEntry, type OtSettings, type Weekday } from "@/lib/otPay";
+import { estimateNetOt, summarizeCutoff, type DayType, type Holiday, type OtEntry, type OtSettings, type Weekday } from "@/lib/otPay";
 import { parsePastedEntries } from "@/lib/otPaste";
 
 const WEEKDAYS: Weekday[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -50,6 +50,7 @@ export default function OtPayPage() {
   const [entries, setEntries] = useState<OtEntry[]>([]);
   const [activeCutoff, setActiveCutoff] = useState<string>("all");
   const [rules, setRules] = useState<CutoffRule[]>([]);
+  const [adjustments, setAdjustments] = useState<CutoffAdjustment[]>([]);
 
   // Cutoffs come from the date rules; each shift's cutoff is worked out from its start date.
   const cutoffs = useMemo(() => [...new Set(rules.map((r) => r.cutoff).filter(Boolean))], [rules]);
@@ -82,6 +83,7 @@ export default function OtPayPage() {
         const saved = state.cutoffRules ?? [];
         const seeded = saved.length > 0 ? saved : DEFAULT_RULES;
         setRules(seeded);
+        setAdjustments(state.cutoffAdjustments ?? []);
       })
       .catch((err) => {
         console.error(err);
@@ -102,7 +104,28 @@ export default function OtPayPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [entries, activeCutoff, rules]
   );
-  const { summary } = useMemo(() => summarizeCutoff(visibleEntries, settings, holidays), [visibleEntries, settings, holidays]);
+  // Totals for a group of shifts plus its adjustments. Actual withholding from the payslip
+  // replaces the estimate when an adjustment carries it.
+  const totalsOf = (group: OtEntry[], adjs: CutoffAdjustment[]) => {
+    const base = summarizeCutoff(group, settings, holidays).summary;
+    const expectedGross = Math.round((base.expectedGross + adjs.reduce((s, a) => s + a.gross, 0)) * 100) / 100;
+    const withheld = adjs.filter((a) => a.tax !== undefined);
+    const estimatedTax = withheld.length
+      ? Math.round(withheld.reduce((s, a) => s + (a.tax ?? 0), 0) * 100) / 100
+      : estimateNetOt(expectedGross, settings).tax;
+    return {
+      ...base,
+      expectedGross,
+      estimatedTax,
+      estimatedNet: Math.round((expectedGross - estimatedTax) * 100) / 100,
+      variance: Math.round((base.actualPaid - expectedGross) * 100) / 100,
+    };
+  };
+  const summary = useMemo(
+    () => totalsOf(visibleEntries, activeCutoff === "all" ? adjustments : adjustments.filter((a) => a.cutoff === activeCutoff)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [visibleEntries, adjustments, activeCutoff, settings, holidays]
+  );
 
   // Gross, net and paid for each cutoff on its own (entries without one are "Unassigned").
   const byCutoff = useMemo(() => {
@@ -110,10 +133,10 @@ export default function OtPayPage() {
     if (entries.some((e) => !cutoffOf(e))) labels.push("");
     return labels.map((label) => {
       const group = entries.filter((e) => (cutoffOf(e) ?? "") === label);
-      return { label, count: group.length, ...summarizeCutoff(group, settings, holidays).summary };
+      return { label, count: group.length, ...totalsOf(group, adjustments.filter((a) => a.cutoff === label)) };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entries, cutoffs, settings, holidays, rules]);
+  }, [entries, cutoffs, settings, holidays, rules, adjustments]);
 
   // Entries grouped under their cutoff, in rule order; unmatched shifts last.
   const groupedEntries = useMemo(
@@ -163,11 +186,12 @@ export default function OtPayPage() {
   const save = async () => {
     setSaving(true);
     try {
-      const saved = await saveOtPay({ settings, holidays, entries, cutoffRules: rules });
+      const saved = await saveOtPay({ settings, holidays, entries, cutoffRules: rules, cutoffAdjustments: adjustments });
       setSettings(saved.settings);
       setHolidays(saved.holidays ?? []);
       setEntries(saved.entries ?? []);
       setRules(saved.cutoffRules ?? []);
+      setAdjustments(saved.cutoffAdjustments ?? []);
       showToast("Saved", "success");
     } catch (err) {
       console.error(err);
@@ -559,6 +583,62 @@ export default function OtPayPage() {
                     className={SELECT}
                   />
                   <button onClick={() => setRules((all) => all.filter((_, j) => j !== i))} className="text-xs text-[var(--danger)]">
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-[var(--text-secondary)]">Cutoff adjustments (payroll amounts not in the shift times)</p>
+                <button
+                  onClick={() => setAdjustments((a) => [...a, { cutoff: cutoffs[0] ?? "", label: "", gross: 0 }])}
+                  className="text-xs text-[var(--accent)]"
+                >
+                  + Add
+                </button>
+              </div>
+              {adjustments.map((a, i) => (
+                <div key={i} className="grid grid-cols-2 gap-2">
+                  <select
+                    value={a.cutoff}
+                    onChange={(e) => setAdjustments((all) => all.map((x, j) => (j === i ? { ...x, cutoff: e.target.value } : x)))}
+                    className={SELECT}
+                  >
+                    {cutoffs.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    placeholder="Label"
+                    value={a.label}
+                    onChange={(e) => setAdjustments((all) => all.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))}
+                    className={SELECT}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Gross amount"
+                    value={a.gross}
+                    onChange={(e) => setAdjustments((all) => all.map((x, j) => (j === i ? { ...x, gross: Number(e.target.value) } : x)))}
+                    className={SELECT}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Payslip withholding (optional)"
+                    value={a.tax ?? ""}
+                    onChange={(e) =>
+                      setAdjustments((all) =>
+                        all.map((x, j) =>
+                          j === i ? { ...x, tax: e.target.value === "" ? undefined : Number(e.target.value) } : x
+                        )
+                      )
+                    }
+                    className={SELECT}
+                  />
+                  <button onClick={() => setAdjustments((all) => all.filter((_, j) => j !== i))} className="text-xs text-[var(--danger)]">
                     Remove
                   </button>
                 </div>
