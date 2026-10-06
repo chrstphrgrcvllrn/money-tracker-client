@@ -26,7 +26,8 @@ const fmtDate = (iso: string) => {
   return new Date(y, m - 1, d).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 };
 
-const SELECT = "w-full bg-[var(--bg-input)] px-3 py-2 rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] outline-none focus:border-[var(--accent)]/50";
+const FIELD = "bg-[var(--bg-input)] px-3 py-2 rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] outline-none focus:border-[var(--accent)]/50";
+const SELECT = `w-full ${FIELD}`;
 
 export default function OtPayPage() {
   const showToast = useToast();
@@ -185,7 +186,7 @@ export default function OtPayPage() {
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
               aria-label="Start time"
-              className={`${SELECT} w-28 shrink-0`}
+              className={`${FIELD} w-28 shrink-0`}
             >
               {TIME_CHOICES.map((t) => (
                 <option key={t} value={t}>
@@ -210,7 +211,7 @@ export default function OtPayPage() {
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
               aria-label="End time"
-              className={`${SELECT} w-28 shrink-0`}
+              className={`${FIELD} w-28 shrink-0`}
             >
               {TIME_CHOICES.map((t) => (
                 <option key={t} value={t}>
