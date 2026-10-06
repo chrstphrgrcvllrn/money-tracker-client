@@ -59,7 +59,7 @@ describe("pasted rows feed the calculator", () => {
   const settings: OtSettings = { monthlySalary: 94615.22, workDaysPerYear: 261, restDays: ["Sat", "Sun"], taxablePerCutoff: 1250 };
   const holidays: Holiday[] = [{ date: "2026-08-31", name: "National Heroes Day", type: "regular_holiday" }];
 
-  it("the first four pasted rows (no breaks given) still total 28,509.08", () => {
+  it("the first four pasted rows (no breaks given) total 26,876.15 on the payslip basis", () => {
     const text = [
       "5-Sep-26\t06:00\t5-Sep-26\t15:00\t8",
       "30-Aug-26\t14:00\t31-Aug-26\t03:00\t12",
@@ -67,6 +67,6 @@ describe("pasted rows feed the calculator", () => {
       "16-Aug-26\t14:00\t16-Aug-26\t23:00\t8",
     ].join("\n");
     const { entries } = parsePastedEntries(text);
-    expect(summarizeCutoff(entries, settings, holidays).summary.expectedGross).toBe(28509.08);
+    expect(summarizeCutoff(entries, settings, holidays).summary.expectedGross).toBe(26876.15);
   });
 });

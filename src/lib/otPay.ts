@@ -111,6 +111,13 @@ export const computeEntry = (
   const holidayByDate = new Map(holidays.map((h) => [h.date, h.type as DayType]));
   const hourly = hourlyRate(settings);
 
+  // Payroll classifies a whole shift by its START date (per the October 2026
+  // payslip: the Aug 30 → Aug 31 shift was paid entirely as rest-day OT, with no
+  // regular-holiday line). So day type and rest-day status come from the start.
+  const shiftDateKey = dateKeyOf(start);
+  const shiftDayType: DayType = holidayByDate.get(shiftDateKey) ?? "regular";
+  const shiftIsRestDay = settings.restDays.includes(weekdayOf(start));
+
   // Accumulate hours per (date, dayType, isRest, kind, multiplier).
   const buckets = new Map<string, Line>();
   let workedMin = 0;
@@ -119,8 +126,8 @@ export const computeEntry = (
     if (t >= breakStart && t < breakEnd) continue;
 
     const dateKey = dateKeyOf(t);
-    const dayType: DayType = holidayByDate.get(dateKey) ?? "regular";
-    const isRestDay = settings.restDays.includes(weekdayOf(t));
+    const dayType = shiftDayType;
+    const isRestDay = shiftIsRestDay;
     const kindOf = workedMin >= OT_AFTER_MIN ? "OT" : "REG";
     const hourOfDay = new Date(t * 60000).getUTCHours();
     const isNight = hourOfDay >= 22 || hourOfDay < 6;
