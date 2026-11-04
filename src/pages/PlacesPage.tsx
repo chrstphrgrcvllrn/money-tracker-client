@@ -29,7 +29,7 @@ const mapsUrl = (location: string) => `https://www.google.com/maps/search/?api=1
 const mapsHrefFor = (location: string, mapLink: string): string | null =>
   normalizeLink(mapLink) || (location.trim() ? mapsUrl(location) : null);
 
-const emptyForm = { title: "", location: "", details: "", images: [] as string[], links: [] as string[], mapLink: "" };
+const emptyForm = { title: "", location: "", details: "", specialty: "", images: [] as string[], links: [] as string[], mapLink: "" };
 
 const LINK_STYLE: Record<string, string> = {
   tiktok: "bg-black text-white",
@@ -52,11 +52,28 @@ export default function PlacesPage() {
   const [uploading, setUploading] = useState(false);
   const [query, setQuery] = useState("");
 
-  // Full-screen image viewer, opened from a thumbnail in the form.
+  // Full-screen image viewer, opened from a thumbnail in either the view or
+  // the edit form — it holds its own copy of the images so it isn't tied to
+  // either one.
+  const [viewerImages, setViewerImages] = useState<string[] | null>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [viewerDragX, setViewerDragX] = useState(0);
   const viewerDragging = useRef(false);
   const viewerStartX = useRef(0);
+
+  const openViewer = (images: string[], i: number) => {
+    setViewerImages(images);
+    setViewerIndex(i);
+  };
+  const closeViewer = () => {
+    setViewerImages(null);
+    setViewerIndex(null);
+    setViewerDragX(0);
+  };
+
+  // Tapping a card opens this read-only view; "Edit" switches to the form below.
+  const [viewingPlace, setViewingPlace] = useState<Place | null>(null);
+  const closeView = () => setViewingPlace(null);
 
   const [showForm, setShowForm] = useState(false);
   const [linkInput, setLinkInput] = useState("");
@@ -90,7 +107,7 @@ export default function PlacesPage() {
 
   const openEdit = (p: Place) => {
     setEditingId(p._id);
-    setForm({ title: p.title, location: p.location, details: p.details, images: [...p.images], links: [...(p.links ?? [])], mapLink: p.mapLink ?? "" });
+    setForm({ title: p.title, location: p.location, details: p.details, specialty: p.specialty ?? "", images: [...p.images], links: [...(p.links ?? [])], mapLink: p.mapLink ?? "" });
     setShowForm(true);
   };
 
@@ -98,7 +115,7 @@ export default function PlacesPage() {
     setShowForm(false);
     setEditingId(null);
     setForm(emptyForm);
-    setViewerIndex(null);
+    closeViewer();
   };
 
   const handleFiles = async (fileList: FileList | null) => {
@@ -129,7 +146,7 @@ export default function PlacesPage() {
 
   const removeImage = (idx: number) => setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }));
 
-  const viewerGoTo = (i: number) => setViewerIndex(Math.max(0, Math.min(form.images.length - 1, i)));
+  const viewerGoTo = (i: number) => setViewerIndex(Math.max(0, Math.min((viewerImages?.length ?? 1) - 1, i)));
 
   const onViewerPointerDown = (e: React.PointerEvent) => {
     viewerDragging.current = true;
@@ -218,7 +235,7 @@ export default function PlacesPage() {
 
   const q = query.trim().toLowerCase();
   const filteredPlaces = q
-    ? places.filter((p) => [p.title, p.location, p.details].some((field) => field?.toLowerCase().includes(q)))
+    ? places.filter((p) => [p.title, p.location, p.details, p.specialty].some((field) => field?.toLowerCase().includes(q)))
     : places;
 
   return (
@@ -265,7 +282,7 @@ export default function PlacesPage() {
           {filteredPlaces.map((p) => (
             <button
               key={p._id}
-              onClick={() => openEdit(p)}
+              onClick={() => setViewingPlace(p)}
               className="text-left bg-[var(--bg-surface)] rounded-xl overflow-hidden"
             >
               <div className="h-24 bg-[var(--bg-input)] flex items-center justify-center">
@@ -278,11 +295,110 @@ export default function PlacesPage() {
               <div className="p-2">
                 <p className="text-sm font-medium truncate">{p.title}</p>
                 {p.location && <p className="text-xs text-[var(--text-secondary)] truncate">{p.location}</p>}
+                {p.specialty && <p className="text-xs text-[var(--accent)] truncate">{p.specialty}</p>}
               </div>
             </button>
           ))}
         </div>
       )}
+
+      {/* VIEW — read-only; "Edit" hands off to the form below */}
+      <Modal open={!!viewingPlace} onClose={closeView} title={viewingPlace?.title}>
+        {viewingPlace && (
+          <div className="space-y-4">
+            {viewingPlace.images.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto -mx-1 px-1">
+                {viewingPlace.images.map((src, i) => (
+                  <button
+                    key={i}
+                    onClick={() => openViewer(viewingPlace.images, i)}
+                    className="shrink-0 w-20 h-20 rounded-lg overflow-hidden"
+                  >
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {(viewingPlace.location || mapsHrefFor(viewingPlace.location, viewingPlace.mapLink)) && (
+              <div className="flex items-center gap-2">
+                <MapPinIcon className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />
+                <span className="text-sm flex-1 min-w-0 truncate">{viewingPlace.location || "No address set"}</span>
+                {mapsHrefFor(viewingPlace.location, viewingPlace.mapLink) && (
+                  <a
+                    href={mapsHrefFor(viewingPlace.location, viewingPlace.mapLink)!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 text-xs text-[var(--accent)] font-medium"
+                  >
+                    Open in Maps
+                  </a>
+                )}
+              </div>
+            )}
+
+            {viewingPlace.specialty && (
+              <div>
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Worth trying</p>
+                <p className="text-sm">{viewingPlace.specialty}</p>
+              </div>
+            )}
+
+            {viewingPlace.details && (
+              <div>
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Details</p>
+                <p className="text-sm whitespace-pre-wrap">{viewingPlace.details}</p>
+              </div>
+            )}
+
+            {viewingPlace.links.length > 0 && (
+              <div className="space-y-2">
+                {viewingPlace.links.map((link, i) => {
+                  const platform = linkPlatform(link);
+                  return (
+                    <a
+                      key={i}
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${LINK_STYLE[platform]}`}
+                    >
+                      <LinkIconFor platform={platform} className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{LINK_LABEL[platform]}</span>
+                    </a>
+                  );
+                })}
+              </div>
+            )}
+
+            {!viewingPlace.location &&
+              !viewingPlace.specialty &&
+              !viewingPlace.details &&
+              viewingPlace.links.length === 0 &&
+              viewingPlace.images.length === 0 && (
+                <p className="text-sm text-[var(--text-secondary)]">Nothing added yet.</p>
+              )}
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={closeView}
+                className="flex-1 px-4 py-2 text-[var(--text-secondary)] border border-[var(--border-strong)] rounded-lg text-sm"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  openEdit(viewingPlace);
+                  closeView();
+                }}
+                className="flex-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold px-4 py-2 rounded-lg text-sm"
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* ADD / EDIT */}
       <Modal open={showForm} onClose={closeForm} title={editingId ? "Edit Place" : "Add Place"}>
@@ -341,6 +457,16 @@ export default function PlacesPage() {
             />
           </label>
 
+          <label className="block text-xs text-[var(--text-secondary)]">
+            Any unique on this place?
+            <input
+              value={form.specialty}
+              onChange={(e) => setForm((f) => ({ ...f, specialty: e.target.value }))}
+              placeholder="e.g. Carbonara, Crispy Pata"
+              className={`${INPUT} mt-1`}
+            />
+          </label>
+
           <div>
             <p className="text-xs text-[var(--text-secondary)] mb-2">
               Images ({form.images.length}/{MAX_IMAGES})
@@ -348,7 +474,7 @@ export default function PlacesPage() {
             <div className="flex flex-wrap gap-2">
               {form.images.map((src, i) => (
                 <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                  <button type="button" onClick={() => setViewerIndex(i)} className="w-full h-full block">
+                  <button type="button" onClick={() => openViewer(form.images, i)} className="w-full h-full block">
                     <img src={src} alt="" className="w-full h-full object-cover" />
                   </button>
                   <button
@@ -465,19 +591,19 @@ export default function PlacesPage() {
         </div>
       </Modal>
 
-      {/* IMAGE VIEWER — full-screen, swipeable between a place's images */}
-      {viewerIndex !== null && form.images.length > 0 && (
+      {/* IMAGE VIEWER — full-screen, swipeable, shared by the view and edit modals */}
+      {viewerIndex !== null && viewerImages && viewerImages.length > 0 && (
         <div
           className="fixed inset-0 z-[60] bg-black/95 flex flex-col"
           onClick={(e) => {
-            if (e.target === e.currentTarget) setViewerIndex(null);
+            if (e.target === e.currentTarget) closeViewer();
           }}
         >
           <div className="flex items-center justify-between px-4 py-3 shrink-0">
             <span className="text-sm text-white/80">
-              {viewerIndex + 1} / {form.images.length}
+              {viewerIndex + 1} / {viewerImages.length}
             </span>
-            <button onClick={() => setViewerIndex(null)} aria-label="Close" className="p-1.5 text-white">
+            <button onClick={closeViewer} aria-label="Close" className="p-1.5 text-white">
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
@@ -496,13 +622,13 @@ export default function PlacesPage() {
               <div
                 className="flex h-full"
                 style={{
-                  width: `${form.images.length * 100}%`,
-                  transform: `translateX(calc(${-viewerIndex * (100 / form.images.length)}% + ${viewerDragX}px))`,
+                  width: `${viewerImages.length * 100}%`,
+                  transform: `translateX(calc(${-viewerIndex * (100 / viewerImages.length)}% + ${viewerDragX}px))`,
                   transition: viewerDragX === 0 ? "transform 0.25s ease" : "none",
                 }}
               >
-                {form.images.map((src, i) => (
-                  <div key={i} className="h-full flex items-center justify-center" style={{ width: `${100 / form.images.length}%` }}>
+                {viewerImages.map((src, i) => (
+                  <div key={i} className="h-full flex items-center justify-center" style={{ width: `${100 / viewerImages.length}%` }}>
                     <img src={src} alt="" draggable={false} className="max-w-full max-h-full object-contain select-none" />
                   </div>
                 ))}
@@ -518,7 +644,7 @@ export default function PlacesPage() {
                 <ChevronLeftIcon className="w-5 h-5" />
               </button>
             )}
-            {viewerIndex < form.images.length - 1 && (
+            {viewerIndex < viewerImages.length - 1 && (
               <button
                 onClick={() => viewerGoTo(viewerIndex + 1)}
                 aria-label="Next image"
@@ -529,9 +655,9 @@ export default function PlacesPage() {
             )}
           </div>
 
-          {form.images.length > 1 && (
+          {viewerImages.length > 1 && (
             <div className="flex items-center justify-center gap-1.5 py-3 shrink-0">
-              {form.images.map((_, i) => (
+              {viewerImages.map((_, i) => (
                 <span
                   key={i}
                   className={`w-1.5 h-1.5 rounded-full ${i === viewerIndex ? "bg-white" : "bg-white/30"}`}
