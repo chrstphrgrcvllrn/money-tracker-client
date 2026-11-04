@@ -29,7 +29,16 @@ const mapsUrl = (location: string) => `https://www.google.com/maps/search/?api=1
 const mapsHrefFor = (location: string, mapLink: string): string | null =>
   normalizeLink(mapLink) || (location.trim() ? mapsUrl(location) : null);
 
-const emptyForm = { title: "", location: "", details: "", specialty: "", images: [] as string[], links: [] as string[], mapLink: "" };
+const emptyForm = {
+  title: "",
+  location: "",
+  details: "",
+  specialty: "",
+  images: [] as string[],
+  foodImages: [] as string[],
+  links: [] as string[],
+  mapLink: "",
+};
 
 const LINK_STYLE: Record<string, string> = {
   tiktok: "bg-black text-white",
@@ -80,6 +89,7 @@ export default function PlacesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const foodFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,7 +117,16 @@ export default function PlacesPage() {
 
   const openEdit = (p: Place) => {
     setEditingId(p._id);
-    setForm({ title: p.title, location: p.location, details: p.details, specialty: p.specialty ?? "", images: [...p.images], links: [...(p.links ?? [])], mapLink: p.mapLink ?? "" });
+    setForm({
+      title: p.title,
+      location: p.location,
+      details: p.details,
+      specialty: p.specialty ?? "",
+      images: [...p.images],
+      foodImages: [...(p.foodImages ?? [])],
+      links: [...(p.links ?? [])],
+      mapLink: p.mapLink ?? "",
+    });
     setShowForm(true);
   };
 
@@ -118,10 +137,10 @@ export default function PlacesPage() {
     closeViewer();
   };
 
-  const handleFiles = async (fileList: FileList | null) => {
+  const handleFiles = async (field: "images" | "foodImages", fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
     const files = Array.from(fileList);
-    const room = MAX_IMAGES - form.images.length;
+    const room = MAX_IMAGES - form[field].length;
     if (room <= 0) {
       showToast(`Up to ${MAX_IMAGES} images per place`, "error");
       return;
@@ -140,11 +159,12 @@ export default function PlacesPage() {
     if (files.length > room) {
       showToast(`Only added ${room} more — ${MAX_IMAGES} images per place`, "error");
     }
-    setForm((f) => ({ ...f, images: [...f.images, ...next] }));
+    setForm((f) => ({ ...f, [field]: [...f[field], ...next] }));
     setUploading(false);
   };
 
-  const removeImage = (idx: number) => setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }));
+  const removeImage = (field: "images" | "foodImages", idx: number) =>
+    setForm((f) => ({ ...f, [field]: f[field].filter((_, i) => i !== idx) }));
 
   const viewerGoTo = (i: number) => setViewerIndex(Math.max(0, Math.min((viewerImages?.length ?? 1) - 1, i)));
 
@@ -341,6 +361,19 @@ export default function PlacesPage() {
               <div>
                 <p className="text-xs text-[var(--text-secondary)] mb-1">Worth trying</p>
                 <p className="text-sm">{viewingPlace.specialty}</p>
+                {viewingPlace.foodImages.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto -mx-1 px-1 mt-2">
+                    {viewingPlace.foodImages.map((src, i) => (
+                      <button
+                        key={i}
+                        onClick={() => openViewer(viewingPlace.foodImages, i)}
+                        className="shrink-0 w-20 h-20 rounded-lg overflow-hidden"
+                      >
+                        <img src={src} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -375,7 +408,8 @@ export default function PlacesPage() {
               !viewingPlace.specialty &&
               !viewingPlace.details &&
               viewingPlace.links.length === 0 &&
-              viewingPlace.images.length === 0 && (
+              viewingPlace.images.length === 0 &&
+              viewingPlace.foodImages.length === 0 && (
                 <p className="text-sm text-[var(--text-secondary)]">Nothing added yet.</p>
               )}
 
@@ -469,6 +503,55 @@ export default function PlacesPage() {
 
           <div>
             <p className="text-xs text-[var(--text-secondary)] mb-2">
+              Food photos ({form.foodImages.length}/{MAX_IMAGES})
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {form.foodImages.map((src, i) => (
+                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                  <button type="button" onClick={() => openViewer(form.foodImages, i)} className="w-full h-full block">
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeImage("foodImages", i);
+                    }}
+                    aria-label="Remove food image"
+                    className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center"
+                  >
+                    <XMarkIcon className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              ))}
+              {form.foodImages.length < MAX_IMAGES && (
+                <button
+                  onClick={() => foodFileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-16 h-16 rounded-lg border border-dashed border-[var(--border-strong)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <span className="text-[10px]">...</span>
+                  ) : (
+                    <PhotoIcon className="w-5 h-5" />
+                  )}
+                </button>
+              )}
+              <input
+                ref={foodFileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  handleFiles("foodImages", e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs text-[var(--text-secondary)] mb-2">
               Images ({form.images.length}/{MAX_IMAGES})
             </p>
             <div className="flex flex-wrap gap-2">
@@ -480,7 +563,7 @@ export default function PlacesPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeImage(i);
+                      removeImage("images", i);
                     }}
                     aria-label="Remove image"
                     className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center"
@@ -509,7 +592,7 @@ export default function PlacesPage() {
                 multiple
                 className="hidden"
                 onChange={(e) => {
-                  handleFiles(e.target.files);
+                  handleFiles("images", e.target.files);
                   e.target.value = "";
                 }}
               />
