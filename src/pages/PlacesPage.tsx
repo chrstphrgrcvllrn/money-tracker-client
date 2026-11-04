@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { MapPinIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { LinkIcon, MapPinIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { MusicalNoteIcon, PlayCircleIcon } from "@heroicons/react/24/solid";
 import { createPlace, deletePlace, getPlaces, updatePlace } from "@/api/places";
 import type { Place } from "@/types/places.type";
 import { fileToResizedDataUrl } from "@/lib/imageResize";
+import { linkPlatform, normalizeLink } from "@/lib/linkPlatform";
 import Modal from "@/components/Modal";
 import { useToast } from "@/components/useToast";
 import { SkeletonCard } from "@/components/Skeleton";
@@ -14,7 +16,20 @@ const INPUT =
 
 const mapsUrl = (location: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
 
-const emptyForm = { title: "", location: "", details: "", images: [] as string[] };
+const emptyForm = { title: "", location: "", details: "", images: [] as string[], links: [] as string[] };
+
+const LINK_STYLE: Record<string, string> = {
+  tiktok: "bg-black text-white",
+  youtube: "bg-[#FF0000] text-white",
+  other: "bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)]",
+};
+const LINK_LABEL: Record<string, string> = { tiktok: "TikTok", youtube: "YouTube", other: "Link" };
+
+function LinkIconFor({ platform, className }: { platform: string; className?: string }) {
+  if (platform === "tiktok") return <MusicalNoteIcon className={className} />;
+  if (platform === "youtube") return <PlayCircleIcon className={className} />;
+  return <LinkIcon className={className} />;
+}
 
 export default function PlacesPage() {
   const showToast = useToast();
@@ -24,6 +39,7 @@ export default function PlacesPage() {
   const [uploading, setUploading] = useState(false);
 
   const [showForm, setShowForm] = useState(false);
+  const [linkInput, setLinkInput] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,7 +70,7 @@ export default function PlacesPage() {
 
   const openEdit = (p: Place) => {
     setEditingId(p._id);
-    setForm({ title: p.title, location: p.location, details: p.details, images: [...p.images] });
+    setForm({ title: p.title, location: p.location, details: p.details, images: [...p.images], links: [...(p.links ?? [])] });
     setShowForm(true);
   };
 
@@ -91,6 +107,21 @@ export default function PlacesPage() {
   };
 
   const removeImage = (idx: number) => setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }));
+
+  const addLink = () => {
+    const normalized = normalizeLink(linkInput);
+    if (!normalized) {
+      showToast("That doesn't look like a valid link", "error");
+      return;
+    }
+    if (form.links.includes(normalized)) {
+      setLinkInput("");
+      return;
+    }
+    setForm((f) => ({ ...f, links: [...f.links, normalized] }));
+    setLinkInput("");
+  };
+  const removeLink = (idx: number) => setForm((f) => ({ ...f, links: f.links.filter((_, i) => i !== idx) }));
 
   const save = async () => {
     if (!form.title.trim()) {
@@ -268,6 +299,58 @@ export default function PlacesPage() {
                 }}
               />
             </div>
+          </div>
+
+          <div>
+            <p className="text-xs text-[var(--text-secondary)] mb-2">Links</p>
+            <div className="flex gap-2 mb-2">
+              <input
+                value={linkInput}
+                onChange={(e) => setLinkInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addLink();
+                  }
+                }}
+                placeholder="Paste a TikTok or YouTube link"
+                className={INPUT}
+              />
+              <button
+                onClick={addLink}
+                aria-label="Add link"
+                className="shrink-0 w-10 rounded-lg bg-[var(--bg-input)] border border-[var(--border-strong)] text-[var(--accent)] flex items-center justify-center"
+              >
+                +
+              </button>
+            </div>
+            {form.links.length > 0 && (
+              <div className="space-y-2">
+                {form.links.map((link, i) => {
+                  const platform = linkPlatform(link);
+                  return (
+                    <div key={i} className="flex items-center gap-2">
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex-1 min-w-0 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${LINK_STYLE[platform]}`}
+                      >
+                        <LinkIconFor platform={platform} className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{LINK_LABEL[platform]}</span>
+                      </a>
+                      <button
+                        onClick={() => removeLink(i)}
+                        aria-label="Remove link"
+                        className="shrink-0 text-[var(--text-secondary)]"
+                      >
+                        <XMarkIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 pt-2">
