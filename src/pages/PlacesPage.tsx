@@ -591,72 +591,72 @@ export default function PlacesPage() {
         </div>
       </Modal>
 
-      {/* IMAGE VIEWER — full-screen, swipeable, shared by the view and edit modals */}
+      {/* IMAGE VIEWER — true full-screen: the header and dots float on top of
+          the photo (with a gradient scrim for contrast) instead of taking up
+          their own rows, so the image itself gets the whole viewport. */}
       {viewerIndex !== null && viewerImages && viewerImages.length > 0 && (
         <div
-          className="fixed inset-0 z-[60] bg-black/95 flex flex-col"
+          className="fixed inset-0 z-[60] bg-black"
           onClick={(e) => {
             if (e.target === e.currentTarget) closeViewer();
           }}
         >
-          <div className="flex items-center justify-between px-4 py-3 shrink-0">
+          {/* Pointer/swipe handlers live only on this div, so the chevron
+              buttons below (siblings, not descendants) get a clean click
+              instead of one muddied by this div's pointer capture. */}
+          <div
+            className="absolute inset-0 touch-pan-y"
+            onPointerDown={onViewerPointerDown}
+            onPointerMove={onViewerPointerMove}
+            onPointerUp={onViewerPointerUp}
+            onPointerCancel={onViewerPointerUp}
+          >
+            <div
+              className="flex h-full"
+              style={{
+                width: `${viewerImages.length * 100}%`,
+                transform: `translateX(calc(${-viewerIndex * (100 / viewerImages.length)}% + ${viewerDragX}px))`,
+                transition: viewerDragX === 0 ? "transform 0.25s ease" : "none",
+              }}
+            >
+              {viewerImages.map((src, i) => (
+                <div key={i} className="h-full flex items-center justify-center" style={{ width: `${100 / viewerImages.length}%` }}>
+                  <img src={src} alt="" draggable={false} className="w-full h-full object-contain select-none" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {viewerIndex > 0 && (
+            <button
+              onClick={() => viewerGoTo(viewerIndex - 1)}
+              aria-label="Previous image"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center"
+            >
+              <ChevronLeftIcon className="w-5 h-5" />
+            </button>
+          )}
+          {viewerIndex < viewerImages.length - 1 && (
+            <button
+              onClick={() => viewerGoTo(viewerIndex + 1)}
+              aria-label="Next image"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center"
+            >
+              <ChevronRightIcon className="w-5 h-5" />
+            </button>
+          )}
+
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/70 to-transparent pointer-events-none">
             <span className="text-sm text-white/80">
               {viewerIndex + 1} / {viewerImages.length}
             </span>
-            <button onClick={closeViewer} aria-label="Close" className="p-1.5 text-white">
+            <button onClick={closeViewer} aria-label="Close" className="p-1.5 text-white pointer-events-auto">
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Pointer/swipe handlers live only on this inner div, so the
-              chevron buttons below (siblings, not descendants) get a clean
-              click instead of one muddied by this div's pointer capture. */}
-          <div className="relative flex-1 min-h-0 overflow-hidden">
-            <div
-              className="h-full touch-pan-y"
-              onPointerDown={onViewerPointerDown}
-              onPointerMove={onViewerPointerMove}
-              onPointerUp={onViewerPointerUp}
-              onPointerCancel={onViewerPointerUp}
-            >
-              <div
-                className="flex h-full"
-                style={{
-                  width: `${viewerImages.length * 100}%`,
-                  transform: `translateX(calc(${-viewerIndex * (100 / viewerImages.length)}% + ${viewerDragX}px))`,
-                  transition: viewerDragX === 0 ? "transform 0.25s ease" : "none",
-                }}
-              >
-                {viewerImages.map((src, i) => (
-                  <div key={i} className="h-full flex items-center justify-center" style={{ width: `${100 / viewerImages.length}%` }}>
-                    <img src={src} alt="" draggable={false} className="max-w-full max-h-full object-contain select-none" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {viewerIndex > 0 && (
-              <button
-                onClick={() => viewerGoTo(viewerIndex - 1)}
-                aria-label="Previous image"
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center"
-              >
-                <ChevronLeftIcon className="w-5 h-5" />
-              </button>
-            )}
-            {viewerIndex < viewerImages.length - 1 && (
-              <button
-                onClick={() => viewerGoTo(viewerIndex + 1)}
-                aria-label="Next image"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center"
-              >
-                <ChevronRightIcon className="w-5 h-5" />
-              </button>
-            )}
-          </div>
-
           {viewerImages.length > 1 && (
-            <div className="flex items-center justify-center gap-1.5 py-3 shrink-0">
+            <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-4 bg-gradient-to-t from-black/70 to-transparent pointer-events-none">
               {viewerImages.map((_, i) => (
                 <span
                   key={i}
