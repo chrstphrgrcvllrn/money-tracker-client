@@ -28,8 +28,15 @@ export default function SidebarNav() {
   return (
     <>
       <aside className="hidden md:flex md:w-60 md:shrink-0 md:h-screen md:sticky md:top-0 md:flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-surface)]">
-        <div className="px-5 pt-6 pb-4">
+        <div className="px-5 pt-6 pb-4 flex items-center justify-between">
           <h1 className="text-lg font-bold text-[var(--text-primary)]">Money Tracker</h1>
+          <button
+            onClick={toggleTheme}
+            aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--bg-input)]"
+          >
+            {isLight ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
+          </button>
         </div>
 
         <nav className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-1">
@@ -55,12 +62,6 @@ export default function SidebarNav() {
           </div>
         </nav>
 
-        <div className="px-3 pb-4 pt-2 border-t border-[var(--border-subtle)] space-y-1 shrink-0">
-          <button onClick={toggleTheme} className={actionClass}>
-            {isLight ? <MoonIcon className="w-5 h-5 shrink-0" /> : <SunIcon className="w-5 h-5 shrink-0" />}
-            {isLight ? "Dark mode" : "Light mode"}
-          </button>
-        </div>
       </aside>
 
       {modals}

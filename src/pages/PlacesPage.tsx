@@ -285,7 +285,7 @@ export default function PlacesPage() {
               onClick={() => setViewingPlace(p)}
               className="text-left bg-[var(--bg-surface)] rounded-xl overflow-hidden"
             >
-              <div className="h-24 bg-[var(--bg-input)] flex items-center justify-center">
+              <div className="h-36 bg-[var(--bg-input)] flex items-center justify-center">
                 {p.images[0] ? (
                   <img src={p.images[0]} alt={p.title} className="w-full h-full object-cover" />
                 ) : (
@@ -621,7 +621,7 @@ export default function PlacesPage() {
             >
               {viewerImages.map((src, i) => (
                 <div key={i} className="h-full flex items-center justify-center" style={{ width: `${100 / viewerImages.length}%` }}>
-                  <img src={src} alt="" draggable={false} className="w-full h-full object-contain select-none" />
+                  <img src={src} alt="" draggable={false} className="w-full h-full object-cover select-none" />
                 </div>
               ))}
             </div>

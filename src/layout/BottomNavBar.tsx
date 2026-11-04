@@ -51,6 +51,18 @@ export default function BottomNavBar() {
 
   return (
     <>
+      <button
+        onClick={toggleTheme}
+        aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
+        className={`md:hidden fixed top-4 left-4 z-50 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-xl border ${
+          isLight
+            ? "bg-[rgba(248,250,252,0.85)] border-black/10 text-[var(--nav-inactive)]"
+            : "bg-[rgba(20,20,20,0.85)] border-white/10 text-[var(--nav-inactive)]"
+        }`}
+      >
+        {isLight ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
+      </button>
+
       <nav
         className={`md:hidden fixed bottom-0 left-0 w-full z-50 px-4 py-2 backdrop-blur-xl border-t ${
           isLight
@@ -95,21 +107,6 @@ export default function BottomNavBar() {
               }}
             </NavLink>
           ))}
-
-          {/* THEME TOGGLE */}
-          <button
-            onClick={toggleTheme}
-            className="flex flex-col items-center justify-center text-xs text-[var(--nav-inactive)]"
-          >
-            {isLight ? (
-              <MoonIcon key="theme-dark" className="w-6 h-6 mb-1 nav-icon-active" />
-            ) : (
-              <SunIcon key="theme-light" className="w-6 h-6 mb-1 nav-icon-active" />
-            )}
-            <span className="font-semibold text-center">
-              {isLight ? "Dark" : "Light"}
-            </span>
-          </button>
 
           {/* MORE */}
           <div ref={moreRef} className="relative flex">
