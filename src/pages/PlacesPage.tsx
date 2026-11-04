@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { LinkIcon, MapPinIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { LinkIcon, MagnifyingGlassIcon, MapPinIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { MusicalNoteIcon, PlayCircleIcon } from "@heroicons/react/24/solid";
 import { createPlace, deletePlace, getPlaces, updatePlace } from "@/api/places";
 import type { Place } from "@/types/places.type";
@@ -16,7 +16,12 @@ const INPUT =
 
 const mapsUrl = (location: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
 
-const emptyForm = { title: "", location: "", details: "", images: [] as string[], links: [] as string[] };
+// A pasted Google Maps link (a precise pin) wins over the text-search fallback
+// built from the location field.
+const mapsHrefFor = (location: string, mapLink: string): string | null =>
+  normalizeLink(mapLink) || (location.trim() ? mapsUrl(location) : null);
+
+const emptyForm = { title: "", location: "", details: "", images: [] as string[], links: [] as string[], mapLink: "" };
 
 const LINK_STYLE: Record<string, string> = {
   tiktok: "bg-black text-white",
@@ -37,6 +42,7 @@ export default function PlacesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [query, setQuery] = useState("");
 
   const [showForm, setShowForm] = useState(false);
   const [linkInput, setLinkInput] = useState("");
@@ -70,7 +76,7 @@ export default function PlacesPage() {
 
   const openEdit = (p: Place) => {
     setEditingId(p._id);
-    setForm({ title: p.title, location: p.location, details: p.details, images: [...p.images], links: [...(p.links ?? [])] });
+    setForm({ title: p.title, location: p.location, details: p.details, images: [...p.images], links: [...(p.links ?? [])], mapLink: p.mapLink ?? "" });
     setShowForm(true);
   };
 
@@ -129,14 +135,25 @@ export default function PlacesPage() {
       return;
     }
 
+    let mapLink = "";
+    if (form.mapLink.trim()) {
+      const normalized = normalizeLink(form.mapLink);
+      if (!normalized) {
+        showToast("That Google Maps link doesn't look valid", "error");
+        return;
+      }
+      mapLink = normalized;
+    }
+    const payload = { ...form, mapLink };
+
     setSaving(true);
     try {
       if (editingId) {
-        const updated = await updatePlace(editingId, form);
+        const updated = await updatePlace(editingId, payload);
         setPlaces((prev) => prev.map((p) => (p._id === editingId ? updated : p)));
         showToast("Place updated!", "success");
       } else {
-        const created = await createPlace(form);
+        const created = await createPlace(payload);
         setPlaces((prev) => [created, ...prev]);
         showToast("Place saved!", "success");
       }
@@ -164,9 +181,14 @@ export default function PlacesPage() {
     }
   };
 
+  const q = query.trim().toLowerCase();
+  const filteredPlaces = q
+    ? places.filter((p) => [p.title, p.location, p.details].some((field) => field?.toLowerCase().includes(q)))
+    : places;
+
   return (
     <div className="max-w-md md:max-w-3xl mx-auto px-6 pt-8 pb-10 text-[var(--text-primary)]">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-semibold">Places</h1>
         <button
           onClick={openAdd}
@@ -175,6 +197,19 @@ export default function PlacesPage() {
           +
         </button>
       </div>
+
+      {!loading && places.length > 0 && (
+        <div className="relative mb-6">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search places"
+            aria-label="Search places"
+            className="w-full bg-[var(--bg-input)] pl-9 pr-3 py-2 rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] outline-none focus:border-[var(--accent)]/50"
+          />
+        </div>
+      )}
 
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -186,9 +221,13 @@ export default function PlacesPage() {
         <p className="text-sm text-[var(--text-secondary)] text-center py-12">
           No places yet. Add one to get started!
         </p>
+      ) : filteredPlaces.length === 0 ? (
+        <p className="text-sm text-[var(--text-secondary)] text-center py-12">
+          No places match "{query}".
+        </p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {places.map((p) => (
+          {filteredPlaces.map((p) => (
             <button
               key={p._id}
               onClick={() => openEdit(p)}
@@ -225,16 +264,26 @@ export default function PlacesPage() {
 
           <label className="block text-xs text-[var(--text-secondary)]">
             Location
+            <input
+              value={form.location}
+              onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+              placeholder="Address or description"
+              className={`${INPUT} mt-1`}
+            />
+          </label>
+
+          <label className="block text-xs text-[var(--text-secondary)]">
+            Google Maps link (optional)
             <div className="flex gap-2 mt-1">
               <input
-                value={form.location}
-                onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-                placeholder="Address or description"
+                value={form.mapLink}
+                onChange={(e) => setForm((f) => ({ ...f, mapLink: e.target.value }))}
+                placeholder="Paste a share link for a precise pin"
                 className={INPUT}
               />
-              {form.location.trim() && (
+              {mapsHrefFor(form.location, form.mapLink) && (
                 <a
-                  href={mapsUrl(form.location)}
+                  href={mapsHrefFor(form.location, form.mapLink)!}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Open in Maps"
