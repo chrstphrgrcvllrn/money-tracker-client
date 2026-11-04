@@ -1,0 +1,297 @@
+import { useEffect, useRef, useState } from "react";
+import { MapPinIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { createPlace, deletePlace, getPlaces, updatePlace } from "@/api/places";
+import type { Place } from "@/types/places.type";
+import { fileToResizedDataUrl } from "@/lib/imageResize";
+import Modal from "@/components/Modal";
+import { useToast } from "@/components/useToast";
+import { SkeletonCard } from "@/components/Skeleton";
+
+const MAX_IMAGES = 6;
+
+const INPUT =
+  "w-full bg-[var(--bg-input)] px-3 py-2 rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] outline-none focus:border-[var(--accent)]/50";
+
+const mapsUrl = (location: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+
+const emptyForm = { title: "", location: "", details: "", images: [] as string[] };
+
+export default function PlacesPage() {
+  const showToast = useToast();
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getPlaces()
+      .then((data) => {
+        if (!cancelled) setPlaces(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        showToast("Failed to load places", "error");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showToast]);
+
+  const openAdd = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setShowForm(true);
+  };
+
+  const openEdit = (p: Place) => {
+    setEditingId(p._id);
+    setForm({ title: p.title, location: p.location, details: p.details, images: [...p.images] });
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setForm(emptyForm);
+  };
+
+  const handleFiles = async (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList);
+    const room = MAX_IMAGES - form.images.length;
+    if (room <= 0) {
+      showToast(`Up to ${MAX_IMAGES} images per place`, "error");
+      return;
+    }
+
+    setUploading(true);
+    const next: string[] = [];
+    for (const file of files.slice(0, room)) {
+      try {
+        next.push(await fileToResizedDataUrl(file));
+      } catch (err) {
+        console.error(err);
+        showToast(err instanceof Error ? err.message : "Failed to add an image", "error");
+      }
+    }
+    if (files.length > room) {
+      showToast(`Only added ${room} more — ${MAX_IMAGES} images per place`, "error");
+    }
+    setForm((f) => ({ ...f, images: [...f.images, ...next] }));
+    setUploading(false);
+  };
+
+  const removeImage = (idx: number) => setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }));
+
+  const save = async () => {
+    if (!form.title.trim()) {
+      showToast("Please enter a title", "error");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      if (editingId) {
+        const updated = await updatePlace(editingId, form);
+        setPlaces((prev) => prev.map((p) => (p._id === editingId ? updated : p)));
+        showToast("Place updated!", "success");
+      } else {
+        const created = await createPlace(form);
+        setPlaces((prev) => [created, ...prev]);
+        showToast("Place saved!", "success");
+      }
+      closeForm();
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save place", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editingId) return;
+    if (!confirm("Delete this place? This can't be undone.")) return;
+
+    try {
+      await deletePlace(editingId);
+      setPlaces((prev) => prev.filter((p) => p._id !== editingId));
+      showToast("Place deleted!", "success");
+      closeForm();
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to delete place", "error");
+    }
+  };
+
+  return (
+    <div className="max-w-md md:max-w-3xl mx-auto px-6 pt-8 pb-10 text-[var(--text-primary)]">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-lg font-semibold">Places</h1>
+        <button
+          onClick={openAdd}
+          className="px-[0.7rem] py-[0.3rem] bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold rounded-4xl text-sm"
+        >
+          +
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} className="h-40" />
+          ))}
+        </div>
+      ) : places.length === 0 ? (
+        <p className="text-sm text-[var(--text-secondary)] text-center py-12">
+          No places yet. Add one to get started!
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {places.map((p) => (
+            <button
+              key={p._id}
+              onClick={() => openEdit(p)}
+              className="text-left bg-[var(--bg-surface)] rounded-xl overflow-hidden"
+            >
+              <div className="h-24 bg-[var(--bg-input)] flex items-center justify-center">
+                {p.images[0] ? (
+                  <img src={p.images[0]} alt={p.title} className="w-full h-full object-cover" />
+                ) : (
+                  <MapPinIcon className="w-8 h-8 text-[var(--text-secondary)]" />
+                )}
+              </div>
+              <div className="p-2">
+                <p className="text-sm font-medium truncate">{p.title}</p>
+                {p.location && <p className="text-xs text-[var(--text-secondary)] truncate">{p.location}</p>}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ADD / EDIT */}
+      <Modal open={showForm} onClose={closeForm} title={editingId ? "Edit Place" : "Add Place"}>
+        <div className="space-y-4">
+          <label className="block text-xs text-[var(--text-secondary)]">
+            Title
+            <input
+              value={form.title}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              placeholder="e.g. Grandma's house"
+              className={`${INPUT} mt-1`}
+            />
+          </label>
+
+          <label className="block text-xs text-[var(--text-secondary)]">
+            Location
+            <div className="flex gap-2 mt-1">
+              <input
+                value={form.location}
+                onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+                placeholder="Address or description"
+                className={INPUT}
+              />
+              {form.location.trim() && (
+                <a
+                  href={mapsUrl(form.location)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open in Maps"
+                  className="shrink-0 flex items-center justify-center w-10 rounded-lg bg-[var(--bg-input)] border border-[var(--border-strong)] text-[var(--accent)]"
+                >
+                  <MapPinIcon className="w-4 h-4" />
+                </a>
+              )}
+            </div>
+          </label>
+
+          <label className="block text-xs text-[var(--text-secondary)]">
+            Details
+            <textarea
+              value={form.details}
+              onChange={(e) => setForm((f) => ({ ...f, details: e.target.value }))}
+              rows={4}
+              placeholder="Notes, directions, anything worth remembering"
+              className={`${INPUT} mt-1 resize-none`}
+            />
+          </label>
+
+          <div>
+            <p className="text-xs text-[var(--text-secondary)] mb-2">
+              Images ({form.images.length}/{MAX_IMAGES})
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {form.images.map((src, i) => (
+                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => removeImage(i)}
+                    aria-label="Remove image"
+                    className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center"
+                  >
+                    <XMarkIcon className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              ))}
+              {form.images.length < MAX_IMAGES && (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-16 h-16 rounded-lg border border-dashed border-[var(--border-strong)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <span className="text-[10px]">...</span>
+                  ) : (
+                    <PhotoIcon className="w-5 h-5" />
+                  )}
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  handleFiles(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-2">
+            {editingId && (
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 text-[var(--danger)] border border-[var(--danger)]/30 rounded-lg text-sm"
+              >
+                Delete
+              </button>
+            )}
+            <button onClick={closeForm} className="flex-1 px-4 py-2 text-[var(--text-secondary)] border border-[var(--border-strong)] rounded-lg text-sm">
+              Cancel
+            </button>
+            <button
+              onClick={save}
+              disabled={saving || uploading}
+              className="flex-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}

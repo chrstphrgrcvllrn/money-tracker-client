@@ -9,6 +9,7 @@ import Dashboard from "@/pages/Dashboard";
 import WaterPage from "@/pages/WaterPage";
 import OtPayPage from "@/pages/OtPayPage";
 import CalendarPage from "@/pages/CalendarPage";
+import PlacesPage from "@/pages/PlacesPage";
 import SalaryPage from "@/pages/SalaryPage";
 import LoansPage from "@/pages/LoanPage";
 import BillsPage from "@/pages/BillsPage";
@@ -50,6 +51,7 @@ export default function AppRoutes() {
           <Route path="water" element={<WaterPage />} />
           <Route path="ot-pay" element={<OtPayPage />} />
           <Route path="calendar" element={<CalendarPage />} />
+          <Route path="places" element={<PlacesPage />} />
           <Route path="account" element={<AccountPage />} />
         </Route>
       </Route>
