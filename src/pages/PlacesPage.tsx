@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { LinkIcon, MagnifyingGlassIcon, MapPinIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  LinkIcon,
+  MagnifyingGlassIcon,
+  MapPinIcon,
+  PhotoIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { MusicalNoteIcon, PlayCircleIcon } from "@heroicons/react/24/solid";
 import { createPlace, deletePlace, getPlaces, updatePlace } from "@/api/places";
 import type { Place } from "@/types/places.type";
@@ -44,6 +52,12 @@ export default function PlacesPage() {
   const [uploading, setUploading] = useState(false);
   const [query, setQuery] = useState("");
 
+  // Full-screen image viewer, opened from a thumbnail in the form.
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [viewerDragX, setViewerDragX] = useState(0);
+  const viewerDragging = useRef(false);
+  const viewerStartX = useRef(0);
+
   const [showForm, setShowForm] = useState(false);
   const [linkInput, setLinkInput] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -84,6 +98,7 @@ export default function PlacesPage() {
     setShowForm(false);
     setEditingId(null);
     setForm(emptyForm);
+    setViewerIndex(null);
   };
 
   const handleFiles = async (fileList: FileList | null) => {
@@ -113,6 +128,26 @@ export default function PlacesPage() {
   };
 
   const removeImage = (idx: number) => setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }));
+
+  const viewerGoTo = (i: number) => setViewerIndex(Math.max(0, Math.min(form.images.length - 1, i)));
+
+  const onViewerPointerDown = (e: React.PointerEvent) => {
+    viewerDragging.current = true;
+    viewerStartX.current = e.clientX;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onViewerPointerMove = (e: React.PointerEvent) => {
+    if (!viewerDragging.current) return;
+    setViewerDragX(e.clientX - viewerStartX.current);
+  };
+  const onViewerPointerUp = () => {
+    if (!viewerDragging.current || viewerIndex === null) return;
+    viewerDragging.current = false;
+    const THRESHOLD = 50;
+    if (viewerDragX <= -THRESHOLD) viewerGoTo(viewerIndex + 1);
+    else if (viewerDragX >= THRESHOLD) viewerGoTo(viewerIndex - 1);
+    setViewerDragX(0);
+  };
 
   const addLink = () => {
     const normalized = normalizeLink(linkInput);
@@ -313,9 +348,14 @@ export default function PlacesPage() {
             <div className="flex flex-wrap gap-2">
               {form.images.map((src, i) => (
                 <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => setViewerIndex(i)} className="w-full h-full block">
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                  </button>
                   <button
-                    onClick={() => removeImage(i)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeImage(i);
+                    }}
                     aria-label="Remove image"
                     className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center"
                   >
@@ -424,6 +464,83 @@ export default function PlacesPage() {
           </div>
         </div>
       </Modal>
+
+      {/* IMAGE VIEWER — full-screen, swipeable between a place's images */}
+      {viewerIndex !== null && form.images.length > 0 && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/95 flex flex-col"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setViewerIndex(null);
+          }}
+        >
+          <div className="flex items-center justify-between px-4 py-3 shrink-0">
+            <span className="text-sm text-white/80">
+              {viewerIndex + 1} / {form.images.length}
+            </span>
+            <button onClick={() => setViewerIndex(null)} aria-label="Close" className="p-1.5 text-white">
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Pointer/swipe handlers live only on this inner div, so the
+              chevron buttons below (siblings, not descendants) get a clean
+              click instead of one muddied by this div's pointer capture. */}
+          <div className="relative flex-1 min-h-0 overflow-hidden">
+            <div
+              className="h-full touch-pan-y"
+              onPointerDown={onViewerPointerDown}
+              onPointerMove={onViewerPointerMove}
+              onPointerUp={onViewerPointerUp}
+              onPointerCancel={onViewerPointerUp}
+            >
+              <div
+                className="flex h-full"
+                style={{
+                  width: `${form.images.length * 100}%`,
+                  transform: `translateX(calc(${-viewerIndex * (100 / form.images.length)}% + ${viewerDragX}px))`,
+                  transition: viewerDragX === 0 ? "transform 0.25s ease" : "none",
+                }}
+              >
+                {form.images.map((src, i) => (
+                  <div key={i} className="h-full flex items-center justify-center" style={{ width: `${100 / form.images.length}%` }}>
+                    <img src={src} alt="" draggable={false} className="max-w-full max-h-full object-contain select-none" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {viewerIndex > 0 && (
+              <button
+                onClick={() => viewerGoTo(viewerIndex - 1)}
+                aria-label="Previous image"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+              </button>
+            )}
+            {viewerIndex < form.images.length - 1 && (
+              <button
+                onClick={() => viewerGoTo(viewerIndex + 1)}
+                aria-label="Next image"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center"
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+
+          {form.images.length > 1 && (
+            <div className="flex items-center justify-center gap-1.5 py-3 shrink-0">
+              {form.images.map((_, i) => (
+                <span
+                  key={i}
+                  className={`w-1.5 h-1.5 rounded-full ${i === viewerIndex ? "bg-white" : "bg-white/30"}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
