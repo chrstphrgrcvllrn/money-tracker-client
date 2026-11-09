@@ -841,7 +841,7 @@ export default function SalaryPage() {
           {totals.length === 0 ? (
             <div className="text-[var(--text-secondary)] text-center py-8">No expenses to show</div>
           ) : (
-            <div className="max-w-3xl">
+            <div className="max-w-md">
             {totals.map((item, idx, arr) => (
               <div
                 key={idx}
