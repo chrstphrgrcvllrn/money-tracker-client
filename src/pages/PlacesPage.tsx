@@ -15,8 +15,8 @@ import { fileToResizedDataUrl } from "@/lib/imageResize";
 import { linkPlatform, normalizeLink } from "@/lib/linkPlatform";
 import Modal from "@/components/Modal";
 import SubPlacesEditor from "@/components/places/SubPlacesEditor";
-import SubPlacesView from "@/components/places/SubPlacesView";
-import { newSpot, subPlacesOf, type EditableSubPlace } from "@/components/places/spots";
+import PlaceDetail from "@/components/places/PlaceDetail";
+import { newSpot, type EditableSubPlace } from "@/components/places/spots";
 import { useToast } from "@/components/useToast";
 import { SkeletonCard } from "@/components/Skeleton";
 
@@ -422,161 +422,18 @@ export default function PlacesPage() {
       )}
 
       {/* VIEW — read-only; "Edit" hands off to the form below */}
-      <Modal
-        open={!!viewingPlace}
-        onClose={closeView}
-        title={viewingPlace?.title}
-        maxWidth="max-w-sm md:max-w-[95vw]"
-      >
-        {viewingPlace && (
-          <div className="space-y-4">
-            {viewingPlace.images.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto -mx-1 px-1">
-                {viewingPlace.images.map((src, i) => (
-                  <button
-                    key={i}
-                    onClick={() => openViewer(viewingPlace.images, i)}
-                    className="shrink-0 w-20 h-20 rounded-lg overflow-hidden"
-                  >
-                    <img
-                      src={src}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {(viewingPlace.location ||
-              mapsHrefFor(viewingPlace.location, viewingPlace.mapLink)) && (
-              <div className="flex items-center gap-2">
-                <MapPinIcon className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />
-                <span className="text-sm flex-1 min-w-0 truncate">
-                  {viewingPlace.location || "No address set"}
-                </span>
-                {mapsHrefFor(viewingPlace.location, viewingPlace.mapLink) && (
-                  <a
-                    href={mapsHrefFor(
-                      viewingPlace.location,
-                      viewingPlace.mapLink,
-                    )!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shrink-0 text-xs text-[var(--accent)] font-medium"
-                  >
-                    Open in Maps
-                  </a>
-                )}
-              </div>
-            )}
-
-            {viewingPlace.specialty && (
-              <div>
-                <p className="text-xs text-[var(--text-secondary)] mb-1">
-                  Worth trying
-                </p>
-                <p className="text-sm">{viewingPlace.specialty}</p>
-                {viewingPlace.foodImages.length > 0 && (
-                  <div className="flex gap-2 overflow-x-auto -mx-1 px-1 mt-2">
-                    {viewingPlace.foodImages.map((src, i) => (
-                      <button
-                        key={i}
-                        onClick={() => openViewer(viewingPlace.foodImages, i)}
-                        className="shrink-0 w-20 h-20 rounded-lg overflow-hidden"
-                      >
-                        <img
-                          src={src}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {viewingPlace.details && (
-              <div>
-                <p className="text-xs text-[var(--text-secondary)] mb-1">
-                  Details
-                </p>
-                <p className="text-sm whitespace-pre-wrap">
-                  {viewingPlace.details}
-                </p>
-              </div>
-            )}
-
-            {viewingPlace.thingsToKnow && (
-              <div>
-                <p className="text-xs text-[var(--text-secondary)] mb-1">
-                  Things to know
-                </p>
-                <p className="text-sm whitespace-pre-wrap">
-                  {viewingPlace.thingsToKnow}
-                </p>
-              </div>
-            )}
-
-            <SubPlacesView subPlaces={subPlacesOf(viewingPlace)} onOpenImages={openViewer} />
-
-            {viewingPlace.links.length > 0 && (
-              <div className="space-y-2">
-                {viewingPlace.links.map((link, i) => {
-                  const platform = linkPlatform(link);
-                  return (
-                    <a
-                      key={i}
-                      href={link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${LINK_STYLE[platform]}`}
-                    >
-                      <LinkIconFor
-                        platform={platform}
-                        className="w-4 h-4 shrink-0"
-                      />
-                      <span className="truncate">{LINK_LABEL[platform]}</span>
-                    </a>
-                  );
-                })}
-              </div>
-            )}
-
-            {!viewingPlace.location &&
-              !viewingPlace.specialty &&
-              !viewingPlace.details &&
-              !viewingPlace.thingsToKnow &&
-              viewingPlace.links.length === 0 &&
-              subPlacesOf(viewingPlace).length === 0 &&
-              viewingPlace.images.length === 0 &&
-              viewingPlace.foodImages.length === 0 && (
-                <p className="text-sm text-[var(--text-secondary)]">
-                  Nothing added yet.
-                </p>
-              )}
-
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={closeView}
-                className="flex-1 px-4 py-2 text-[var(--text-secondary)] border border-[var(--border-strong)] rounded-lg text-sm"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  openEdit(viewingPlace);
-                  closeView();
-                }}
-                className="flex-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold px-4 py-2 rounded-lg text-sm"
-              >
-                Edit
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
+      {viewingPlace && (
+        <PlaceDetail
+          place={viewingPlace}
+          mapsHref={mapsHrefFor(viewingPlace.location, viewingPlace.mapLink)}
+          onClose={closeView}
+          onEdit={() => {
+            openEdit(viewingPlace);
+            closeView();
+          }}
+          onOpenImages={openViewer}
+        />
+      )}
 
       {/* ADD / EDIT */}
       <Modal
