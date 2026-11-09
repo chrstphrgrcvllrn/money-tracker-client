@@ -4,6 +4,7 @@ export type Place = {
   location: string;
   details: string;
   specialty: string; // standout dishes/items worth trying, free text
+  thingsToKnow: string; // tips/warnings worth knowing before going, free text
   images: string[]; // base64 data URLs, resized/compressed client-side
   foodImages: string[]; // separate gallery for the `specialty` dishes/items
   links: string[]; // video links (TikTok, YouTube, etc.), rendered as buttons
@@ -17,6 +18,7 @@ export type PlaceInput = {
   location: string;
   details: string;
   specialty: string;
+  thingsToKnow: string;
   images: string[];
   foodImages: string[];
   links: string[];
