@@ -172,6 +172,7 @@ export default function SalaryPage() {
   const [expenseName, setExpenseName] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
   const [expenseNote, setExpenseNote] = useState("");
+  const [expenseCategory, setExpenseCategory] = useState("");
   const [currentSalaryId, setCurrentSalaryId] = useState<string | null>(null);
 
   // ✅ DELETE SALARY MODAL STATE
@@ -369,6 +370,7 @@ export default function SalaryPage() {
     setExpenseName("");
     setExpenseAmount("");
     setExpenseNote("");
+    setExpenseCategory("");
     setShowExpenseForm(true);
   };
 
@@ -381,7 +383,7 @@ export default function SalaryPage() {
     if (!entry) return;
 
     const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
-    const updatedExpenses = [...expenses, { name: expenseName, amount, paid: false, note: expenseNote.trim() }];
+    const updatedExpenses = [...expenses, { name: expenseName, amount, paid: false, note: expenseNote.trim(), category: expenseCategory.trim() }];
 
     try {
       const updated = await updateSalary(currentSalaryId, { expenses: updatedExpenses });
@@ -572,6 +574,13 @@ export default function SalaryPage() {
 
   const totals = calculateTotals();
 
+  // Categories already used on any expense, offered as suggestions.
+  const existingCategories = Array.from(
+    new Set(
+      salaryData.flatMap((s) => (s.expenses ?? []).map((e) => (e.category ?? "").trim()).filter(Boolean))
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
   if (loading) {
     return (
       <div className="text-xs max-w-md md:max-w-5xl mx-auto mt-8 px-6 pb-6 bg-[var(--bg-page)]">
@@ -639,6 +648,19 @@ export default function SalaryPage() {
           onChange={(e) => setExpenseAmount(e.target.value)}
           className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
         />
+        <input
+          type="text"
+          list="expense-categories"
+          placeholder="Category (optional)"
+          value={expenseCategory}
+          onChange={(e) => setExpenseCategory(e.target.value)}
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+        />
+        <datalist id="expense-categories">
+          {existingCategories.map((c) => (
+            <option key={c} value={c} />
+          ))}
+        </datalist>
         <input
           type="text"
           placeholder="Note (optional)"
@@ -922,6 +944,20 @@ export default function SalaryPage() {
                         />
                         <input
                           type="text"
+                          list="expense-categories"
+                          value={editedExpenses[idx]?.category || ""}
+                          placeholder="Category"
+                          onChange={(e) => {
+                            const newExpenses = [...editedExpenses];
+                            if (newExpenses[idx]) {
+                              newExpenses[idx].category = e.target.value;
+                              setEditedExpenses(newExpenses);
+                            }
+                          }}
+                          className="border border-mist-900 px-2 py-1 rounded text-[var(--text-secondary)]"
+                        />
+                        <input
+                          type="text"
                           value={editedExpenses[idx]?.note || ""}
                           placeholder="Note"
                           onChange={(e) => {
@@ -942,6 +978,11 @@ export default function SalaryPage() {
                         }`}
                       >
                         {expense.name}
+                        {expense.category && (
+                          <span className="ml-2 align-middle px-1.5 py-0.5 rounded-full bg-[var(--avatar-bg)] text-[var(--avatar-fg)] text-[10px] font-medium no-underline">
+                            {expense.category}
+                          </span>
+                        )}
                         {expense.note && (
                           <span className="block text-[11px] font-normal no-underline text-[var(--text-secondary)]">
                             {expense.note}
