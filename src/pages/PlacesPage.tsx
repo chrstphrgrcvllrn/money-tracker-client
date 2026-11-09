@@ -15,8 +15,13 @@ import { fileToResizedDataUrl } from "@/lib/imageResize";
 import { linkPlatform, normalizeLink } from "@/lib/linkPlatform";
 import Modal from "@/components/Modal";
 import SubPlacesEditor from "@/components/places/SubPlacesEditor";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import PlaceDetail from "@/components/places/PlaceDetail";
-import { newSpot, type EditableSubPlace } from "@/components/places/spots";
+import {
+  newSpot,
+  subPlacesOf,
+  type EditableSubPlace,
+} from "@/components/places/spots";
 import { useToast } from "@/components/useToast";
 import { SkeletonCard } from "@/components/Skeleton";
 
@@ -98,8 +103,11 @@ export default function PlacesPage() {
   };
 
   // Tapping a card opens this read-only view; "Edit" switches to the form below.
-  const [viewingPlace, setViewingPlace] = useState<Place | null>(null);
-  const closeView = () => setViewingPlace(null);
+  // Phones: tapping a place opens it full-screen. Desktop: master-detail, so
+  // a place is always selected (the first one until you pick another).
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const closeView = () => setOpenId(null);
 
   const [showForm, setShowForm] = useState(false);
   const [linkInput, setLinkInput] = useState("");
@@ -346,8 +354,36 @@ export default function PlacesPage() {
       )
     : places;
 
+  const viewingPlace =
+    places.find(
+      (p) => p._id === (openId ?? (isDesktop ? filteredPlaces[0]?._id : null)),
+    ) ?? null;
+
+  const detail = viewingPlace && (
+    <PlaceDetail
+      embedded={isDesktop}
+      place={viewingPlace}
+      mapsHref={mapsHrefFor(viewingPlace.location, viewingPlace.mapLink)}
+      onClose={closeView}
+      onEdit={() => {
+        openEdit(viewingPlace);
+        if (!isDesktop) closeView();
+      }}
+      onOpenImages={openViewer}
+      onSaveSubPlaces={async (subPlaces) => {
+        const updated = await updatePlace(viewingPlace._id, {
+          subPlaces,
+          spots: [],
+        });
+        setPlaces((prev) =>
+          prev.map((p) => (p._id === updated._id ? updated : p)),
+        );
+      }}
+    />
+  );
+
   return (
-    <div className="max-w-md md:max-w-none mx-auto px-6 md:px-8 pt-8 pb-10 text-[var(--text-primary)]">
+    <div className="max-w-md md:max-w-none mx-auto px-6 md:px-8 pt-8 pb-10 lg:pb-4 lg:h-screen lg:flex lg:flex-col text-[var(--text-primary)]">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-semibold">Places</h1>
         <button
@@ -359,93 +395,126 @@ export default function PlacesPage() {
         </button>
       </div>
 
-      {!loading && places.length > 0 && (
-        <div className="relative mb-6">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search places"
-            aria-label="Search places"
-            className="w-full bg-[var(--bg-input)] pl-9 pr-3 py-2 rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] outline-none focus:border-[var(--accent)]/50"
-          />
-        </div>
-      )}
+      <div className="lg:flex-1 lg:min-h-0 lg:grid lg:grid-cols-[300px_1fr] lg:gap-4">
+        <div className="lg:flex lg:flex-col lg:min-h-0">
+          {!loading && places.length > 0 && (
+            <div className="relative mb-6">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search places"
+                aria-label="Search places"
+                className="w-full bg-[var(--bg-input)] pl-9 pr-3 py-2 rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] outline-none focus:border-[var(--accent)]/50"
+              />
+            </div>
+          )}
 
-      {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonCard key={i} className="h-40" />
-          ))}
-        </div>
-      ) : places.length === 0 ? (
-        <p className="text-sm text-[var(--text-secondary)] text-center py-12">
-          No places yet. Add one to get started!
-        </p>
-      ) : filteredPlaces.length === 0 ? (
-        <p className="text-sm text-[var(--text-secondary)] text-center py-12">
-          No places match "{query}".
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-          {filteredPlaces.map((p) => (
-            <button
-              key={p._id}
-              onClick={() => setViewingPlace(p)}
-              className="text-left bg-[var(--bg-surface)] rounded-xl overflow-hidden"
-            >
-              <div className="h-36 bg-[var(--bg-input)] flex items-center justify-center">
-                {p.images[0] ? (
-                  <img
-                    src={p.images[0]}
-                    alt={p.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <MapPinIcon className="w-8 h-8 text-[var(--text-secondary)]" />
-                )}
-              </div>
-              <div className="p-2">
-                <p className="text-sm font-medium truncate">{p.title}</p>
-                {p.location && (
-                  <p className="text-xs text-[var(--text-secondary)] truncate">
-                    {p.location}
-                  </p>
-                )}
-                {p.specialty && (
-                  <p className="text-xs text-[var(--accent)] truncate">
-                    {p.specialty}
-                  </p>
-                )}
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 lg:hidden">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonCard key={i} className="h-40" />
+              ))}
+            </div>
+          ) : places.length === 0 ? (
+            <p className="text-sm text-[var(--text-secondary)] text-center py-12">
+              No places yet. Add one to get started!
+            </p>
+          ) : filteredPlaces.length === 0 ? (
+            <p className="text-sm text-[var(--text-secondary)] text-center py-12">
+              No places match "{query}".
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 lg:hidden">
+              {filteredPlaces.map((p) => (
+                <button
+                  key={p._id}
+                  onClick={() => setOpenId(p._id)}
+                  className="text-left bg-[var(--bg-surface)] rounded-xl overflow-hidden"
+                >
+                  <div className="h-36 bg-[var(--bg-input)] flex items-center justify-center">
+                    {p.images[0] ? (
+                      <img
+                        src={p.images[0]}
+                        alt={p.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <MapPinIcon className="w-8 h-8 text-[var(--text-secondary)]" />
+                    )}
+                  </div>
+                  <div className="p-2">
+                    <p className="text-sm font-medium truncate">{p.title}</p>
+                    {p.location && (
+                      <p className="text-xs text-[var(--text-secondary)] truncate">
+                        {p.location}
+                      </p>
+                    )}
+                    {p.specialty && (
+                      <p className="text-xs text-[var(--accent)] truncate">
+                        {p.specialty}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
 
-      {/* VIEW — read-only; "Edit" hands off to the form below */}
-      {viewingPlace && (
-        <PlaceDetail
-          place={viewingPlace}
-          mapsHref={mapsHrefFor(viewingPlace.location, viewingPlace.mapLink)}
-          onClose={closeView}
-          onEdit={() => {
-            openEdit(viewingPlace);
-            closeView();
-          }}
-          onOpenImages={openViewer}
-          onSaveSubPlaces={async (subPlaces) => {
-            const updated = await updatePlace(viewingPlace._id, {
-              subPlaces,
-              spots: [],
-            });
-            setPlaces((prev) =>
-              prev.map((p) => (p._id === updated._id ? updated : p)),
-            );
-            setViewingPlace(updated);
-          }}
-        />
-      )}
+          <div className="hidden lg:block lg:flex-1 lg:min-h-0 lg:overflow-y-auto -mx-1 px-1 space-y-1">
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonCard key={i} className="h-16" />
+                ))
+              : filteredPlaces.map((p) => {
+                  const groups = subPlacesOf(p);
+                  const spotCount = groups.reduce(
+                    (n, g) => n + g.spots.length,
+                    0,
+                  );
+                  const selected = p._id === viewingPlace?._id;
+                  return (
+                    <button
+                      key={p._id}
+                      onClick={() => setOpenId(p._id)}
+                      aria-current={selected}
+                      className={`w-full flex items-center gap-3 p-2 rounded-xl text-left transition ${
+                        selected
+                          ? "bg-[var(--bg-input)]"
+                          : "hover:bg-[var(--bg-input)]/60"
+                      }`}
+                    >
+                      <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-[var(--bg-input)] flex items-center justify-center">
+                        {p.images[0] ? (
+                          <img
+                            src={p.images[0]}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <MapPinIcon className="w-5 h-5 text-[var(--text-secondary)]" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold truncate">
+                          {p.title}
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)] truncate">
+                          {groups.length > 0
+                            ? `${groups.length} ${groups.length === 1 ? "place" : "places"} · ${spotCount} ${spotCount === 1 ? "spot" : "spots"}`
+                            : p.location || "No places inside yet"}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+          </div>
+        </div>
+        {isDesktop && <div className="min-h-0">{detail}</div>}
+      </div>
+
+      {/* Phones: full-screen sheet */}
+      {!isDesktop && detail}
 
       {/* ADD / EDIT */}
       <Modal

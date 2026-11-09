@@ -12,6 +12,7 @@ import {
   PencilSquareIcon,
   PhotoIcon,
   PlusIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import type { Spot, SubPlace, SubPlaceInput } from "@/types/places.type";
 import { useToast } from "@/components/useToast";
@@ -375,13 +376,69 @@ export default function SpotExplorer({
   } | null>(null);
   const [saving, setSaving] = useState(false);
 
-  if (subPlaces.length === 0) return null;
-  const activeIdx = Math.min(active, subPlaces.length - 1);
-  const current = subPlaces[activeIdx];
-  const spotIndex = current.spots.findIndex((s) => s._id === spotId);
+  // Adding or renaming a place inside the country, inline in the pill row.
+  const [placeEdit, setPlaceEdit] = useState<{
+    mode: "add" | "rename";
+    value: string;
+  } | null>(null);
+
+  const activeIdx = Math.min(active, Math.max(subPlaces.length - 1, 0));
+  const current: SubPlace | undefined = subPlaces[activeIdx];
+  const spotIndex = current
+    ? current.spots.findIndex((s) => s._id === spotId)
+    : -1;
+
+  const savePlaces = async (input: SubPlaceInput[], okMsg: string) => {
+    setSaving(true);
+    try {
+      await onSave(input);
+      showToast(okMsg, "success");
+      return true;
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save", "error");
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const submitPlaceEdit = async () => {
+    if (!placeEdit) return;
+    const name = placeEdit.value.trim();
+    if (!name) return;
+    const input = subPlacesToInput(subPlaces);
+    if (placeEdit.mode === "add") {
+      input.push({ name, spots: [] });
+      if (await savePlaces(input, "Place added!")) {
+        setActive(input.length - 1);
+        setPlaceEdit(null);
+      }
+    } else {
+      input[activeIdx] = { ...input[activeIdx], name };
+      if (await savePlaces(input, "Place renamed!")) setPlaceEdit(null);
+    }
+  };
+
+  const deletePlace = async () => {
+    if (!current) return;
+    const n = current.spots.length;
+    if (
+      !confirm(
+        `Delete "${current.name}"${n ? ` and its ${n} ${n === 1 ? "spot" : "spots"}` : ""}? This can't be undone.`,
+      )
+    )
+      return;
+    const input = subPlacesToInput(subPlaces).filter((_, i) => i !== activeIdx);
+    if (await savePlaces(input, "Place deleted!")) {
+      setActive(0);
+      setSpotId(null);
+    }
+  };
 
   // Persist the whole sub-place list with this place's spots replaced.
   const persist = async (nextSpots: SubPlaceInput["spots"]) => {
+    if (!current) return false;
     const input = subPlacesToInput(subPlaces);
     input[activeIdx] = { ...input[activeIdx], spots: nextSpots };
     setSaving(true);
@@ -443,7 +500,7 @@ export default function SpotExplorer({
     }
   };
 
-  if (editing) {
+  if (editing && current) {
     return (
       <div className="space-y-4">
         <button
@@ -483,7 +540,7 @@ export default function SpotExplorer({
     );
   }
 
-  if (spotIndex >= 0) {
+  if (current && spotIndex >= 0) {
     const spot = current.spots[spotIndex];
     return (
       <SpotDetail
@@ -516,7 +573,10 @@ export default function SpotExplorer({
         {subPlaces.map((sp, i) => (
           <button
             key={sp._id}
-            onClick={() => setActive(i)}
+            onClick={() => {
+              setActive(i);
+              setPlaceEdit(null);
+            }}
             className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition ${
               sp === current
                 ? "bg-[var(--btn-bg)] text-[var(--btn-text)]"
@@ -527,23 +587,90 @@ export default function SpotExplorer({
             <span className="ml-1.5 opacity-60">{sp.spots.length}</span>
           </button>
         ))}
+        {placeEdit ? (
+          <form
+            className="shrink-0 flex items-center gap-1"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void submitPlaceEdit();
+            }}
+          >
+            <input
+              autoFocus
+              value={placeEdit.value}
+              onChange={(e) =>
+                setPlaceEdit({ ...placeEdit, value: e.target.value })
+              }
+              onKeyDown={(e) => e.key === "Escape" && setPlaceEdit(null)}
+              placeholder={
+                placeEdit.mode === "add" ? "e.g. Sapa" : "Place name"
+              }
+              aria-label="Place name"
+              className="w-36 bg-[var(--bg-input)] px-3 py-1.5 rounded-full text-sm outline-none"
+            />
+            <button
+              type="submit"
+              disabled={saving || !placeEdit.value.trim()}
+              className="px-3 py-1.5 rounded-full bg-[var(--btn-bg)] text-[var(--btn-text)] text-sm font-semibold disabled:opacity-50"
+            >
+              {placeEdit.mode === "add" ? "Add" : "Save"}
+            </button>
+          </form>
+        ) : (
+          <button
+            onClick={() => setPlaceEdit({ mode: "add", value: "" })}
+            className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full border border-dashed border-[var(--border-strong)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          >
+            <PlusIcon className="w-4 h-4" />
+            {subPlaces.length === 0 ? "Add a place inside" : "Place"}
+          </button>
+        )}
       </div>
 
-      <h3 className="text-sm font-semibold text-[var(--text-secondary)] mt-4 mb-3">
-        {current.spots.length} {current.spots.length === 1 ? "spot" : "spots"}{" "}
-        in {current.name}
-      </h3>
+      {!current ? (
+        <p className="text-sm text-[var(--text-secondary)] py-10 text-center">
+          Break this destination into places (e.g. Sapa, Hanoi), then add the
+          spots to see inside each.
+        </p>
+      ) : (
+        <>
+          <div className="flex items-center justify-between mt-4 mb-3">
+            <h3 className="text-sm font-semibold text-[var(--text-secondary)]">
+              {current.spots.length}{" "}
+              {current.spots.length === 1 ? "spot" : "spots"} in {current.name}
+            </h3>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() =>
+                  setPlaceEdit({ mode: "rename", value: current.name })
+                }
+                aria-label={`Rename ${current.name}`}
+                className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-input)]"
+              >
+                <PencilSquareIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => void deletePlace()}
+                aria-label={`Delete ${current.name}`}
+                className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--danger)] hover:bg-[var(--bg-input)]"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {current.spots.map((spot) => (
-          <SpotCard
-            key={spot._id}
-            spot={spot}
-            onOpen={() => setSpotId(spot._id)}
-          />
-        ))}
-        {addTile}
-      </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {current.spots.map((spot) => (
+              <SpotCard
+                key={spot._id}
+                spot={spot}
+                onOpen={() => setSpotId(spot._id)}
+              />
+            ))}
+            {addTile}
+          </div>
+        </>
+      )}
     </section>
   );
 }
