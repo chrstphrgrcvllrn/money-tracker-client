@@ -14,6 +14,7 @@ export const newSpot = (): EditableSpot => ({
   links: [],
   mapLink: "",
   notes: "",
+  activities: "",
   whereToEat: "",
   hotel: "",
 });

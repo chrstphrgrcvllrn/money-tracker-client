@@ -4,7 +4,8 @@ export type SpotInput = {
   images: string[]; // base64 data URLs
   links: string[];
   mapLink: string;
-  notes: string;
+  notes: string; // "Things to know"
+  activities: string; // "What we can do"
   whereToEat: string;
   hotel: string;
 };

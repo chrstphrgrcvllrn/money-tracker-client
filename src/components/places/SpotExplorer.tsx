@@ -5,7 +5,9 @@ import {
   ArrowLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  DocumentTextIcon,
+  LightBulbIcon,
+  PlayCircleIcon,
+  SparklesIcon,
   MapPinIcon,
   PhotoIcon,
 } from "@heroicons/react/24/outline";
@@ -15,42 +17,78 @@ import LinkButton from "./LinkButton";
 
 type OpenImages = (images: string[], index: number) => void;
 
-function Block({
-  icon: Icon,
-  label,
-  children,
-}: {
-  icon: typeof DocumentTextIcon;
-  label: string;
-  children: React.ReactNode;
-}) {
+// Multi-line text renders as a tidy list (leading "-", "•" or "*" stripped);
+// a single line stays a plain paragraph.
+function Lines({ text }: { text: string }) {
+  const lines = text
+    .split("\n")
+    .map((l) => l.replace(/^\s*[-•*]\s*/, "").trim())
+    .filter(Boolean);
+  if (lines.length <= 1) return <p className="text-sm">{lines[0]}</p>;
   return (
-    <div className="rounded-xl bg-[var(--bg-surface)] p-3">
-      <p className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] mb-1">
-        <Icon className="w-3.5 h-3.5" />
-        {label}
-      </p>
-      {children}
-    </div>
+    <ul className="space-y-1.5">
+      {lines.map((l, i) => (
+        <li key={i} className="flex gap-2 text-sm">
+          <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-current opacity-40 shrink-0" />
+          <span className="min-w-0 whitespace-pre-wrap">{l}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
+
+type SectionKey = "stay" | "do" | "know" | "eat" | "watch";
+
+const SECTIONS: Record<
+  SectionKey,
+  { label: string; Icon: typeof PhotoIcon; tint: string }
+> = {
+  stay: {
+    label: "Where to stay",
+    Icon: BuildingOffice2Icon,
+    tint: "text-indigo-400 bg-indigo-500/15",
+  },
+  do: {
+    label: "What we can do",
+    Icon: SparklesIcon,
+    tint: "text-emerald-400 bg-emerald-500/15",
+  },
+  know: {
+    label: "Things to know",
+    Icon: LightBulbIcon,
+    tint: "text-amber-400 bg-amber-500/15",
+  },
+  eat: {
+    label: "Where to eat",
+    Icon: BuildingStorefrontIcon,
+    tint: "text-orange-400 bg-orange-500/15",
+  },
+  watch: {
+    label: "Watch",
+    Icon: PlayCircleIcon,
+    tint: "text-rose-400 bg-rose-500/15",
+  },
+};
+
+// Which sections a spot actually has content for, in display order.
+const sectionsOf = (spot: Spot): SectionKey[] =>
+  (
+    [
+      spot.hotel && "stay",
+      spot.activities && "do",
+      spot.notes && "know",
+      spot.whereToEat && "eat",
+      spot.links.length > 0 && "watch",
+    ] as (SectionKey | "" | false)[]
+  ).filter(Boolean) as SectionKey[];
 
 // A spot in the list: cover, name, a one-line preview and badges. Tapping it
 // opens the full spot view.
 function SpotCard({ spot, onOpen }: { spot: Spot; onOpen: () => void }) {
-  const mapHref = normalizeLink(spot.mapLink);
   const cover = spot.images[0];
-  const preview = spot.notes || spot.whereToEat || spot.hotel;
-  const badges = [
-    spot.images.length > 0 && {
-      Icon: PhotoIcon,
-      text: String(spot.images.length),
-    },
-    spot.notes && { Icon: DocumentTextIcon, text: "Notes" },
-    spot.whereToEat && { Icon: BuildingStorefrontIcon, text: "Eat" },
-    spot.hotel && { Icon: BuildingOffice2Icon, text: "Stay" },
-    mapHref && { Icon: MapPinIcon, text: "Map" },
-  ].filter(Boolean) as { Icon: typeof PhotoIcon; text: string }[];
+  const preview =
+    spot.activities || spot.notes || spot.hotel || spot.whereToEat;
+  const keys = sectionsOf(spot);
 
   return (
     <button
@@ -68,30 +106,62 @@ function SpotCard({ spot, onOpen }: { spot: Spot; onOpen: () => void }) {
           <MapPinIcon className="w-7 h-7 text-[var(--text-secondary)]" />
         )}
       </div>
-      <div className="p-3 space-y-1.5">
+      <div className="p-3 space-y-2">
         <p className="font-semibold truncate">{spot.name}</p>
         {preview && (
           <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
             {preview}
           </p>
         )}
-        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-          {badges.map(({ Icon, text }) => (
-            <span
-              key={text}
-              className="flex items-center gap-1 text-xs text-[var(--text-secondary)]"
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {text}
-            </span>
-          ))}
-        </div>
+        {keys.length > 0 && (
+          <div className="flex gap-1.5">
+            {keys.map((k) => {
+              const { Icon, tint, label } = SECTIONS[k];
+              return (
+                <span
+                  key={k}
+                  title={label}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${tint}`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
     </button>
   );
 }
 
-// Full view of one spot: gallery up top, then the practical info as cards.
+function SectionCard({
+  k,
+  children,
+}: {
+  k: SectionKey;
+  children: React.ReactNode;
+}) {
+  const { Icon, tint, label } = SECTIONS[k];
+  return (
+    <section
+      id={`spot-${k}`}
+      className="rounded-2xl bg-[var(--bg-input)] p-4 scroll-mt-4 mb-3 break-inside-avoid"
+    >
+      <h4 className="flex items-center gap-2 text-sm font-semibold mb-3">
+        <span
+          className={`w-7 h-7 rounded-lg flex items-center justify-center ${tint}`}
+        >
+          <Icon className="w-4 h-4" />
+        </span>
+        {label}
+      </h4>
+      {children}
+    </section>
+  );
+}
+
+// Full view of one spot, laid out as a trip guide: photos, a quick-jump bar,
+// then Where to stay / What we can do / Things to know / Where to eat / Watch.
 function SpotDetail({
   spot,
   placeName,
@@ -111,7 +181,12 @@ function SpotDetail({
 }) {
   const mapHref = normalizeLink(spot.mapLink);
   const [hero, ...rest] = spot.images;
-  const hasInfo = spot.notes || spot.whereToEat || spot.hotel;
+  const keys = sectionsOf(spot);
+
+  const jump = (k: SectionKey) =>
+    document
+      .getElementById(`spot-${k}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <div className="space-y-5">
@@ -190,44 +265,65 @@ function SpotDetail({
         </div>
       )}
 
-      {hasInfo && (
-        <div className="grid gap-3 md:grid-cols-2 items-start">
+      {keys.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto sticky top-0 z-[5] py-2 -my-2 bg-[var(--bg-surface)]">
+          {keys.map((k) => {
+            const { Icon, tint, label } = SECTIONS[k];
+            return (
+              <button
+                key={k}
+                onClick={() => jump(k)}
+                className="shrink-0 flex items-center gap-1.5 pl-1.5 pr-3 py-1 rounded-full bg-[var(--bg-input)] text-sm font-medium"
+              >
+                <span
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${tint}`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                </span>
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {keys.length > 0 && (
+        <div className="xl:columns-2 gap-3">
+          {spot.hotel && (
+            <SectionCard k="stay">
+              <Lines text={spot.hotel} />
+            </SectionCard>
+          )}
+          {spot.activities && (
+            <SectionCard k="do">
+              <Lines text={spot.activities} />
+            </SectionCard>
+          )}
           {spot.notes && (
-            <div className="md:col-span-2">
-              <Block icon={DocumentTextIcon} label="Notes">
-                <p className="text-sm whitespace-pre-wrap">{spot.notes}</p>
-              </Block>
-            </div>
+            <SectionCard k="know">
+              <Lines text={spot.notes} />
+            </SectionCard>
           )}
           {spot.whereToEat && (
-            <Block icon={BuildingStorefrontIcon} label="Where to eat">
-              <p className="text-sm whitespace-pre-wrap">{spot.whereToEat}</p>
-            </Block>
+            <SectionCard k="eat">
+              <Lines text={spot.whereToEat} />
+            </SectionCard>
           )}
-          {spot.hotel && (
-            <Block icon={BuildingOffice2Icon} label="Hotel">
-              <p className="text-sm whitespace-pre-wrap">{spot.hotel}</p>
-            </Block>
-          )}
-        </div>
-      )}
-
-      {spot.links.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">
-            Videos & links
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {spot.links.map((link, i) => (
-              <div key={i} className="flex min-w-[8rem] flex-1 max-w-xs">
-                <LinkButton link={link} />
+          {spot.links.length > 0 && (
+            <SectionCard k="watch">
+              <div className="grid gap-2 sm:grid-cols-2">
+                {spot.links.map((link, i) => (
+                  <div key={i} className="flex">
+                    <LinkButton link={link} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </SectionCard>
+          )}
         </div>
       )}
 
-      {!hero && !hasInfo && !mapHref && spot.links.length === 0 && (
+      {!hero && keys.length === 0 && (
         <p className="text-sm text-[var(--text-secondary)]">
           Nothing added to this spot yet.
         </p>

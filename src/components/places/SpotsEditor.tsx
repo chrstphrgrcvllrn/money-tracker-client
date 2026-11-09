@@ -185,12 +185,34 @@ function SpotForm({
           </label>
 
           <label className="block text-xs text-[var(--text-secondary)]">
-            Notes
+            Where to stay
+            <textarea
+              value={spot.hotel}
+              onChange={(e) => onChange({ hotel: e.target.value })}
+              rows={2}
+              placeholder="Hotels or homestays nearby — one per line"
+              className={`${INPUT} mt-1 resize-none`}
+            />
+          </label>
+
+          <label className="block text-xs text-[var(--text-secondary)]">
+            What we can do
+            <textarea
+              value={spot.activities}
+              onChange={(e) => onChange({ activities: e.target.value })}
+              rows={3}
+              placeholder="Things to do here — one per line"
+              className={`${INPUT} mt-1 resize-none`}
+            />
+          </label>
+
+          <label className="block text-xs text-[var(--text-secondary)]">
+            Things to know
             <textarea
               value={spot.notes}
               onChange={(e) => onChange({ notes: e.target.value })}
               rows={3}
-              placeholder="Tips, best time to go, how to get there"
+              placeholder="Tips, best time to go, how to get there — one per line"
               className={`${INPUT} mt-1 resize-none`}
             />
           </label>
@@ -201,18 +223,7 @@ function SpotForm({
               value={spot.whereToEat}
               onChange={(e) => onChange({ whereToEat: e.target.value })}
               rows={2}
-              placeholder="Restaurants or dishes nearby"
-              className={`${INPUT} mt-1 resize-none`}
-            />
-          </label>
-
-          <label className="block text-xs text-[var(--text-secondary)]">
-            Hotel
-            <textarea
-              value={spot.hotel}
-              onChange={(e) => onChange({ hotel: e.target.value })}
-              rows={2}
-              placeholder="Where to stay nearby"
+              placeholder="Restaurants or dishes nearby — one per line"
               className={`${INPUT} mt-1 resize-none`}
             />
           </label>

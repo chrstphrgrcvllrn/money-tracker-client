@@ -46,7 +46,6 @@ const emptyForm = {
   subPlaces: [] as EditableSubPlace[],
 };
 
-
 const LINK_STYLE: Record<string, string> = {
   tiktok: "bg-black text-white",
   youtube: "bg-[#FF0000] text-white",
@@ -78,8 +77,6 @@ export default function PlacesPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [query, setQuery] = useState("");
-
-
 
   // Full-screen image viewer, opened from a thumbnail in either the view or
   // the edit form — it holds its own copy of the images so it isn't tied to
@@ -157,6 +154,7 @@ export default function PlacesPage() {
           links: [...spot.links],
           mapLink: spot.mapLink ?? "",
           notes: spot.notes ?? "",
+          activities: spot.activities ?? "",
           whereToEat: spot.whereToEat ?? "",
           hotel: spot.hotel ?? "",
         })),
@@ -278,7 +276,10 @@ export default function PlacesPage() {
         if (spot.mapLink.trim()) {
           const normalized = normalizeLink(spot.mapLink);
           if (!normalized) {
-            showToast(`The Google Maps link for "${spot.name.trim()}" doesn't look valid`, "error");
+            showToast(
+              `The Google Maps link for "${spot.name.trim()}" doesn't look valid`,
+              "error",
+            );
             return;
           }
           spotMapLink = normalized;
@@ -289,6 +290,7 @@ export default function PlacesPage() {
           links: spot.links,
           mapLink: spotMapLink,
           notes: spot.notes,
+          activities: spot.activities,
           whereToEat: spot.whereToEat,
           hotel: spot.hotel,
         });
