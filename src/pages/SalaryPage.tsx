@@ -55,6 +55,31 @@ const remainingOf = (e: SalaryEntry) =>
 
 const ORDER_KEY = "salaryOrder";
 
+// Totals groups expenses that are the same thing: "ICCT 1st installment
+// (April 16)" and "ICCT 3rd installment (May 16)" both become "ICCT". What was
+// stripped (ordinal, "installment", date) is kept as a sub-note so no detail
+// is lost. Parentheses are only stripped when they hold a date/number, so
+// "Bayad utang (Tan)" stays its own group.
+const MONTHS =
+  "jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?";
+const DETAIL_RE = new RegExp(
+  `\\([^)]*(?:\\d|\\b(?:${MONTHS})\\b)[^)]*\\)|\\b(?:\\d+(?:st|nd|rd|th)|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\\b|\\b(?:installment|hulog)\\b`,
+  "gi"
+);
+const splitExpenseName = (raw: string) => {
+  const name = (raw ?? "").trim();
+  const parts: string[] = [];
+  const label = name
+    .replace(DETAIL_RE, (m) => {
+      parts.push(m);
+      return " ";
+    })
+    .replace(/\s+/g, " ")
+    .replace(/[\s\-–]+$/, "")
+    .trim();
+  return { label: label || name, detail: label ? parts.join(" ") : "" };
+};
+
 // A salary card that can be dragged by its handle (so touch scrolling still
 // works everywhere else on the card). The handle is passed to `children`.
 function SortableCard({
@@ -499,23 +524,23 @@ export default function SalaryPage() {
 
   // Compute totals by expense name, sorted highest to lowest
   const calculateTotals = () => {
-    const totalsMap: Record<string, number> = {};
+    const groups: Record<string, { name: string; total: number; notes: { detail: string; amount: number }[] }> = {};
 
     salaryData.forEach((entry) => {
       const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
       // Only completed salaries (every expense paid) count toward totals.
       if (expenses.length === 0 || !expenses.every((e) => e.paid)) return;
       expenses.forEach((expense) => {
-        if (!totalsMap[expense.name]) {
-          totalsMap[expense.name] = 0;
-        }
-        totalsMap[expense.name] += Number(expense.amount || 0);
+        const { label, detail } = splitExpenseName(expense.name);
+        const key = label.toLowerCase();
+        const amount = Number(expense.amount || 0);
+        const g = (groups[key] ??= { name: label, total: 0, notes: [] });
+        g.total += amount;
+        if (detail) g.notes.push({ detail, amount });
       });
     });
 
-    return Object.entries(totalsMap)
-      .map(([name, total]) => ({ name, total }))
-      .sort((a, b) => b.total - a.total);
+    return Object.values(groups).sort((a, b) => b.total - a.total);
   };
 
   const totals = calculateTotals();
@@ -675,8 +700,20 @@ export default function SalaryPage() {
                   idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
                 }`}
               >
-                <span className="text-[var(--text-primary)] font-semibold">{item.name}</span>
-                <span className="text-[var(--accent)] font-bold">{format(item.total)}</span>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[var(--text-primary)] font-semibold">{item.name}</span>
+                  {item.notes.length > 0 && (
+                    <ul className="mt-1 space-y-0.5">
+                      {item.notes.map((n, i) => (
+                        <li key={i} className="flex justify-between gap-3 text-[var(--text-secondary)]">
+                          <span className="break-words">{n.detail}</span>
+                          <span className="shrink-0">{format(n.amount)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <span className="text-[var(--accent)] font-bold self-start ml-3">{format(item.total)}</span>
               </div>
             ))}
             </div>
