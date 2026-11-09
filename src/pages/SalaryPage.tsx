@@ -66,11 +66,29 @@ const DETAIL_RE = new RegExp(
   `\\([^)]*(?:\\d|\\b(?:${MONTHS})\\b)[^)]*\\)|\\b(?:\\d+(?:st|nd|rd|th)|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\\b|\\b(?:installment|hulog)\\b`,
   "gi"
 );
-// Different names that are really the same thing in Totals (lowercase key).
+// Different names that are really the same thing in Totals. Exact (lowercase)
+// names first, then ordered patterns; the first match wins. The original
+// wording is kept as the sub-note.
 const TOTALS_ALIASES: Record<string, string> = {
   "bengot budget": "Budget",
   "shanen budget": "Budget",
   shanen: "Budget",
+  gloan: "GLoan 1", // "GLoan 1st (June 3)" is loan 1's first payment
+};
+const TOTALS_RULES: [RegExp, string][] = [
+  [/^bahay\b/i, "Bahay"],
+  [/^bayad\b/i, "Bayad utang"],
+  [/^pamasko\b/i, "Pamasko"],
+  [/\bicct\b/i, "ICCT"],
+  [/^billease\b/i, "Billease"],
+  [/^baon\b/i, "Baon"],
+  [/netflix|neflix|railway|claude pro|^google/i, "Subscriptions"],
+  [/\b(?:hiram|heram)\b/i, "Hiram"],
+];
+const groupFor = (base: string) => {
+  const exact = TOTALS_ALIASES[base.toLowerCase()];
+  if (exact) return exact;
+  return TOTALS_RULES.find(([re]) => re.test(base))?.[1];
 };
 const splitExpenseName = (raw: string) => {
   const name = (raw ?? "").trim();
@@ -84,10 +102,13 @@ const splitExpenseName = (raw: string) => {
     .replace(/[\s\-–]+$/, "")
     .trim();
   const base = label || name;
-  const alias = TOTALS_ALIASES[base.toLowerCase()];
-  if (alias) {
-    // Renamed group: keep the original wording as the sub-note.
-    return { label: alias, detail: [base, ...parts].join(" ") };
+  const group = groupFor(base);
+  if (group) {
+    // Keep what the group name doesn't already say as the sub-note.
+    const rest = base.toLowerCase().startsWith(group.toLowerCase())
+      ? base.slice(group.length).replace(/^[\s\-–:]+/, "")
+      : base;
+    return { label: group, detail: [rest, ...parts].filter(Boolean).join(" ") };
   }
   return { label: base, detail: label ? parts.join(" ") : "" };
 };
