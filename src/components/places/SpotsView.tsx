@@ -124,9 +124,11 @@ export default function SpotsView({ spots, onOpenImages }: Props) {
       <p className="text-xs text-[var(--text-secondary)]">
         Spots ({spots.length})
       </p>
-      {spots.map((spot) => (
-        <SpotCard key={spot._id} spot={spot} onOpenImages={onOpenImages} />
-      ))}
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3 items-start">
+        {spots.map((spot) => (
+          <SpotCard key={spot._id} spot={spot} onOpenImages={onOpenImages} />
+        ))}
+      </div>
     </div>
   );
 }

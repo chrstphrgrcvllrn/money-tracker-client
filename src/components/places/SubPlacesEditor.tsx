@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { MAX_SUBPLACES, newSubPlace, type EditableSubPlace } from "./spots";
 import SpotsEditor from "./SpotsEditor";
 
@@ -39,7 +43,11 @@ function SubPlaceForm({
           aria-label={open ? "Collapse place" : "Expand place"}
           className="shrink-0 w-8 h-8 flex items-center justify-center text-[var(--text-secondary)]"
         >
-          {open ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+          {open ? (
+            <ChevronUpIcon className="w-4 h-4" />
+          ) : (
+            <ChevronDownIcon className="w-4 h-4" />
+          )}
         </button>
         <button
           onClick={onRemove}
@@ -50,13 +58,21 @@ function SubPlaceForm({
         </button>
       </div>
       {open && (
-        <SpotsEditor spots={subPlace.spots} onChange={(spots) => onChange({ spots })} onOpenImages={onOpenImages} />
+        <SpotsEditor
+          spots={subPlace.spots}
+          onChange={(spots) => onChange({ spots })}
+          onOpenImages={onOpenImages}
+        />
       )}
     </div>
   );
 }
 
-export default function SubPlacesEditor({ subPlaces, onChange, onOpenImages }: Props) {
+export default function SubPlacesEditor({
+  subPlaces,
+  onChange,
+  onOpenImages,
+}: Props) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-[var(--text-secondary)]">
@@ -66,7 +82,11 @@ export default function SubPlacesEditor({ subPlaces, onChange, onOpenImages }: P
         <SubPlaceForm
           key={sp.uid}
           subPlace={sp}
-          onChange={(patch) => onChange(subPlaces.map((s, j) => (j === i ? { ...s, ...patch } : s)))}
+          onChange={(patch) =>
+            onChange(
+              subPlaces.map((s, j) => (j === i ? { ...s, ...patch } : s)),
+            )
+          }
           onRemove={() => onChange(subPlaces.filter((_, j) => j !== i))}
           onOpenImages={onOpenImages}
         />

@@ -1,7 +1,17 @@
 import { useRef, useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  PhotoIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import type { SpotInput } from "@/types/places.type";
-import { MAX_SPOTS, MAX_SPOT_IMAGES, newSpot, type EditableSpot } from "./spots";
+import {
+  MAX_SPOTS,
+  MAX_SPOT_IMAGES,
+  newSpot,
+  type EditableSpot,
+} from "./spots";
 import { fileToResizedDataUrl } from "@/lib/imageResize";
 import { normalizeLink } from "@/lib/linkPlatform";
 import { useToast } from "@/components/useToast";
@@ -18,7 +28,13 @@ type SpotFormProps = {
   onOpenImages: (images: string[], index: number) => void;
 };
 
-function SpotForm({ spot, defaultOpen, onChange, onRemove, onOpenImages }: SpotFormProps) {
+function SpotForm({
+  spot,
+  defaultOpen,
+  onChange,
+  onRemove,
+  onOpenImages,
+}: SpotFormProps) {
   const showToast = useToast();
   const [open, setOpen] = useState(defaultOpen);
   const [uploading, setUploading] = useState(false);
@@ -38,10 +54,17 @@ function SpotForm({ spot, defaultOpen, onChange, onRemove, onOpenImages }: SpotF
       try {
         next.push(await fileToResizedDataUrl(file));
       } catch (err) {
-        showToast(err instanceof Error ? err.message : "Failed to add an image", "error");
+        showToast(
+          err instanceof Error ? err.message : "Failed to add an image",
+          "error",
+        );
       }
     }
-    if (fileList.length > room) showToast(`Only added ${room} more — ${MAX_SPOT_IMAGES} images per spot`, "error");
+    if (fileList.length > room)
+      showToast(
+        `Only added ${room} more — ${MAX_SPOT_IMAGES} images per spot`,
+        "error",
+      );
     onChange({ images: [...spot.images, ...next] });
     setUploading(false);
   };
@@ -52,7 +75,8 @@ function SpotForm({ spot, defaultOpen, onChange, onRemove, onOpenImages }: SpotF
       showToast("That doesn't look like a valid link", "error");
       return;
     }
-    if (!spot.links.includes(normalized)) onChange({ links: [...spot.links, normalized] });
+    if (!spot.links.includes(normalized))
+      onChange({ links: [...spot.links, normalized] });
     setLinkInput("");
   };
 
@@ -71,7 +95,11 @@ function SpotForm({ spot, defaultOpen, onChange, onRemove, onOpenImages }: SpotF
           aria-label={open ? "Collapse spot" : "Expand spot"}
           className="shrink-0 w-8 h-8 flex items-center justify-center text-[var(--text-secondary)]"
         >
-          {open ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+          {open ? (
+            <ChevronUpIcon className="w-4 h-4" />
+          ) : (
+            <ChevronDownIcon className="w-4 h-4" />
+          )}
         </button>
         <button
           onClick={onRemove}
@@ -90,12 +118,27 @@ function SpotForm({ spot, defaultOpen, onChange, onRemove, onOpenImages }: SpotF
             </p>
             <div className="flex flex-wrap gap-2">
               {spot.images.map((src, i) => (
-                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                  <button type="button" onClick={() => onOpenImages(spot.images, i)} className="w-full h-full block">
-                    <img src={src} alt="" className="w-full h-full object-cover" />
+                <div
+                  key={i}
+                  className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0"
+                >
+                  <button
+                    type="button"
+                    onClick={() => onOpenImages(spot.images, i)}
+                    className="w-full h-full block"
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                   <button
-                    onClick={() => onChange({ images: spot.images.filter((_, j) => j !== i) })}
+                    onClick={() =>
+                      onChange({
+                        images: spot.images.filter((_, j) => j !== i),
+                      })
+                    }
                     aria-label="Remove image"
                     className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center"
                   >
@@ -110,7 +153,11 @@ function SpotForm({ spot, defaultOpen, onChange, onRemove, onOpenImages }: SpotF
                   aria-label="Add image"
                   className="w-16 h-16 rounded-lg border border-dashed border-[var(--border-strong)] flex items-center justify-center text-[var(--text-secondary)] shrink-0 disabled:opacity-50"
                 >
-                  {uploading ? <span className="text-[10px]">...</span> : <PhotoIcon className="w-5 h-5" />}
+                  {uploading ? (
+                    <span className="text-[10px]">...</span>
+                  ) : (
+                    <PhotoIcon className="w-5 h-5" />
+                  )}
                 </button>
               )}
               <input
@@ -198,7 +245,9 @@ function SpotForm({ spot, defaultOpen, onChange, onRemove, onOpenImages }: SpotF
                 <div key={i} className="flex items-center gap-2">
                   <LinkButton link={link} />
                   <button
-                    onClick={() => onChange({ links: spot.links.filter((_, j) => j !== i) })}
+                    onClick={() =>
+                      onChange({ links: spot.links.filter((_, j) => j !== i) })
+                    }
                     aria-label="Remove link"
                     className="shrink-0 text-[var(--text-secondary)]"
                   >
@@ -226,16 +275,20 @@ export default function SpotsEditor({ spots, onChange, onOpenImages }: Props) {
       <p className="text-xs text-[var(--text-secondary)]">
         Spots ({spots.length}/{MAX_SPOTS})
       </p>
-      {spots.map((spot, i) => (
-        <SpotForm
-          key={spot.uid}
-          spot={spot}
-          defaultOpen={!spot.name}
-          onChange={(patch) => onChange(spots.map((s, j) => (j === i ? { ...s, ...patch } : s)))}
-          onRemove={() => onChange(spots.filter((_, j) => j !== i))}
-          onOpenImages={onOpenImages}
-        />
-      ))}
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3 items-start">
+        {spots.map((spot, i) => (
+          <SpotForm
+            key={spot.uid}
+            spot={spot}
+            defaultOpen={!spot.name}
+            onChange={(patch) =>
+              onChange(spots.map((s, j) => (j === i ? { ...s, ...patch } : s)))
+            }
+            onRemove={() => onChange(spots.filter((_, j) => j !== i))}
+            onOpenImages={onOpenImages}
+          />
+        ))}
+      </div>
       {spots.length < MAX_SPOTS && (
         <button
           onClick={() => onChange([...spots, newSpot()])}

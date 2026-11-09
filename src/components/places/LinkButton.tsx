@@ -5,13 +5,23 @@ import { linkPlatform } from "@/lib/linkPlatform";
 const LINK_STYLE: Record<string, string> = {
   tiktok: "bg-black text-white",
   youtube: "bg-[#FF0000] text-white",
-  other: "bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)]",
+  other:
+    "bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)]",
 };
-const LINK_LABEL: Record<string, string> = { tiktok: "TikTok", youtube: "YouTube", other: "Link" };
+const LINK_LABEL: Record<string, string> = {
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  other: "Link",
+};
 
 export default function LinkButton({ link }: { link: string }) {
   const platform = linkPlatform(link);
-  const Icon = platform === "tiktok" ? MusicalNoteIcon : platform === "youtube" ? PlayCircleIcon : LinkIcon;
+  const Icon =
+    platform === "tiktok"
+      ? MusicalNoteIcon
+      : platform === "youtube"
+        ? PlayCircleIcon
+        : LinkIcon;
   return (
     <a
       href={link}

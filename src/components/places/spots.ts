@@ -20,7 +20,11 @@ export const newSpot = (): EditableSpot => ({
 
 export const MAX_SUBPLACES = 15;
 
-export type EditableSubPlace = { uid: string; name: string; spots: EditableSpot[] };
+export type EditableSubPlace = {
+  uid: string;
+  name: string;
+  spots: EditableSpot[];
+};
 
 export const newSubPlace = (): EditableSubPlace => ({
   uid: crypto.randomUUID(),
@@ -32,6 +36,7 @@ export const newSubPlace = (): EditableSubPlace => ({
 // data saved before sub-places existed still shows up.
 export const subPlacesOf = (p: Place) => {
   const groups = [...(p.subPlaces ?? [])];
-  if ((p.spots ?? []).length > 0) groups.unshift({ _id: "legacy", name: "Spots", spots: p.spots ?? [] });
+  if ((p.spots ?? []).length > 0)
+    groups.unshift({ _id: "legacy", name: "Spots", spots: p.spots ?? [] });
   return groups;
 };
