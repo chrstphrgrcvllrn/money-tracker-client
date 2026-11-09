@@ -79,7 +79,7 @@ const TOTALS_ALIASES: Record<string, string> = {
   gloan: "GLoan 1", // "GLoan 1st (June 3)" is loan 1's first payment
 };
 const TOTALS_RULES: [RegExp, string][] = [
-  [/^bahay\b/i, "Bahay"],
+  [/^(?:budget )?bahay\b/i, "Bahay"],
   [/^bayad\b/i, "Bayad utang"],
   [/^pamasko\b/i, "Pamasko"],
   [/\bicct\b/i, "ICCT"],
