@@ -92,25 +92,17 @@ const groupFor = (base: string) => {
 };
 const splitExpenseName = (raw: string) => {
   const name = (raw ?? "").trim();
-  const parts: string[] = [];
   const label = name
-    .replace(DETAIL_RE, (m) => {
-      parts.push(m);
-      return " ";
-    })
+    .replace(DETAIL_RE, " ")
     .replace(/\s+/g, " ")
     .replace(/[\s\-–]+$/, "")
     .trim();
   const base = label || name;
   const group = groupFor(base);
-  if (group) {
-    // Keep what the group name doesn't already say as the sub-note.
-    const rest = base.toLowerCase().startsWith(group.toLowerCase())
-      ? base.slice(group.length).replace(/^[\s\-–:]+/, "")
-      : base;
-    return { label: group, detail: [rest, ...parts].filter(Boolean).join(" ") };
-  }
-  return { label: base, detail: label ? parts.join(" ") : "" };
+  // The sub-note is the full original name (e.g. "ICCT 1st installment
+  // (April 16)"), shown only when it says more than the group label itself.
+  const label2 = group ?? base;
+  return { label: label2, detail: name.toLowerCase() === label2.toLowerCase() ? "" : name };
 };
 
 // A salary card that can be dragged by its handle (so touch scrolling still
