@@ -19,6 +19,21 @@ import { SkeletonBlock, SkeletonCards } from "../components/Skeleton";
 // ellipsis. They still count toward the totals; everything else always shows.
 const isHiddenBaon = (name: string | undefined) => /^baon\s*\d+$/i.test((name ?? "").trim());
 
+type SalarySort = "default" | "salary-desc" | "salary-asc" | "remaining-desc" | "remaining-asc";
+
+const SALARY_SORTS: { value: SalarySort; label: string }[] = [
+  { value: "default", label: "Default order" },
+  { value: "salary-desc", label: "Salary: high to low" },
+  { value: "salary-asc", label: "Salary: low to high" },
+  { value: "remaining-desc", label: "Remaining: high to low" },
+  { value: "remaining-asc", label: "Remaining: low to high" },
+];
+
+const budgetOf = (e: SalaryEntry) =>
+  Number(e.salary || 0) + Number(e.overtime || 0) + Number(e.adjustment || 0);
+const remainingOf = (e: SalaryEntry) =>
+  budgetOf(e) - (e.expenses ?? []).reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
 export default function SalaryPage() {
   const showToast = useToast();
 
@@ -48,6 +63,14 @@ export default function SalaryPage() {
 
   // ✅ TAB STATE
   const [activeTab, setActiveTab] = useState<"active" | "completed" | "totals">("active");
+  const [salarySort, setSalarySort] = useState<SalarySort>(() => {
+    try {
+      const saved = localStorage.getItem("salarySort");
+      return SALARY_SORTS.some((o) => o.value === saved) ? (saved as SalarySort) : "default";
+    } catch {
+      return "default";
+    }
+  });
 
   const format = (value: unknown) => Number(value || 0).toLocaleString();
 
@@ -327,14 +350,24 @@ export default function SalaryPage() {
     setEditedExpenses(newExpenses);
   };
 
-  const displayedSalaries = salaryData.filter((entry) => {
+  const displayedSalaries = salaryData
+    .filter((entry) => {
     const allPaid = entry.expenses.length > 0 && entry.expenses.every((e) => e.paid);
 
     if (activeTab === "completed") return allPaid;
     if (activeTab === "active") return !allPaid;
     if (activeTab === "totals") return false;
     return true;
-  });
+    })
+    .sort((a, b) => {
+      switch (salarySort) {
+        case "salary-desc": return budgetOf(b) - budgetOf(a);
+        case "salary-asc": return budgetOf(a) - budgetOf(b);
+        case "remaining-desc": return remainingOf(b) - remainingOf(a);
+        case "remaining-asc": return remainingOf(a) - remainingOf(b);
+        default: return 0;
+      }
+    });
 
   const handleEditSalaryName = async (id: string) => {
     const entry = salaryData.find((s) => s._id === id);
@@ -495,6 +528,22 @@ export default function SalaryPage() {
 
         <div className="mb-4 flex justify-between items-start">
           <div className="flex items-center gap-3">
+            {activeTab !== "totals" && (
+              <select
+                aria-label="Sort salaries"
+                value={salarySort}
+                onChange={(e) => {
+                  const v = e.target.value as SalarySort;
+                  setSalarySort(v);
+                  try { localStorage.setItem("salarySort", v); } catch { /* ignore */ }
+                }}
+                className="px-2 py-[0.3rem] bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)] rounded-4xl text-xs outline-none"
+              >
+                {SALARY_SORTS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            )}
             <button
               onClick={() => setShowForm(true)}
               title="Add Salary"
