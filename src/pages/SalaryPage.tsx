@@ -17,7 +17,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { SalaryEntry, Expense } from "../types/salary.type";
+import type { SalaryEntry, Expense, SalaryExtra } from "../types/salary.type";
 import {
   fetchSalaries,
   createSalary,
@@ -48,8 +48,10 @@ const SALARY_SORTS: { value: SalarySort; label: string }[] = [
   { value: "remaining-asc", label: "Remaining: low to high" },
 ];
 
+const extrasOf = (e: SalaryEntry) =>
+  (e.extras ?? []).reduce((sum, x) => sum + Number(x.amount || 0), 0);
 const budgetOf = (e: SalaryEntry) =>
-  Number(e.salary || 0) + Number(e.overtime || 0) + Number(e.adjustment || 0);
+  Number(e.salary || 0) + Number(e.overtime || 0) + Number(e.adjustment || 0) + extrasOf(e);
 const remainingOf = (e: SalaryEntry) =>
   budgetOf(e) - (e.expenses ?? []).reduce((sum, x) => sum + Number(x.amount || 0), 0);
 
@@ -172,6 +174,12 @@ export default function SalaryPage() {
   const [expenseName, setExpenseName] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
   const [expenseNote, setExpenseNote] = useState("");
+
+  // Custom income lines (e.g. "13th month") added on top of the budget.
+  const [extraSalaryId, setExtraSalaryId] = useState<string | null>(null);
+  const [extraIndex, setExtraIndex] = useState<number | null>(null); // null = adding
+  const [extraName, setExtraName] = useState("");
+  const [extraAmount, setExtraAmount] = useState("");
   const [expenseCategory, setExpenseCategory] = useState("");
   const [currentSalaryId, setCurrentSalaryId] = useState<string | null>(null);
 
@@ -256,6 +264,7 @@ export default function SalaryPage() {
         date: entry.date + " (Copy)",
         salary: entry.salary,
         overtime: entry.overtime ?? 0,
+        extras: (entry.extras ?? []).map(({ name, amount }) => ({ name, amount })),
         expenses: [...(entry.expenses ?? [])],
       });
 
@@ -319,6 +328,48 @@ export default function SalaryPage() {
         showToast("Failed to update adjustment", "error");
       }
     }
+  };
+
+  const openExtraModal = (salaryId: string, index: number | null) => {
+    const extra = index === null ? undefined : salaryData.find((s) => s._id === salaryId)?.extras?.[index];
+    setExtraSalaryId(salaryId);
+    setExtraIndex(index);
+    setExtraName(extra?.name ?? "");
+    setExtraAmount(extra ? String(extra.amount) : "");
+  };
+
+  const saveExtras = async (salaryId: string, extras: SalaryExtra[], message: string) => {
+    try {
+      const updated = await updateSalary(salaryId, { extras });
+      setSalaryData((prev) =>
+        prev.map((s) =>
+          s._id === salaryId
+            ? { ...updated, expenses: Array.isArray(updated.expenses) ? updated.expenses : [] }
+            : s
+        )
+      );
+      setExtraSalaryId(null);
+      showToast(message, "success");
+    } catch (error) {
+      console.error("Failed to save income:", error);
+      showToast("Failed to save income", "error");
+    }
+  };
+
+  const handleSaveExtra = () => {
+    const entry = salaryData.find((s) => s._id === extraSalaryId);
+    const amount = Number(extraAmount);
+    if (!entry || !extraName.trim() || extraAmount === "" || isNaN(amount)) return;
+    const current = entry.extras ?? [];
+    const item = { ...(extraIndex === null ? {} : current[extraIndex]), name: extraName.trim(), amount };
+    const next = extraIndex === null ? [...current, item] : current.map((x, i) => (i === extraIndex ? item : x));
+    saveExtras(entry._id, next, extraIndex === null ? "Income added!" : "Income updated!");
+  };
+
+  const handleDeleteExtra = () => {
+    const entry = salaryData.find((s) => s._id === extraSalaryId);
+    if (!entry || extraIndex === null) return;
+    saveExtras(entry._id, (entry.extras ?? []).filter((_, i) => i !== extraIndex), "Income removed");
   };
 
   const handleEditOvertime = async (id: string) => {
@@ -684,6 +735,48 @@ export default function SalaryPage() {
         </div>
       </Modal>
 
+      {/* ADD / EDIT CUSTOM INCOME MODAL */}
+      <Modal
+        open={extraSalaryId !== null}
+        onClose={() => setExtraSalaryId(null)}
+        title={extraIndex === null ? "Add Income" : "Edit Income"}
+      >
+        <input
+          type="text"
+          placeholder="Name (e.g. 13th month)"
+          value={extraName}
+          onChange={(e) => setExtraName(e.target.value)}
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+        />
+        <input
+          type="number"
+          placeholder="Amount"
+          value={extraAmount}
+          onChange={(e) => setExtraAmount(e.target.value)}
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+        />
+        <div className="flex justify-between items-center pt-2">
+          {extraIndex !== null ? (
+            <button onClick={handleDeleteExtra} className="px-3 py-1 text-sm text-red-400">
+              Delete
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="flex space-x-2">
+            <button onClick={() => setExtraSalaryId(null)} className="px-3 py-1 text-sm text-[var(--text-secondary)]">
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveExtra}
+              className="px-3 py-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold rounded-lg text-sm"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       {/* DELETE CONFIRM MODAL */}
       <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Confirm Delete">
         <p className="text-[var(--text-secondary)]">Are you sure you want to delete this salary?</p>
@@ -785,7 +878,7 @@ export default function SalaryPage() {
         {displayedSalaries.map((entry) => {
           const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
           const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
-          const budget = Number(entry.salary || 0) + Number(entry.overtime || 0) + Number(entry.adjustment || 0);
+          const budget = budgetOf(entry);
           const remaining = budget - totalExpenses;
           const isEditingAll = editingAllEntryId === entry._id;
 
@@ -889,7 +982,25 @@ export default function SalaryPage() {
                 </button>
               </div>
 
-              {(!!entry.overtime || !!entry.adjustment) && (
+              {(entry.extras ?? []).map((x, i) => (
+                <div key={x._id ?? i} className="flex justify-between text-[var(--text-primary)] mb-2">
+                  <span className="break-words">{x.name}</span>
+                  <button onClick={() => openExtraModal(entry._id, i)}>
+                    <span className="font-semibold text-[var(--accent)]">{format(x.amount)}</span>
+                  </button>
+                </div>
+              ))}
+
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={() => openExtraModal(entry._id, null)}
+                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                >
+                  + Add income
+                </button>
+              </div>
+
+              {(!!entry.overtime || !!entry.adjustment || (entry.extras ?? []).length > 0) && (
                 <div className="flex justify-between text-[var(--text-primary)] mb-2 pb-2 border-b border-[var(--border-subtle)]">
                   <span>Budget</span>
                   <span className="font-semibold">{format(budget)}</span>
