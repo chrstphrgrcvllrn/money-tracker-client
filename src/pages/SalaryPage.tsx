@@ -845,27 +845,28 @@ export default function SalaryPage() {
             {totals.map((item, idx, arr) => (
               <div
                 key={idx}
-                className={`flex justify-between items-center py-3 md:break-inside-avoid md:mb-2 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
+                className={`py-3 md:mb-2 md:rounded-xl md:bg-[var(--bg-surface)] md:px-4 ${
                   idx !== arr.length - 1 ? "border-b border-[var(--border-subtle)] md:border-b-0" : ""
                 }`}
               >
-                <div className="min-w-0 flex-1">
-                  <span className="text-[var(--text-primary)] font-semibold">{item.name}</span>
-                  {item.notes.length > 0 && (
-                    <ul className="mt-1 space-y-0.5">
-                      {item.notes.map((n, i) => (
-                        <li key={i} className="flex justify-between gap-3 text-[var(--text-secondary)]">
-                          <span className="min-w-0 truncate whitespace-nowrap" title={`${n.detail} · ${n.salary}`}>
-                            {n.detail}
-                            <span className="opacity-70"> · {n.salary}</span>
-                          </span>
-                          <span className="shrink-0 whitespace-nowrap">{format(n.amount)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                {/* Group total and its entries share one right edge, so the amounts line up. */}
+                <div className="flex justify-between items-baseline gap-3">
+                  <span className="min-w-0 text-[var(--text-primary)] font-semibold">{item.name}</span>
+                  <span className="shrink-0 whitespace-nowrap text-[var(--accent)] font-bold">{format(item.total)}</span>
                 </div>
-                <span className="text-[var(--accent)] font-bold self-start ml-3">{format(item.total)}</span>
+                {item.notes.length > 0 && (
+                  <ul className="mt-1 space-y-0.5">
+                    {item.notes.map((n, i) => (
+                      <li key={i} className="flex justify-between gap-3 text-[var(--text-secondary)]">
+                        <span className="min-w-0 truncate whitespace-nowrap" title={`${n.detail} · ${n.salary}`}>
+                          {n.detail}
+                          <span className="opacity-70"> · {n.salary}</span>
+                        </span>
+                        <span className="shrink-0 whitespace-nowrap">{format(n.amount)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             ))}
             </div>
