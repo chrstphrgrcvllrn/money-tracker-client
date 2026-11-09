@@ -9,9 +9,19 @@ import {
   PlayCircleIcon,
   SparklesIcon,
   MapPinIcon,
+  PencilSquareIcon,
   PhotoIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
-import type { Spot, SubPlace } from "@/types/places.type";
+import type { Spot, SubPlace, SubPlaceInput } from "@/types/places.type";
+import { useToast } from "@/components/useToast";
+import {
+  newSpot,
+  subPlacesToInput,
+  toEditableSpot,
+  type EditableSpot,
+} from "./spots";
+import { SpotForm } from "./SpotsEditor";
 import { normalizeLink } from "@/lib/linkPlatform";
 import LinkButton from "./LinkButton";
 
@@ -169,6 +179,7 @@ function SpotDetail({
   total,
   onBack,
   onStep,
+  onEdit,
   onOpenImages,
 }: {
   spot: Spot;
@@ -177,6 +188,7 @@ function SpotDetail({
   total: number;
   onBack: () => void;
   onStep: (delta: number) => void;
+  onEdit: () => void;
   onOpenImages: OpenImages;
 }) {
   const mapHref = normalizeLink(spot.mapLink);
@@ -224,17 +236,26 @@ function SpotDetail({
 
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-2xl font-bold leading-tight">{spot.name}</h3>
-        {mapHref && (
-          <a
-            href={mapHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent)]/15 text-[var(--accent)] text-sm font-semibold"
+        <div className="shrink-0 flex items-center gap-2">
+          <button
+            onClick={onEdit}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--bg-input)] text-sm font-semibold"
           >
-            <MapPinIcon className="w-4 h-4" />
-            Open in Maps
-          </a>
-        )}
+            <PencilSquareIcon className="w-4 h-4" />
+            Edit
+          </button>
+          {mapHref && (
+            <a
+              href={mapHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent)]/15 text-[var(--accent)] text-sm font-semibold"
+            >
+              <MapPinIcon className="w-4 h-4" />
+              Open in Maps
+            </a>
+          )}
+        </div>
       </div>
 
       {hero && (
@@ -338,31 +359,156 @@ function SpotDetail({
 export default function SpotExplorer({
   subPlaces,
   onOpenImages,
+  onSave,
 }: {
   subPlaces: SubPlace[];
   onOpenImages: OpenImages;
+  onSave: (subPlaces: SubPlaceInput[]) => Promise<void>;
 }) {
+  const showToast = useToast();
   const [active, setActive] = useState(0);
   const [spotId, setSpotId] = useState<string | null>(null);
+  // Editing a spot in place: `id` is null while adding a new one.
+  const [editing, setEditing] = useState<{
+    id: string | null;
+    draft: EditableSpot;
+  } | null>(null);
+  const [saving, setSaving] = useState(false);
 
   if (subPlaces.length === 0) return null;
-  const current = subPlaces[Math.min(active, subPlaces.length - 1)];
+  const activeIdx = Math.min(active, subPlaces.length - 1);
+  const current = subPlaces[activeIdx];
   const spotIndex = current.spots.findIndex((s) => s._id === spotId);
 
+  // Persist the whole sub-place list with this place's spots replaced.
+  const persist = async (nextSpots: SubPlaceInput["spots"]) => {
+    const input = subPlacesToInput(subPlaces);
+    input[activeIdx] = { ...input[activeIdx], spots: nextSpots };
+    setSaving(true);
+    try {
+      await onSave(input);
+      return true;
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save spot", "error");
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveEditing = async () => {
+    if (!editing) return;
+    const { draft, id } = editing;
+    if (!draft.name.trim()) {
+      showToast("Please give the spot a name", "error");
+      return;
+    }
+    let mapLink = "";
+    if (draft.mapLink.trim()) {
+      const normalized = normalizeLink(draft.mapLink);
+      if (!normalized) {
+        showToast("That Google Maps link doesn't look valid", "error");
+        return;
+      }
+      mapLink = normalized;
+    }
+    const { uid: _uid, ...rest } = draft;
+    void _uid;
+    const spot = { ...rest, name: draft.name.trim(), mapLink };
+    const existing = subPlacesToInput(subPlaces)[activeIdx].spots;
+    const next = id
+      ? existing.map((s) => (s._id === id ? { ...spot, _id: id } : s))
+      : [...existing, spot];
+    if (await persist(next)) {
+      setEditing(null);
+      if (!id) setSpotId(null);
+      showToast(id ? "Spot updated!" : "Spot added!", "success");
+    }
+  };
+
+  const deleteEditing = async () => {
+    if (!editing?.id) {
+      setEditing(null);
+      return;
+    }
+    if (!confirm("Delete this spot? This can't be undone.")) return;
+    const next = subPlacesToInput(subPlaces)[activeIdx].spots.filter(
+      (s) => s._id !== editing.id,
+    );
+    if (await persist(next)) {
+      setEditing(null);
+      setSpotId(null);
+      showToast("Spot deleted!", "success");
+    }
+  };
+
+  if (editing) {
+    return (
+      <div className="space-y-4">
+        <button
+          onClick={() => setEditing(null)}
+          className="flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+        >
+          <ArrowLeftIcon className="w-4 h-4" /> Cancel
+        </button>
+        <h3 className="text-xl font-bold">
+          {editing.id ? "Edit spot" : `New spot in ${current.name}`}
+        </h3>
+        <SpotForm
+          spot={editing.draft}
+          defaultOpen
+          onChange={(patch) =>
+            setEditing((e) => e && { ...e, draft: { ...e.draft, ...patch } })
+          }
+          onRemove={() => void deleteEditing()}
+          onOpenImages={onOpenImages}
+        />
+        <div className="flex gap-2">
+          <button
+            onClick={() => setEditing(null)}
+            className="flex-1 px-4 py-2 text-[var(--text-secondary)] border border-[var(--border-strong)] rounded-lg text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => void saveEditing()}
+            disabled={saving}
+            className="flex-1 bg-[var(--btn-bg)] text-[var(--btn-text)] font-semibold px-4 py-2 rounded-lg text-sm disabled:opacity-60"
+          >
+            {saving ? "Saving..." : "Save spot"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (spotIndex >= 0) {
+    const spot = current.spots[spotIndex];
     return (
       <SpotDetail
-        key={current.spots[spotIndex]._id}
-        spot={current.spots[spotIndex]}
+        key={spot._id}
+        spot={spot}
         placeName={current.name}
         index={spotIndex}
         total={current.spots.length}
         onBack={() => setSpotId(null)}
         onStep={(d) => setSpotId(current.spots[spotIndex + d]._id)}
+        onEdit={() => setEditing({ id: spot._id, draft: toEditableSpot(spot) })}
         onOpenImages={onOpenImages}
       />
     );
   }
+
+  const addTile = (
+    <button
+      onClick={() => setEditing({ id: null, draft: newSpot() })}
+      className="min-h-32 rounded-2xl border border-dashed border-[var(--border-strong)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex flex-col items-center justify-center gap-1 text-sm font-medium"
+    >
+      <PlusIcon className="w-5 h-5" />
+      Add spot
+    </button>
+  );
 
   return (
     <section>
@@ -388,21 +534,16 @@ export default function SpotExplorer({
         in {current.name}
       </h3>
 
-      {current.spots.length === 0 ? (
-        <p className="text-sm text-[var(--text-secondary)] py-6 text-center">
-          No spots added to {current.name} yet.
-        </p>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {current.spots.map((spot) => (
-            <SpotCard
-              key={spot._id}
-              spot={spot}
-              onOpen={() => setSpotId(spot._id)}
-            />
-          ))}
-        </div>
-      )}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {current.spots.map((spot) => (
+          <SpotCard
+            key={spot._id}
+            spot={spot}
+            onOpen={() => setSpotId(spot._id)}
+          />
+        ))}
+        {addTile}
+      </div>
     </section>
   );
 }

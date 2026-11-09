@@ -28,7 +28,7 @@ type SpotFormProps = {
   onOpenImages: (images: string[], index: number) => void;
 };
 
-function SpotForm({
+export function SpotForm({
   spot,
   defaultOpen,
   onChange,

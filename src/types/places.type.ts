@@ -14,8 +14,9 @@ export type Spot = SpotInput & { _id: string };
 
 // A place inside the country (e.g. "Sapa" inside "Vietnam"), grouping its spots.
 export type SubPlaceInput = {
+  _id?: string; // kept for saved ones so ids stay stable across saves
   name: string;
-  spots: SpotInput[];
+  spots: (SpotInput & { _id?: string })[];
 };
 
 export type SubPlace = { _id: string; name: string; spots: Spot[] };

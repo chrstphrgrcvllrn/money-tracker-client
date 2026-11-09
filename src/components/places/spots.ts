@@ -1,4 +1,10 @@
-import type { Place, SpotInput } from "@/types/places.type";
+import type {
+  Place,
+  Spot,
+  SpotInput,
+  SubPlace,
+  SubPlaceInput,
+} from "@/types/places.type";
 
 export const MAX_SPOTS = 15;
 export const MAX_SPOT_IMAGES = 4;
@@ -41,3 +47,36 @@ export const subPlacesOf = (p: Place) => {
     groups.unshift({ _id: "legacy", name: "Spots", spots: p.spots ?? [] });
   return groups;
 };
+
+export const toEditableSpot = (spot: Spot): EditableSpot => ({
+  ...newSpot(),
+  name: spot.name,
+  images: [...spot.images],
+  links: [...spot.links],
+  mapLink: spot.mapLink ?? "",
+  notes: spot.notes ?? "",
+  activities: spot.activities ?? "",
+  whereToEat: spot.whereToEat ?? "",
+  hotel: spot.hotel ?? "",
+});
+
+const OBJECT_ID = /^[a-f0-9]{24}$/i;
+
+// Saved sub-places back to the payload shape. Real ids are kept; the synthetic
+// "legacy" group has none, so it becomes a regular new sub-place.
+export const subPlacesToInput = (groups: SubPlace[]): SubPlaceInput[] =>
+  groups.map((g) => ({
+    ...(OBJECT_ID.test(g._id) ? { _id: g._id } : {}),
+    name: g.name,
+    spots: g.spots.map((s) => ({
+      ...(OBJECT_ID.test(s._id) ? { _id: s._id } : {}),
+      name: s.name,
+      images: s.images,
+      links: s.links,
+      mapLink: s.mapLink ?? "",
+      notes: s.notes ?? "",
+      activities: s.activities ?? "",
+      whereToEat: s.whereToEat ?? "",
+      hotel: s.hotel ?? "",
+    })),
+  }));

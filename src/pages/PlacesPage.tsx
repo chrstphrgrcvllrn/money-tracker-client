@@ -434,6 +434,16 @@ export default function PlacesPage() {
             closeView();
           }}
           onOpenImages={openViewer}
+          onSaveSubPlaces={async (subPlaces) => {
+            const updated = await updatePlace(viewingPlace._id, {
+              subPlaces,
+              spots: [],
+            });
+            setPlaces((prev) =>
+              prev.map((p) => (p._id === updated._id ? updated : p)),
+            );
+            setViewingPlace(updated);
+          }}
         />
       )}
 

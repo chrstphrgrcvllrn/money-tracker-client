@@ -4,7 +4,7 @@ import {
   PencilSquareIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import type { Place } from "@/types/places.type";
+import type { Place, SubPlaceInput } from "@/types/places.type";
 import { subPlacesOf } from "./spots";
 import LinkButton from "./LinkButton";
 import SpotExplorer from "./SpotExplorer";
@@ -15,6 +15,7 @@ type Props = {
   onClose: () => void;
   onEdit: () => void;
   onOpenImages: (images: string[], index: number) => void;
+  onSaveSubPlaces: (subPlaces: SubPlaceInput[]) => Promise<void>;
 };
 
 function Gallery({
