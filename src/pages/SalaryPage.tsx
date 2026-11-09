@@ -1107,7 +1107,7 @@ export default function SalaryPage() {
                       >
                         {expense.name}
                         {expense.category && (
-                          <span className="ml-2 align-middle text-[var(--text-secondary)] text-[10px] font-medium no-underline">
+                          <span className="ml-2 align-middle text-[var(--text-secondary)] opacity-60 text-[10px] font-medium no-underline">
                             {expense.category}
                           </span>
                         )}
