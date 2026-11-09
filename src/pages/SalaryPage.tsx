@@ -683,7 +683,7 @@ export default function SalaryPage() {
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={displayedSalaries.map((e) => e._id)} strategy={rectSortingStrategy}>
-        <div className="md:columns-2 lg:columns-3 md:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4 items-start">
         {displayedSalaries.map((entry) => {
           const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
           const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
@@ -696,7 +696,7 @@ export default function SalaryPage() {
               key={entry._id}
               id={entry._id}
               enabled={salarySort === "custom"}
-              className="mb-6 bg-[var(--bg-surface)] shadow rounded-xl p-4 md:break-inside-avoid"
+              className="bg-[var(--bg-surface)] shadow rounded-xl p-4"
             >
               {(handle) => (<>
               <div className="flex justify-between items-center mb-2">
