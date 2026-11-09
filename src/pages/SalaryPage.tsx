@@ -1,4 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
+import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+  arrayMove,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { SalaryEntry, Expense } from "../types/salary.type";
 import {
   fetchSalaries,
@@ -8,7 +26,7 @@ import {
 } from "../api/salary";
 
 import { TrashIcon, CurrencyDollarIcon } from "@heroicons/react/24/solid";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { EllipsisHorizontalIcon, Bars3Icon } from "@heroicons/react/24/outline";
 
 import Modal from "../components/Modal";
 import { useToast } from "../components/useToast";
@@ -19,10 +37,11 @@ import { SkeletonBlock, SkeletonCards } from "../components/Skeleton";
 // ellipsis. They still count toward the totals; everything else always shows.
 const isHiddenBaon = (name: string | undefined) => /^baon\s*\d+$/i.test((name ?? "").trim());
 
-type SalarySort = "default" | "salary-desc" | "salary-asc" | "remaining-desc" | "remaining-asc";
+type SalarySort = "default" | "custom" | "salary-desc" | "salary-asc" | "remaining-desc" | "remaining-asc";
 
 const SALARY_SORTS: { value: SalarySort; label: string }[] = [
   { value: "default", label: "Default order" },
+  { value: "custom", label: "Custom (drag to reorder)" },
   { value: "salary-desc", label: "Salary: high to low" },
   { value: "salary-asc", label: "Salary: low to high" },
   { value: "remaining-desc", label: "Remaining: high to low" },
@@ -33,6 +52,53 @@ const budgetOf = (e: SalaryEntry) =>
   Number(e.salary || 0) + Number(e.overtime || 0) + Number(e.adjustment || 0);
 const remainingOf = (e: SalaryEntry) =>
   budgetOf(e) - (e.expenses ?? []).reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+const ORDER_KEY = "salaryOrder";
+
+// A salary card that can be dragged by its handle (so touch scrolling still
+// works everywhere else on the card). The handle is passed to `children`.
+function SortableCard({
+  id,
+  enabled,
+  className,
+  children,
+}: {
+  id: string;
+  enabled: boolean;
+  className: string;
+  children: (handle: ReactNode) => ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled: !enabled,
+  });
+  const handle = enabled ? (
+    <button
+      type="button"
+      aria-label="Drag to reorder"
+      {...attributes}
+      {...listeners}
+      style={{ touchAction: "none" }}
+      className="cursor-grab active:cursor-grabbing text-[var(--text-secondary)] px-1"
+    >
+      <Bars3Icon className="w-5 h-5" />
+    </button>
+  ) : null;
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 40 : undefined,
+        opacity: isDragging ? 0.85 : undefined,
+      }}
+      className={className}
+    >
+      {children(handle)}
+    </div>
+  );
+}
 
 export default function SalaryPage() {
   const showToast = useToast();
@@ -350,6 +416,25 @@ export default function SalaryPage() {
     setEditedExpenses(newExpenses);
   };
 
+  const [customOrder, setCustomOrder] = useState<string[]>(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(ORDER_KEY) || "[]");
+      return Array.isArray(raw) ? raw : [];
+    } catch {
+      return [];
+    }
+  });
+  const orderIndex = (id: string) => {
+    const i = customOrder.indexOf(id);
+    return i === -1 ? Number.MAX_SAFE_INTEGER : i; // new cards go last
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
   const displayedSalaries = salaryData
     .filter((entry) => {
     const allPaid = entry.expenses.length > 0 && entry.expenses.every((e) => e.paid);
@@ -365,9 +450,29 @@ export default function SalaryPage() {
         case "salary-asc": return budgetOf(a) - budgetOf(b);
         case "remaining-desc": return remainingOf(b) - remainingOf(a);
         case "remaining-asc": return remainingOf(a) - remainingOf(b);
+        case "custom": return orderIndex(a._id) - orderIndex(b._id);
         default: return 0;
       }
     });
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    const ids = displayedSalaries.map((e) => e._id);
+    const from = ids.indexOf(String(active.id));
+    const to = ids.indexOf(String(over.id));
+    if (from < 0 || to < 0) return;
+    const reordered = arrayMove(ids, from, to);
+
+    // Splice the reordered visible ids back into the full (all-tabs) order.
+    const full = [...salaryData]
+      .sort((a, b) => orderIndex(a._id) - orderIndex(b._id))
+      .map((e) => e._id);
+    const visible = new Set(ids);
+    let k = 0;
+    const next = full.map((id) => (visible.has(id) ? reordered[k++] : id));
+    setCustomOrder(next);
+    try { localStorage.setItem(ORDER_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  };
 
   const handleEditSalaryName = async (id: string) => {
     const entry = salaryData.find((s) => s._id === id);
@@ -576,6 +681,8 @@ export default function SalaryPage() {
           )}
         </div>
       ) : (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={displayedSalaries.map((e) => e._id)} strategy={rectSortingStrategy}>
         <div className="md:columns-2 lg:columns-3 md:gap-4">
         {displayedSalaries.map((entry) => {
           const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
@@ -585,8 +692,15 @@ export default function SalaryPage() {
           const isEditingAll = editingAllEntryId === entry._id;
 
           return (
-            <div key={entry._id} className="mb-6 bg-[var(--bg-surface)] shadow rounded-xl p-4 md:break-inside-avoid">
+            <SortableCard
+              key={entry._id}
+              id={entry._id}
+              enabled={salarySort === "custom"}
+              className="mb-6 bg-[var(--bg-surface)] shadow rounded-xl p-4 md:break-inside-avoid"
+            >
+              {(handle) => (<>
               <div className="flex justify-between items-center mb-2">
+                {handle}
                 <button onClick={() => handleEditSalaryName(entry._id)} className="flex items-center gap-3">
                   <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[var(--avatar-bg)]">
                     <CurrencyDollarIcon className="w-5 h-5 text-[var(--avatar-fg)]" />
@@ -803,10 +917,13 @@ export default function SalaryPage() {
                   {format(remaining)}
                 </span>
               </div>
-            </div>
+              </>)}
+            </SortableCard>
           );
         })}
         </div>
+        </SortableContext>
+        </DndContext>
       )}
     </div>
   );
