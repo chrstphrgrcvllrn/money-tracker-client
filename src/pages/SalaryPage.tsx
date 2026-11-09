@@ -964,23 +964,23 @@ export default function SalaryPage() {
                 </button>
               </div>
 
-              <div className="flex justify-between text-[var(--text-primary)] mb-2">
-                <span>Overtime</span>
-                <button onClick={() => handleEditOvertime(entry._id)}>
-                  <span className="font-semibold text-[var(--accent)]">
-                    {entry.overtime ? format(entry.overtime) : "Add"}
-                  </span>
-                </button>
-              </div>
+              {!!entry.overtime && (
+                <div className="flex justify-between text-[var(--text-primary)] mb-2">
+                  <span>Overtime</span>
+                  <button onClick={() => handleEditOvertime(entry._id)}>
+                    <span className="font-semibold text-[var(--accent)]">{format(entry.overtime)}</span>
+                  </button>
+                </div>
+              )}
 
-              <div className="flex justify-between text-[var(--text-primary)] mb-2">
-                <span>Adjustment</span>
-                <button onClick={() => handleEditAdjustment(entry._id)}>
-                  <span className="font-semibold text-[var(--accent)]">
-                    {entry.adjustment ? format(entry.adjustment) : "Add"}
-                  </span>
-                </button>
-              </div>
+              {!!entry.adjustment && (
+                <div className="flex justify-between text-[var(--text-primary)] mb-2">
+                  <span>Adjustment</span>
+                  <button onClick={() => handleEditAdjustment(entry._id)}>
+                    <span className="font-semibold text-[var(--accent)]">{format(entry.adjustment)}</span>
+                  </button>
+                </div>
+              )}
 
               {(entry.extras ?? []).map((x, i) => (
                 <div key={x._id ?? i} className="flex justify-between text-[var(--text-primary)] mb-2">
@@ -991,7 +991,23 @@ export default function SalaryPage() {
                 </div>
               ))}
 
-              <div className="flex justify-end mb-2">
+              <div className="flex justify-end gap-3 mb-2">
+                {!entry.overtime && (
+                  <button
+                    onClick={() => handleEditOvertime(entry._id)}
+                    className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  >
+                    + Overtime
+                  </button>
+                )}
+                {!entry.adjustment && (
+                  <button
+                    onClick={() => handleEditAdjustment(entry._id)}
+                    className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  >
+                    + Adjustment
+                  </button>
+                )}
                 <button
                   onClick={() => openExtraModal(entry._id, null)}
                   className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
