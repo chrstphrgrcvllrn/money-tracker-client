@@ -14,9 +14,9 @@ import type { Place } from "@/types/places.type";
 import { fileToResizedDataUrl } from "@/lib/imageResize";
 import { linkPlatform, normalizeLink } from "@/lib/linkPlatform";
 import Modal from "@/components/Modal";
-import SpotsEditor from "@/components/places/SpotsEditor";
-import SpotsView from "@/components/places/SpotsView";
-import { newSpot, type EditableSpot } from "@/components/places/spots";
+import SubPlacesEditor from "@/components/places/SubPlacesEditor";
+import SubPlacesView from "@/components/places/SubPlacesView";
+import { newSpot, subPlacesOf, type EditableSubPlace } from "@/components/places/spots";
 import { useToast } from "@/components/useToast";
 import { SkeletonCard } from "@/components/Skeleton";
 
@@ -43,7 +43,7 @@ const emptyForm = {
   foodImages: [] as string[],
   links: [] as string[],
   mapLink: "",
-  spots: [] as EditableSpot[],
+  subPlaces: [] as EditableSubPlace[],
 };
 
 
@@ -147,15 +147,19 @@ export default function PlacesPage() {
       foodImages: [...(p.foodImages ?? [])],
       links: [...(p.links ?? [])],
       mapLink: p.mapLink ?? "",
-      spots: (p.spots ?? []).map((spot) => ({
-        ...newSpot(),
-        name: spot.name,
-        images: [...spot.images],
-        links: [...spot.links],
-        mapLink: spot.mapLink ?? "",
-        notes: spot.notes ?? "",
-        whereToEat: spot.whereToEat ?? "",
-        hotel: spot.hotel ?? "",
+      subPlaces: subPlacesOf(p).map((sp) => ({
+        uid: crypto.randomUUID(),
+        name: sp.name,
+        spots: sp.spots.map((spot) => ({
+          ...newSpot(),
+          name: spot.name,
+          images: [...spot.images],
+          links: [...spot.links],
+          mapLink: spot.mapLink ?? "",
+          notes: spot.notes ?? "",
+          whereToEat: spot.whereToEat ?? "",
+          hotel: spot.hotel ?? "",
+        })),
       })),
     });
     setShowForm(true);
@@ -258,32 +262,41 @@ export default function PlacesPage() {
       }
       mapLink = normalized;
     }
-    const spots = [];
-    for (const spot of form.spots) {
-      if (!spot.name.trim()) {
-        showToast("Every spot needs a name", "error");
+    const subPlaces = [];
+    for (const sp of form.subPlaces) {
+      if (!sp.name.trim()) {
+        showToast("Every place needs a name", "error");
         return;
       }
-      let spotMapLink = "";
-      if (spot.mapLink.trim()) {
-        const normalized = normalizeLink(spot.mapLink);
-        if (!normalized) {
-          showToast(`The Google Maps link for "${spot.name.trim()}" doesn't look valid`, "error");
+      const spots = [];
+      for (const spot of sp.spots) {
+        if (!spot.name.trim()) {
+          showToast(`Every spot in "${sp.name.trim()}" needs a name`, "error");
           return;
         }
-        spotMapLink = normalized;
+        let spotMapLink = "";
+        if (spot.mapLink.trim()) {
+          const normalized = normalizeLink(spot.mapLink);
+          if (!normalized) {
+            showToast(`The Google Maps link for "${spot.name.trim()}" doesn't look valid`, "error");
+            return;
+          }
+          spotMapLink = normalized;
+        }
+        spots.push({
+          name: spot.name.trim(),
+          images: spot.images,
+          links: spot.links,
+          mapLink: spotMapLink,
+          notes: spot.notes,
+          whereToEat: spot.whereToEat,
+          hotel: spot.hotel,
+        });
       }
-      spots.push({
-        name: spot.name.trim(),
-        images: spot.images,
-        links: spot.links,
-        mapLink: spotMapLink,
-        notes: spot.notes,
-        whereToEat: spot.whereToEat,
-        hotel: spot.hotel,
-      });
+      subPlaces.push({ name: sp.name.trim(), spots });
     }
-    const payload = { ...form, mapLink, spots };
+    // Legacy top-level spots were folded into a sub-place above; clear them.
+    const payload = { ...form, mapLink, subPlaces, spots: [] };
 
     setSaving(true);
     try {
@@ -413,6 +426,7 @@ export default function PlacesPage() {
         open={!!viewingPlace}
         onClose={closeView}
         title={viewingPlace?.title}
+        maxWidth="max-w-sm md:max-w-[95vw]"
       >
         {viewingPlace && (
           <div className="space-y-4">
@@ -505,7 +519,7 @@ export default function PlacesPage() {
               </div>
             )}
 
-            <SpotsView spots={viewingPlace.spots ?? []} onOpenImages={openViewer} />
+            <SubPlacesView subPlaces={subPlacesOf(viewingPlace)} onOpenImages={openViewer} />
 
             {viewingPlace.links.length > 0 && (
               <div className="space-y-2">
@@ -535,7 +549,7 @@ export default function PlacesPage() {
               !viewingPlace.details &&
               !viewingPlace.thingsToKnow &&
               viewingPlace.links.length === 0 &&
-              (viewingPlace.spots ?? []).length === 0 &&
+              subPlacesOf(viewingPlace).length === 0 &&
               viewingPlace.images.length === 0 &&
               viewingPlace.foodImages.length === 0 && (
                 <p className="text-sm text-[var(--text-secondary)]">
@@ -569,6 +583,7 @@ export default function PlacesPage() {
         open={showForm}
         onClose={closeForm}
         title={editingId ? "Edit Place" : "Add Place"}
+        maxWidth="max-w-sm md:max-w-[95vw]"
       >
         <div className="space-y-4">
           <label className="block text-xs text-[var(--text-secondary)]">
@@ -778,9 +793,9 @@ export default function PlacesPage() {
             </div>
           </div>
 
-          <SpotsEditor
-            spots={form.spots}
-            onChange={(spots) => setForm((f) => ({ ...f, spots }))}
+          <SubPlacesEditor
+            subPlaces={form.subPlaces}
+            onChange={(subPlaces) => setForm((f) => ({ ...f, subPlaces }))}
             onOpenImages={openViewer}
           />
 

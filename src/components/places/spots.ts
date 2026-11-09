@@ -1,4 +1,4 @@
-import type { SpotInput } from "@/types/places.type";
+import type { Place, SpotInput } from "@/types/places.type";
 
 export const MAX_SPOTS = 15;
 export const MAX_SPOT_IMAGES = 4;
@@ -17,3 +17,21 @@ export const newSpot = (): EditableSpot => ({
   whereToEat: "",
   hotel: "",
 });
+
+export const MAX_SUBPLACES = 15;
+
+export type EditableSubPlace = { uid: string; name: string; spots: EditableSpot[] };
+
+export const newSubPlace = (): EditableSubPlace => ({
+  uid: crypto.randomUUID(),
+  name: "",
+  spots: [],
+});
+
+// Sub-places for a place, folding any legacy top-level spots into a group so
+// data saved before sub-places existed still shows up.
+export const subPlacesOf = (p: Place) => {
+  const groups = [...(p.subPlaces ?? [])];
+  if ((p.spots ?? []).length > 0) groups.unshift({ _id: "legacy", name: "Spots", spots: p.spots ?? [] });
+  return groups;
+};

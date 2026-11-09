@@ -11,6 +11,15 @@ export type SpotInput = {
 
 export type Spot = SpotInput & { _id: string };
 
+// A place inside the country (e.g. "Sapa" inside "Vietnam"), grouping its spots.
+export type SubPlaceInput = {
+  name: string;
+  spots: SpotInput[];
+  subPlaces: SubPlaceInput[];
+};
+
+export type SubPlace = { _id: string; name: string; spots: Spot[] };
+
 export type Place = {
   _id: string;
   title: string;
@@ -22,7 +31,8 @@ export type Place = {
   foodImages: string[]; // separate gallery for the `specialty` dishes/items
   links: string[]; // video links (TikTok, YouTube, etc.), rendered as buttons
   mapLink: string; // optional precise Google Maps share link
-  spots: Spot[]; // sub-locations, each with its own sections
+  spots?: Spot[]; // legacy: spots that used to hang directly off a place
+  subPlaces: SubPlace[]; // places inside this one, each with spots
   createdAt?: string;
   updatedAt?: string;
 };
@@ -38,4 +48,5 @@ export type PlaceInput = {
   links: string[];
   mapLink: string;
   spots: SpotInput[];
+  subPlaces: SubPlaceInput[];
 };
