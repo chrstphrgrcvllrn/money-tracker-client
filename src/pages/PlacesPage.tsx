@@ -27,7 +27,8 @@ const MAX_IMAGES = 6;
 const INPUT =
   "w-full bg-[var(--bg-input)] px-3 py-2 rounded-lg text-sm text-[var(--text-primary)] border border-[var(--border-strong)] outline-none focus:border-[var(--accent)]/50";
 
-const mapsUrl = (location: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+const mapsUrl = (location: string) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
 
 // A pasted Google Maps link (a precise pin) wins over the text-search fallback
 // built from the location field.
@@ -51,11 +52,22 @@ const emptyTripForm = { title: "", days: [] as TripDay[] };
 const LINK_STYLE: Record<string, string> = {
   tiktok: "bg-black text-white",
   youtube: "bg-[#FF0000] text-white",
-  other: "bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)]",
+  other:
+    "bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-strong)]",
 };
-const LINK_LABEL: Record<string, string> = { tiktok: "TikTok", youtube: "YouTube", other: "Link" };
+const LINK_LABEL: Record<string, string> = {
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  other: "Link",
+};
 
-function LinkIconFor({ platform, className }: { platform: string; className?: string }) {
+function LinkIconFor({
+  platform,
+  className,
+}: {
+  platform: string;
+  className?: string;
+}) {
   if (platform === "tiktok") return <MusicalNoteIcon className={className} />;
   if (platform === "youtube") return <PlayCircleIcon className={className} />;
   return <LinkIcon className={className} />;
@@ -63,7 +75,6 @@ function LinkIconFor({ platform, className }: { platform: string; className?: st
 
 export default function PlacesPage() {
   const showToast = useToast();
-  const [activeTab, setActiveTab] = useState<"places" | "itineraries">("places");
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -179,7 +190,10 @@ export default function PlacesPage() {
     closeViewer();
   };
 
-  const handleFiles = async (field: "images" | "foodImages", fileList: FileList | null) => {
+  const handleFiles = async (
+    field: "images" | "foodImages",
+    fileList: FileList | null,
+  ) => {
     if (!fileList || fileList.length === 0) return;
     const files = Array.from(fileList);
     const room = MAX_IMAGES - form[field].length;
@@ -195,11 +209,17 @@ export default function PlacesPage() {
         next.push(await fileToResizedDataUrl(file));
       } catch (err) {
         console.error(err);
-        showToast(err instanceof Error ? err.message : "Failed to add an image", "error");
+        showToast(
+          err instanceof Error ? err.message : "Failed to add an image",
+          "error",
+        );
       }
     }
     if (files.length > room) {
-      showToast(`Only added ${room} more — ${MAX_IMAGES} images per place`, "error");
+      showToast(
+        `Only added ${room} more — ${MAX_IMAGES} images per place`,
+        "error",
+      );
     }
     setForm((f) => ({ ...f, [field]: [...f[field], ...next] }));
     setUploading(false);
@@ -208,7 +228,8 @@ export default function PlacesPage() {
   const removeImage = (field: "images" | "foodImages", idx: number) =>
     setForm((f) => ({ ...f, [field]: f[field].filter((_, i) => i !== idx) }));
 
-  const viewerGoTo = (i: number) => setViewerIndex(Math.max(0, Math.min((viewerImages?.length ?? 1) - 1, i)));
+  const viewerGoTo = (i: number) =>
+    setViewerIndex(Math.max(0, Math.min((viewerImages?.length ?? 1) - 1, i)));
 
   const onViewerPointerDown = (e: React.PointerEvent) => {
     viewerDragging.current = true;
@@ -241,7 +262,8 @@ export default function PlacesPage() {
     setForm((f) => ({ ...f, links: [...f.links, normalized] }));
     setLinkInput("");
   };
-  const removeLink = (idx: number) => setForm((f) => ({ ...f, links: f.links.filter((_, i) => i !== idx) }));
+  const removeLink = (idx: number) =>
+    setForm((f) => ({ ...f, links: f.links.filter((_, i) => i !== idx) }));
 
   // ITINERARIES
 
@@ -253,7 +275,10 @@ export default function PlacesPage() {
 
   const openEditTrip = (t: Trip) => {
     setEditingTripId(t._id);
-    setTripForm({ title: t.title, days: t.days.map((d) => ({ label: d.label, placeIds: [...d.placeIds] })) });
+    setTripForm({
+      title: t.title,
+      days: t.days.map((d) => ({ label: d.label, placeIds: [...d.placeIds] })),
+    });
     setShowTripForm(true);
   };
 
@@ -266,7 +291,10 @@ export default function PlacesPage() {
   const closeTripView = () => setViewingTrip(null);
 
   const addDay = () =>
-    setTripForm((f) => ({ ...f, days: [...f.days, { label: `Day ${f.days.length + 1}`, placeIds: [] }] }));
+    setTripForm((f) => ({
+      ...f,
+      days: [...f.days, { label: `Day ${f.days.length + 1}`, placeIds: [] }],
+    }));
 
   const removeDay = (dayIdx: number) =>
     setTripForm((f) => ({ ...f, days: f.days.filter((_, i) => i !== dayIdx) }));
@@ -296,14 +324,20 @@ export default function PlacesPage() {
     if (pickerDayIndex === null) return;
     setTripForm((f) => ({
       ...f,
-      days: f.days.map((d, i) => (i === pickerDayIndex ? { ...d, placeIds: [...d.placeIds, placeId] } : d)),
+      days: f.days.map((d, i) =>
+        i === pickerDayIndex ? { ...d, placeIds: [...d.placeIds, placeId] } : d,
+      ),
     }));
   };
 
   const removePlaceFromDay = (dayIdx: number, placeIdx: number) =>
     setTripForm((f) => ({
       ...f,
-      days: f.days.map((d, i) => (i === dayIdx ? { ...d, placeIds: d.placeIds.filter((_, j) => j !== placeIdx) } : d)),
+      days: f.days.map((d, i) =>
+        i === dayIdx
+          ? { ...d, placeIds: d.placeIds.filter((_, j) => j !== placeIdx) }
+          : d,
+      ),
     }));
 
   const movePlaceInDay = (dayIdx: number, placeIdx: number, dir: -1 | 1) =>
@@ -314,7 +348,10 @@ export default function PlacesPage() {
         const target = placeIdx + dir;
         if (target < 0 || target >= d.placeIds.length) return d;
         const placeIds = [...d.placeIds];
-        [placeIds[placeIdx], placeIds[target]] = [placeIds[target], placeIds[placeIdx]];
+        [placeIds[placeIdx], placeIds[target]] = [
+          placeIds[target],
+          placeIds[placeIdx],
+        ];
         return { ...d, placeIds };
       }),
     }));
@@ -329,7 +366,9 @@ export default function PlacesPage() {
     try {
       if (editingTripId) {
         const updated = await updateTrip(editingTripId, tripForm);
-        setTrips((prev) => prev.map((t) => (t._id === editingTripId ? updated : t)));
+        setTrips((prev) =>
+          prev.map((t) => (t._id === editingTripId ? updated : t)),
+        );
         showToast("Itinerary updated!", "success");
       } else {
         const created = await createTrip(tripForm);
@@ -381,7 +420,9 @@ export default function PlacesPage() {
     try {
       if (editingId) {
         const updated = await updatePlace(editingId, payload);
-        setPlaces((prev) => prev.map((p) => (p._id === editingId ? updated : p)));
+        setPlaces((prev) =>
+          prev.map((p) => (p._id === editingId ? updated : p)),
+        );
         showToast("Place updated!", "success");
       } else {
         const created = await createPlace(payload);
@@ -415,42 +456,94 @@ export default function PlacesPage() {
   const q = query.trim().toLowerCase();
   const filteredPlaces = q
     ? places.filter((p) =>
-        [p.title, p.location, p.details, p.specialty, p.thingsToKnow].some((field) => field?.toLowerCase().includes(q))
+        [p.title, p.location, p.details, p.specialty, p.thingsToKnow].some(
+          (field) => field?.toLowerCase().includes(q),
+        ),
       )
     : places;
 
   return (
     <div className="max-w-md md:max-w-none mx-auto px-6 md:px-8 pt-8 pb-10 text-[var(--text-primary)]">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold">Places</h1>
+      <h1 className="text-lg font-semibold mb-6">Places</h1>
+
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-[var(--text-secondary)]">
+          Itineraries
+        </h2>
         <button
-          onClick={activeTab === "places" ? openAdd : openAddTrip}
+          onClick={openAddTrip}
+          aria-label="Add itinerary"
           className="px-[0.7rem] py-[0.3rem] bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold rounded-4xl text-sm"
         >
           +
         </button>
       </div>
 
-      <div className="flex gap-1 p-1 mb-6 rounded-lg bg-[var(--bg-input)] w-fit">
+      {tripsLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} className="h-40" />
+          ))}
+        </div>
+      ) : trips.length === 0 ? (
+        <p className="text-sm text-[var(--text-secondary)] text-center py-6">
+          No itineraries yet.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {trips.map((t) => {
+            const totalPlaces = t.days.reduce(
+              (sum, d) => sum + d.placeIds.length,
+              0,
+            );
+            const coverPlace = t.days
+              .flatMap((d) => d.placeIds)
+              .map(findPlace)
+              .find((p) => p?.images[0]);
+            return (
+              <button
+                key={t._id}
+                onClick={() => setViewingTrip(t)}
+                className="text-left bg-[var(--bg-surface)] rounded-xl overflow-hidden"
+              >
+                <div className="h-36 bg-[var(--bg-input)] flex items-center justify-center">
+                  {coverPlace?.images[0] ? (
+                    <img
+                      src={coverPlace.images[0]}
+                      alt={t.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <CalendarDaysIcon className="w-8 h-8 text-[var(--text-secondary)]" />
+                  )}
+                </div>
+                <div className="p-2">
+                  <p className="text-sm font-medium truncate">{t.title}</p>
+                  <p className="text-xs text-[var(--text-secondary)] truncate">
+                    {t.days.length} {t.days.length === 1 ? "day" : "days"} ·{" "}
+                    {totalPlaces} {totalPlaces === 1 ? "place" : "places"}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mt-8 mb-3">
+        <h2 className="text-sm font-semibold text-[var(--text-secondary)]">
+          Saved places
+        </h2>
         <button
-          onClick={() => setActiveTab("places")}
-          className={`px-3 py-1.5 rounded-md text-sm font-semibold ${
-            activeTab === "places" ? "bg-[var(--bg-surface)] text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
-          }`}
+          onClick={openAdd}
+          aria-label="Add place"
+          className="px-[0.7rem] py-[0.3rem] bg-[var(--btn-bg)] text-[var(--btn-text)] font-bold rounded-4xl text-sm"
         >
-          Places
-        </button>
-        <button
-          onClick={() => setActiveTab("itineraries")}
-          className={`px-3 py-1.5 rounded-md text-sm font-semibold ${
-            activeTab === "itineraries" ? "bg-[var(--bg-surface)] text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
-          }`}
-        >
-          Itineraries
+          +
         </button>
       </div>
 
-      {activeTab === "places" && !loading && places.length > 0 && (
+      {!loading && places.length > 0 && (
         <div className="relative mb-6">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
           <input
@@ -463,90 +556,63 @@ export default function PlacesPage() {
         </div>
       )}
 
-      {activeTab === "places" &&
-        (loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <SkeletonCard key={i} className="h-40" />
-            ))}
-          </div>
-        ) : places.length === 0 ? (
-          <p className="text-sm text-[var(--text-secondary)] text-center py-12">
-            No places yet. Add one to get started!
-          </p>
-        ) : filteredPlaces.length === 0 ? (
-          <p className="text-sm text-[var(--text-secondary)] text-center py-12">
-            No places match "{query}".
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {filteredPlaces.map((p) => (
-              <button
-                key={p._id}
-                onClick={() => setViewingPlace(p)}
-                className="text-left bg-[var(--bg-surface)] rounded-xl overflow-hidden"
-              >
-                <div className="h-36 bg-[var(--bg-input)] flex items-center justify-center">
-                  {p.images[0] ? (
-                    <img src={p.images[0]} alt={p.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <MapPinIcon className="w-8 h-8 text-[var(--text-secondary)]" />
-                  )}
-                </div>
-                <div className="p-2">
-                  <p className="text-sm font-medium truncate">{p.title}</p>
-                  {p.location && <p className="text-xs text-[var(--text-secondary)] truncate">{p.location}</p>}
-                  {p.specialty && <p className="text-xs text-[var(--accent)] truncate">{p.specialty}</p>}
-                </div>
-              </button>
-            ))}
-          </div>
-        ))}
-
-      {activeTab === "itineraries" &&
-        (tripsLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <SkeletonCard key={i} className="h-40" />
-            ))}
-          </div>
-        ) : trips.length === 0 ? (
-          <p className="text-sm text-[var(--text-secondary)] text-center py-12">
-            No itineraries yet. Add one to get started!
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {trips.map((t) => {
-              const totalPlaces = t.days.reduce((sum, d) => sum + d.placeIds.length, 0);
-              const coverPlace = t.days.flatMap((d) => d.placeIds).map(findPlace).find((p) => p?.images[0]);
-              return (
-                <button
-                  key={t._id}
-                  onClick={() => setViewingTrip(t)}
-                  className="text-left bg-[var(--bg-surface)] rounded-xl overflow-hidden"
-                >
-                  <div className="h-36 bg-[var(--bg-input)] flex items-center justify-center">
-                    {coverPlace?.images[0] ? (
-                      <img src={coverPlace.images[0]} alt={t.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <CalendarDaysIcon className="w-8 h-8 text-[var(--text-secondary)]" />
-                    )}
-                  </div>
-                  <div className="p-2">
-                    <p className="text-sm font-medium truncate">{t.title}</p>
-                    <p className="text-xs text-[var(--text-secondary)] truncate">
-                      {t.days.length} {t.days.length === 1 ? "day" : "days"} · {totalPlaces}{" "}
-                      {totalPlaces === 1 ? "place" : "places"}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        ))}
+      {loading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} className="h-40" />
+          ))}
+        </div>
+      ) : places.length === 0 ? (
+        <p className="text-sm text-[var(--text-secondary)] text-center py-12">
+          No places yet. Add one to get started!
+        </p>
+      ) : filteredPlaces.length === 0 ? (
+        <p className="text-sm text-[var(--text-secondary)] text-center py-12">
+          No places match "{query}".
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {filteredPlaces.map((p) => (
+            <button
+              key={p._id}
+              onClick={() => setViewingPlace(p)}
+              className="text-left bg-[var(--bg-surface)] rounded-xl overflow-hidden"
+            >
+              <div className="h-36 bg-[var(--bg-input)] flex items-center justify-center">
+                {p.images[0] ? (
+                  <img
+                    src={p.images[0]}
+                    alt={p.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <MapPinIcon className="w-8 h-8 text-[var(--text-secondary)]" />
+                )}
+              </div>
+              <div className="p-2">
+                <p className="text-sm font-medium truncate">{p.title}</p>
+                {p.location && (
+                  <p className="text-xs text-[var(--text-secondary)] truncate">
+                    {p.location}
+                  </p>
+                )}
+                {p.specialty && (
+                  <p className="text-xs text-[var(--accent)] truncate">
+                    {p.specialty}
+                  </p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* VIEW — read-only; "Edit" hands off to the form below */}
-      <Modal open={!!viewingPlace} onClose={closeView} title={viewingPlace?.title}>
+      <Modal
+        open={!!viewingPlace}
+        onClose={closeView}
+        title={viewingPlace?.title}
+      >
         {viewingPlace && (
           <div className="space-y-4">
             {viewingPlace.images.length > 0 && (
@@ -557,19 +623,29 @@ export default function PlacesPage() {
                     onClick={() => openViewer(viewingPlace.images, i)}
                     className="shrink-0 w-20 h-20 rounded-lg overflow-hidden"
                   >
-                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={src}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
             )}
 
-            {(viewingPlace.location || mapsHrefFor(viewingPlace.location, viewingPlace.mapLink)) && (
+            {(viewingPlace.location ||
+              mapsHrefFor(viewingPlace.location, viewingPlace.mapLink)) && (
               <div className="flex items-center gap-2">
                 <MapPinIcon className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />
-                <span className="text-sm flex-1 min-w-0 truncate">{viewingPlace.location || "No address set"}</span>
+                <span className="text-sm flex-1 min-w-0 truncate">
+                  {viewingPlace.location || "No address set"}
+                </span>
                 {mapsHrefFor(viewingPlace.location, viewingPlace.mapLink) && (
                   <a
-                    href={mapsHrefFor(viewingPlace.location, viewingPlace.mapLink)!}
+                    href={mapsHrefFor(
+                      viewingPlace.location,
+                      viewingPlace.mapLink,
+                    )!}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="shrink-0 text-xs text-[var(--accent)] font-medium"
@@ -582,7 +658,9 @@ export default function PlacesPage() {
 
             {viewingPlace.specialty && (
               <div>
-                <p className="text-xs text-[var(--text-secondary)] mb-1">Worth trying</p>
+                <p className="text-xs text-[var(--text-secondary)] mb-1">
+                  Worth trying
+                </p>
                 <p className="text-sm">{viewingPlace.specialty}</p>
                 {viewingPlace.foodImages.length > 0 && (
                   <div className="flex gap-2 overflow-x-auto -mx-1 px-1 mt-2">
@@ -592,7 +670,11 @@ export default function PlacesPage() {
                         onClick={() => openViewer(viewingPlace.foodImages, i)}
                         className="shrink-0 w-20 h-20 rounded-lg overflow-hidden"
                       >
-                        <img src={src} alt="" className="w-full h-full object-cover" />
+                        <img
+                          src={src}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
                       </button>
                     ))}
                   </div>
@@ -602,15 +684,23 @@ export default function PlacesPage() {
 
             {viewingPlace.details && (
               <div>
-                <p className="text-xs text-[var(--text-secondary)] mb-1">Details</p>
-                <p className="text-sm whitespace-pre-wrap">{viewingPlace.details}</p>
+                <p className="text-xs text-[var(--text-secondary)] mb-1">
+                  Details
+                </p>
+                <p className="text-sm whitespace-pre-wrap">
+                  {viewingPlace.details}
+                </p>
               </div>
             )}
 
             {viewingPlace.thingsToKnow && (
               <div>
-                <p className="text-xs text-[var(--text-secondary)] mb-1">Things to know</p>
-                <p className="text-sm whitespace-pre-wrap">{viewingPlace.thingsToKnow}</p>
+                <p className="text-xs text-[var(--text-secondary)] mb-1">
+                  Things to know
+                </p>
+                <p className="text-sm whitespace-pre-wrap">
+                  {viewingPlace.thingsToKnow}
+                </p>
               </div>
             )}
 
@@ -626,7 +716,10 @@ export default function PlacesPage() {
                       rel="noopener noreferrer"
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${LINK_STYLE[platform]}`}
                     >
-                      <LinkIconFor platform={platform} className="w-4 h-4 shrink-0" />
+                      <LinkIconFor
+                        platform={platform}
+                        className="w-4 h-4 shrink-0"
+                      />
                       <span className="truncate">{LINK_LABEL[platform]}</span>
                     </a>
                   );
@@ -641,7 +734,9 @@ export default function PlacesPage() {
               viewingPlace.links.length === 0 &&
               viewingPlace.images.length === 0 &&
               viewingPlace.foodImages.length === 0 && (
-                <p className="text-sm text-[var(--text-secondary)]">Nothing added yet.</p>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Nothing added yet.
+                </p>
               )}
 
             <div className="flex gap-2 pt-2">
@@ -666,13 +761,19 @@ export default function PlacesPage() {
       </Modal>
 
       {/* ADD / EDIT */}
-      <Modal open={showForm} onClose={closeForm} title={editingId ? "Edit Place" : "Add Place"}>
+      <Modal
+        open={showForm}
+        onClose={closeForm}
+        title={editingId ? "Edit Place" : "Add Place"}
+      >
         <div className="space-y-4">
           <label className="block text-xs text-[var(--text-secondary)]">
             Title
             <input
               value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, title: e.target.value }))
+              }
               placeholder="e.g. Grandma's house"
               className={`${INPUT} mt-1`}
             />
@@ -682,7 +783,9 @@ export default function PlacesPage() {
             Location
             <input
               value={form.location}
-              onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, location: e.target.value }))
+              }
               placeholder="Address or description"
               className={`${INPUT} mt-1`}
             />
@@ -693,7 +796,9 @@ export default function PlacesPage() {
             <div className="flex gap-2 mt-1">
               <input
                 value={form.mapLink}
-                onChange={(e) => setForm((f) => ({ ...f, mapLink: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, mapLink: e.target.value }))
+                }
                 placeholder="Paste a share link for a precise pin"
                 className={INPUT}
               />
@@ -715,7 +820,9 @@ export default function PlacesPage() {
             Details
             <textarea
               value={form.details}
-              onChange={(e) => setForm((f) => ({ ...f, details: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, details: e.target.value }))
+              }
               rows={4}
               placeholder="Notes, directions, anything worth remembering"
               className={`${INPUT} mt-1 resize-none`}
@@ -726,7 +833,9 @@ export default function PlacesPage() {
             Things to know
             <textarea
               value={form.thingsToKnow}
-              onChange={(e) => setForm((f) => ({ ...f, thingsToKnow: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, thingsToKnow: e.target.value }))
+              }
               rows={3}
               placeholder="e.g. Cash only, closed Mondays, bring ID"
               className={`${INPUT} mt-1 resize-none`}
@@ -737,7 +846,9 @@ export default function PlacesPage() {
             Any unique on this place?
             <input
               value={form.specialty}
-              onChange={(e) => setForm((f) => ({ ...f, specialty: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, specialty: e.target.value }))
+              }
               placeholder="e.g. Carbonara, Crispy Pata"
               className={`${INPUT} mt-1`}
             />
@@ -749,9 +860,20 @@ export default function PlacesPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               {form.foodImages.map((src, i) => (
-                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                  <button type="button" onClick={() => openViewer(form.foodImages, i)} className="w-full h-full block">
-                    <img src={src} alt="" className="w-full h-full object-cover" />
+                <div
+                  key={i}
+                  className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0"
+                >
+                  <button
+                    type="button"
+                    onClick={() => openViewer(form.foodImages, i)}
+                    className="w-full h-full block"
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                   <button
                     onClick={(e) => {
@@ -798,9 +920,20 @@ export default function PlacesPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               {form.images.map((src, i) => (
-                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                  <button type="button" onClick={() => openViewer(form.images, i)} className="w-full h-full block">
-                    <img src={src} alt="" className="w-full h-full object-cover" />
+                <div
+                  key={i}
+                  className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0"
+                >
+                  <button
+                    type="button"
+                    onClick={() => openViewer(form.images, i)}
+                    className="w-full h-full block"
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                   <button
                     onClick={(e) => {
@@ -876,7 +1009,10 @@ export default function PlacesPage() {
                         rel="noopener noreferrer"
                         className={`flex-1 min-w-0 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${LINK_STYLE[platform]}`}
                       >
-                        <LinkIconFor platform={platform} className="w-4 h-4 shrink-0" />
+                        <LinkIconFor
+                          platform={platform}
+                          className="w-4 h-4 shrink-0"
+                        />
                         <span className="truncate">{LINK_LABEL[platform]}</span>
                       </a>
                       <button
@@ -902,7 +1038,10 @@ export default function PlacesPage() {
                 Delete
               </button>
             )}
-            <button onClick={closeForm} className="flex-1 px-4 py-2 text-[var(--text-secondary)] border border-[var(--border-strong)] rounded-lg text-sm">
+            <button
+              onClick={closeForm}
+              className="flex-1 px-4 py-2 text-[var(--text-secondary)] border border-[var(--border-strong)] rounded-lg text-sm"
+            >
               Cancel
             </button>
             <button
@@ -917,17 +1056,27 @@ export default function PlacesPage() {
       </Modal>
 
       {/* ITINERARY VIEW — read-only; "Edit" hands off to the form below */}
-      <Modal open={!!viewingTrip} onClose={closeTripView} title={viewingTrip?.title}>
+      <Modal
+        open={!!viewingTrip}
+        onClose={closeTripView}
+        title={viewingTrip?.title}
+      >
         {viewingTrip && (
           <div className="space-y-4">
             {viewingTrip.days.length === 0 ? (
-              <p className="text-sm text-[var(--text-secondary)]">No days added yet.</p>
+              <p className="text-sm text-[var(--text-secondary)]">
+                No days added yet.
+              </p>
             ) : (
               viewingTrip.days.map((day, i) => (
                 <div key={i}>
-                  <p className="text-xs text-[var(--text-secondary)] mb-2">{day.label || `Day ${i + 1}`}</p>
+                  <p className="text-xs text-[var(--text-secondary)] mb-2">
+                    {day.label || `Day ${i + 1}`}
+                  </p>
                   {day.placeIds.length === 0 ? (
-                    <p className="text-sm text-[var(--text-secondary)]">No places added.</p>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      No places added.
+                    </p>
                   ) : (
                     <div className="space-y-1.5">
                       {day.placeIds.map((placeId, j) => {
@@ -944,15 +1093,23 @@ export default function PlacesPage() {
                           >
                             <div className="w-10 h-10 rounded-md overflow-hidden shrink-0 bg-[var(--bg-surface)] flex items-center justify-center">
                               {place.images[0] ? (
-                                <img src={place.images[0]} alt="" className="w-full h-full object-cover" />
+                                <img
+                                  src={place.images[0]}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
                               ) : (
                                 <MapPinIcon className="w-4 h-4 text-[var(--text-secondary)]" />
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium truncate">{place.title}</p>
+                              <p className="text-sm font-medium truncate">
+                                {place.title}
+                              </p>
                               {place.location && (
-                                <p className="text-xs text-[var(--text-secondary)] truncate">{place.location}</p>
+                                <p className="text-xs text-[var(--text-secondary)] truncate">
+                                  {place.location}
+                                </p>
                               )}
                             </div>
                           </button>
@@ -986,13 +1143,19 @@ export default function PlacesPage() {
       </Modal>
 
       {/* ITINERARY ADD / EDIT */}
-      <Modal open={showTripForm} onClose={closeTripForm} title={editingTripId ? "Edit Itinerary" : "Add Itinerary"}>
+      <Modal
+        open={showTripForm}
+        onClose={closeTripForm}
+        title={editingTripId ? "Edit Itinerary" : "Add Itinerary"}
+      >
         <div className="space-y-4">
           <label className="block text-xs text-[var(--text-secondary)]">
             Title
             <input
               value={tripForm.title}
-              onChange={(e) => setTripForm((f) => ({ ...f, title: e.target.value }))}
+              onChange={(e) =>
+                setTripForm((f) => ({ ...f, title: e.target.value }))
+              }
               placeholder="e.g. Japan Trip 2026"
               className={`${INPUT} mt-1`}
             />
@@ -1000,7 +1163,10 @@ export default function PlacesPage() {
 
           <div className="space-y-3">
             {tripForm.days.map((day, dayIdx) => (
-              <div key={dayIdx} className="p-3 rounded-lg bg-[var(--bg-input)] space-y-2">
+              <div
+                key={dayIdx}
+                className="p-3 rounded-lg bg-[var(--bg-input)] space-y-2"
+              >
                 <div className="flex items-center gap-2">
                   <input
                     value={day.label}
@@ -1038,15 +1204,24 @@ export default function PlacesPage() {
                     {day.placeIds.map((placeId, placeIdx) => {
                       const place = findPlace(placeId);
                       return (
-                        <div key={placeIdx} className="flex items-center gap-2 p-1.5 rounded-lg bg-[var(--bg-surface)]">
+                        <div
+                          key={placeIdx}
+                          className="flex items-center gap-2 p-1.5 rounded-lg bg-[var(--bg-surface)]"
+                        >
                           <div className="w-8 h-8 rounded-md overflow-hidden shrink-0 bg-[var(--bg-input)] flex items-center justify-center">
                             {place?.images[0] ? (
-                              <img src={place.images[0]} alt="" className="w-full h-full object-cover" />
+                              <img
+                                src={place.images[0]}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
                             ) : (
                               <MapPinIcon className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                             )}
                           </div>
-                          <p className="text-sm flex-1 min-w-0 truncate">{place?.title ?? "Deleted place"}</p>
+                          <p className="text-sm flex-1 min-w-0 truncate">
+                            {place?.title ?? "Deleted place"}
+                          </p>
                           <button
                             onClick={() => movePlaceInDay(dayIdx, placeIdx, -1)}
                             disabled={placeIdx === 0}
@@ -1102,7 +1277,10 @@ export default function PlacesPage() {
                 Delete
               </button>
             )}
-            <button onClick={closeTripForm} className="flex-1 px-4 py-2 text-[var(--text-secondary)] border border-[var(--border-strong)] rounded-lg text-sm">
+            <button
+              onClick={closeTripForm}
+              className="flex-1 px-4 py-2 text-[var(--text-secondary)] border border-[var(--border-strong)] rounded-lg text-sm"
+            >
               Cancel
             </button>
             <button
@@ -1117,7 +1295,11 @@ export default function PlacesPage() {
       </Modal>
 
       {/* PLACE PICKER — nested inside the itinerary form, for adding a place to a day */}
-      <Modal open={pickerDayIndex !== null} onClose={closePicker} title="Add a place">
+      <Modal
+        open={pickerDayIndex !== null}
+        onClose={closePicker}
+        title="Add a place"
+      >
         <div className="space-y-3">
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
@@ -1137,7 +1319,13 @@ export default function PlacesPage() {
           ) : (
             <div className="space-y-1.5 max-h-80 overflow-y-auto">
               {places
-                .filter((p) => !pickerQuery.trim() || p.title.toLowerCase().includes(pickerQuery.trim().toLowerCase()))
+                .filter(
+                  (p) =>
+                    !pickerQuery.trim() ||
+                    p.title
+                      .toLowerCase()
+                      .includes(pickerQuery.trim().toLowerCase()),
+                )
                 .map((p) => (
                   <button
                     key={p._id}
@@ -1146,14 +1334,22 @@ export default function PlacesPage() {
                   >
                     <div className="w-9 h-9 rounded-md overflow-hidden shrink-0 bg-[var(--bg-surface)] flex items-center justify-center">
                       {p.images[0] ? (
-                        <img src={p.images[0]} alt="" className="w-full h-full object-cover" />
+                        <img
+                          src={p.images[0]}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <MapPinIcon className="w-4 h-4 text-[var(--text-secondary)]" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium truncate">{p.title}</p>
-                      {p.location && <p className="text-xs text-[var(--text-secondary)] truncate">{p.location}</p>}
+                      {p.location && (
+                        <p className="text-xs text-[var(--text-secondary)] truncate">
+                          {p.location}
+                        </p>
+                      )}
                     </div>
                   </button>
                 ))}
@@ -1198,8 +1394,17 @@ export default function PlacesPage() {
               }}
             >
               {viewerImages.map((src, i) => (
-                <div key={i} className="h-full flex items-center justify-center" style={{ width: `${100 / viewerImages.length}%` }}>
-                  <img src={src} alt="" draggable={false} className="w-full h-full object-cover select-none" />
+                <div
+                  key={i}
+                  className="h-full flex items-center justify-center"
+                  style={{ width: `${100 / viewerImages.length}%` }}
+                >
+                  <img
+                    src={src}
+                    alt=""
+                    draggable={false}
+                    className="w-full h-full object-cover select-none"
+                  />
                 </div>
               ))}
             </div>
@@ -1228,7 +1433,11 @@ export default function PlacesPage() {
             <span className="text-sm text-white/80">
               {viewerIndex + 1} / {viewerImages.length}
             </span>
-            <button onClick={closeViewer} aria-label="Close" className="p-1.5 text-white pointer-events-auto">
+            <button
+              onClick={closeViewer}
+              aria-label="Close"
+              className="p-1.5 text-white pointer-events-auto"
+            >
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
