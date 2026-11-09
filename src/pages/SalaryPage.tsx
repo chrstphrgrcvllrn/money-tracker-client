@@ -85,7 +85,7 @@ const TOTALS_RULES: [RegExp, string][] = [
   [/\bicct\b/i, "ICCT"],
   [/^billease\b/i, "Billease"],
   [/^baon\b/i, "Baon"],
-  [/netflix|neflix|railway|claude pro|^google/i, "Subscriptions"],
+  [/^digital\b|netflix|neflix|railway|claude pro|^google|godaddy/i, "Digital"],
   [/\b(?:hiram|heram)\b/i, "Hiram"],
 ];
 const groupFor = (base: string) => {
