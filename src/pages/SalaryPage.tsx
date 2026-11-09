@@ -739,11 +739,11 @@ export default function SalaryPage() {
                     <ul className="mt-1 space-y-0.5">
                       {item.notes.map((n, i) => (
                         <li key={i} className="flex justify-between gap-3 text-[var(--text-secondary)]">
-                          <span className="break-words">
+                          <span className="min-w-0 truncate whitespace-nowrap" title={`${n.detail} · ${n.salary}`}>
                             {n.detail}
                             <span className="opacity-70"> · {n.salary}</span>
                           </span>
-                          <span className="shrink-0">{format(n.amount)}</span>
+                          <span className="shrink-0 whitespace-nowrap">{format(n.amount)}</span>
                         </li>
                       ))}
                     </ul>
