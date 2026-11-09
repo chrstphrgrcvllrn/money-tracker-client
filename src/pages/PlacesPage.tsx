@@ -14,6 +14,9 @@ import type { Place } from "@/types/places.type";
 import { fileToResizedDataUrl } from "@/lib/imageResize";
 import { linkPlatform, normalizeLink } from "@/lib/linkPlatform";
 import Modal from "@/components/Modal";
+import SpotsEditor from "@/components/places/SpotsEditor";
+import SpotsView from "@/components/places/SpotsView";
+import { newSpot, type EditableSpot } from "@/components/places/spots";
 import { useToast } from "@/components/useToast";
 import { SkeletonCard } from "@/components/Skeleton";
 
@@ -40,6 +43,7 @@ const emptyForm = {
   foodImages: [] as string[],
   links: [] as string[],
   mapLink: "",
+  spots: [] as EditableSpot[],
 };
 
 
@@ -143,6 +147,16 @@ export default function PlacesPage() {
       foodImages: [...(p.foodImages ?? [])],
       links: [...(p.links ?? [])],
       mapLink: p.mapLink ?? "",
+      spots: (p.spots ?? []).map((spot) => ({
+        ...newSpot(),
+        name: spot.name,
+        images: [...spot.images],
+        links: [...spot.links],
+        mapLink: spot.mapLink ?? "",
+        notes: spot.notes ?? "",
+        whereToEat: spot.whereToEat ?? "",
+        hotel: spot.hotel ?? "",
+      })),
     });
     setShowForm(true);
   };
@@ -244,7 +258,32 @@ export default function PlacesPage() {
       }
       mapLink = normalized;
     }
-    const payload = { ...form, mapLink };
+    const spots = [];
+    for (const spot of form.spots) {
+      if (!spot.name.trim()) {
+        showToast("Every spot needs a name", "error");
+        return;
+      }
+      let spotMapLink = "";
+      if (spot.mapLink.trim()) {
+        const normalized = normalizeLink(spot.mapLink);
+        if (!normalized) {
+          showToast(`The Google Maps link for "${spot.name.trim()}" doesn't look valid`, "error");
+          return;
+        }
+        spotMapLink = normalized;
+      }
+      spots.push({
+        name: spot.name.trim(),
+        images: spot.images,
+        links: spot.links,
+        mapLink: spotMapLink,
+        notes: spot.notes,
+        whereToEat: spot.whereToEat,
+        hotel: spot.hotel,
+      });
+    }
+    const payload = { ...form, mapLink, spots };
 
     setSaving(true);
     try {
@@ -466,6 +505,8 @@ export default function PlacesPage() {
               </div>
             )}
 
+            <SpotsView spots={viewingPlace.spots ?? []} onOpenImages={openViewer} />
+
             {viewingPlace.links.length > 0 && (
               <div className="space-y-2">
                 {viewingPlace.links.map((link, i) => {
@@ -494,6 +535,7 @@ export default function PlacesPage() {
               !viewingPlace.details &&
               !viewingPlace.thingsToKnow &&
               viewingPlace.links.length === 0 &&
+              (viewingPlace.spots ?? []).length === 0 &&
               viewingPlace.images.length === 0 &&
               viewingPlace.foodImages.length === 0 && (
                 <p className="text-sm text-[var(--text-secondary)]">

@@ -1,3 +1,16 @@
+// A named sub-location inside a place (e.g. "Mount Fansipan" in "Sapa").
+export type SpotInput = {
+  name: string;
+  images: string[]; // base64 data URLs
+  links: string[];
+  mapLink: string;
+  notes: string;
+  whereToEat: string;
+  hotel: string;
+};
+
+export type Spot = SpotInput & { _id: string };
+
 export type Place = {
   _id: string;
   title: string;
@@ -9,6 +22,7 @@ export type Place = {
   foodImages: string[]; // separate gallery for the `specialty` dishes/items
   links: string[]; // video links (TikTok, YouTube, etc.), rendered as buttons
   mapLink: string; // optional precise Google Maps share link
+  spots: Spot[]; // sub-locations, each with its own sections
   createdAt?: string;
   updatedAt?: string;
 };
@@ -23,4 +37,5 @@ export type PlaceInput = {
   foodImages: string[];
   links: string[];
   mapLink: string;
+  spots: SpotInput[];
 };
