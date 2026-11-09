@@ -73,6 +73,7 @@ const TOTALS_ALIASES: Record<string, string> = {
   "bengot budget": "Budget",
   "shanen budget": "Budget",
   shanen: "Budget",
+  bengot: "Budget",
   gloan: "GLoan 1", // "GLoan 1st (June 3)" is loan 1's first payment
 };
 const TOTALS_RULES: [RegExp, string][] = [
