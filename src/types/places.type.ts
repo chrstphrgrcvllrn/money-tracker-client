@@ -15,7 +15,6 @@ export type Spot = SpotInput & { _id: string };
 export type SubPlaceInput = {
   name: string;
   spots: SpotInput[];
-  subPlaces: SubPlaceInput[];
 };
 
 export type SubPlace = { _id: string; name: string; spots: Spot[] };
