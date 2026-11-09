@@ -45,6 +45,16 @@ export default function SpotsView({ spots, onOpenImages }: Props) {
               </div>
             )}
 
+            {spot.links.length > 0 && (
+              <div className="space-y-2">
+                {spot.links.map((link, i) => (
+                  <div key={i} className="flex">
+                    <LinkButton link={link} />
+                  </div>
+                ))}
+              </div>
+            )}
+
             {mapHref && (
               <a
                 href={mapHref}
@@ -71,16 +81,6 @@ export default function SpotsView({ spots, onOpenImages }: Props) {
               <Section label="Hotel">
                 <p className="text-sm whitespace-pre-wrap">{spot.hotel}</p>
               </Section>
-            )}
-
-            {spot.links.length > 0 && (
-              <div className="space-y-2">
-                {spot.links.map((link, i) => (
-                  <div key={i} className="flex">
-                    <LinkButton link={link} />
-                  </div>
-                ))}
-              </div>
             )}
           </div>
         );
