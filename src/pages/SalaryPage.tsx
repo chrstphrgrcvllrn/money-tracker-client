@@ -99,10 +99,9 @@ const splitExpenseName = (raw: string) => {
     .trim();
   const base = label || name;
   const group = groupFor(base);
-  // The sub-note is the full original name (e.g. "ICCT 1st installment
-  // (April 16)"), shown only when it says more than the group label itself.
-  const label2 = group ?? base;
-  return { label: label2, detail: name.toLowerCase() === label2.toLowerCase() ? "" : name };
+  // The sub-note is always the full original name (e.g. "ICCT 1st installment
+  // (April 16)"), so every entry stays visible under its group.
+  return { label: group ?? base, detail: name };
 };
 
 // A salary card that can be dragged by its handle (so touch scrolling still
@@ -551,7 +550,7 @@ export default function SalaryPage() {
 
   // Compute totals by expense name, sorted highest to lowest
   const calculateTotals = () => {
-    const groups: Record<string, { name: string; total: number; notes: { detail: string; amount: number }[] }> = {};
+    const groups: Record<string, { name: string; total: number; notes: { detail: string; amount: number; salary: string }[] }> = {};
 
     salaryData.forEach((entry) => {
       const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
@@ -563,7 +562,7 @@ export default function SalaryPage() {
         const amount = Number(expense.amount || 0);
         const g = (groups[key] ??= { name: label, total: 0, notes: [] });
         g.total += amount;
-        if (detail) g.notes.push({ detail, amount });
+        g.notes.push({ detail, amount, salary: entry.date });
       });
     });
 
@@ -740,7 +739,10 @@ export default function SalaryPage() {
                     <ul className="mt-1 space-y-0.5">
                       {item.notes.map((n, i) => (
                         <li key={i} className="flex justify-between gap-3 text-[var(--text-secondary)]">
-                          <span className="break-words">{n.detail}</span>
+                          <span className="break-words">
+                            {n.detail}
+                            <span className="opacity-70"> · {n.salary}</span>
+                          </span>
                           <span className="shrink-0">{format(n.amount)}</span>
                         </li>
                       ))}
