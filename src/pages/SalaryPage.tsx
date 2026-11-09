@@ -158,6 +158,7 @@ export default function SalaryPage() {
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [expenseName, setExpenseName] = useState("");
   const [expenseAmount, setExpenseAmount] = useState("");
+  const [expenseNote, setExpenseNote] = useState("");
   const [currentSalaryId, setCurrentSalaryId] = useState<string | null>(null);
 
   // ✅ DELETE SALARY MODAL STATE
@@ -354,6 +355,7 @@ export default function SalaryPage() {
     setCurrentSalaryId(salaryId);
     setExpenseName("");
     setExpenseAmount("");
+    setExpenseNote("");
     setShowExpenseForm(true);
   };
 
@@ -366,7 +368,7 @@ export default function SalaryPage() {
     if (!entry) return;
 
     const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
-    const updatedExpenses = [...expenses, { name: expenseName, amount, paid: false }];
+    const updatedExpenses = [...expenses, { name: expenseName, amount, paid: false, note: expenseNote.trim() }];
 
     try {
       const updated = await updateSalary(currentSalaryId, { expenses: updatedExpenses });
@@ -622,6 +624,13 @@ export default function SalaryPage() {
           placeholder="Expense amount"
           value={expenseAmount}
           onChange={(e) => setExpenseAmount(e.target.value)}
+          className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
+        />
+        <input
+          type="text"
+          placeholder="Note (optional)"
+          value={expenseNote}
+          onChange={(e) => setExpenseNote(e.target.value)}
           className="w-full px-3 py-2 bg-[var(--bg-input)] text-sm text-[var(--text-primary)] border border-[var(--border-strong)] rounded-lg focus:border-[var(--accent)]/50 outline-none"
         />
         <div className="flex justify-end space-x-2 pt-2">
@@ -881,18 +890,34 @@ export default function SalaryPage() {
                   isHiddenBaon(expense.name) && !isEditingAll && !revealedExpenses.has(entry._id) ? null : (
                   <li key={idx} className="flex justify-between items-center gap-2 m-2">
                     {isEditingAll ? (
-                      <input
-                        type="text"
-                        value={editedExpenses[idx]?.name || ""}
-                        onChange={(e) => {
-                          const newExpenses = [...editedExpenses];
-                          if (newExpenses[idx]) {
-                            newExpenses[idx].name = e.target.value;
-                            setEditedExpenses(newExpenses);
-                          }
-                        }}
-                        className="flex-1 border border-mist-900 px-2 py-1 rounded text-[var(--text-primary)]"
-                      />
+                      <div className="flex-1 flex flex-col gap-1">
+                        <input
+                          type="text"
+                          value={editedExpenses[idx]?.name || ""}
+                          placeholder="Name"
+                          onChange={(e) => {
+                            const newExpenses = [...editedExpenses];
+                            if (newExpenses[idx]) {
+                              newExpenses[idx].name = e.target.value;
+                              setEditedExpenses(newExpenses);
+                            }
+                          }}
+                          className="border border-mist-900 px-2 py-1 rounded text-[var(--text-primary)]"
+                        />
+                        <input
+                          type="text"
+                          value={editedExpenses[idx]?.note || ""}
+                          placeholder="Note"
+                          onChange={(e) => {
+                            const newExpenses = [...editedExpenses];
+                            if (newExpenses[idx]) {
+                              newExpenses[idx].note = e.target.value;
+                              setEditedExpenses(newExpenses);
+                            }
+                          }}
+                          className="border border-mist-900 px-2 py-1 rounded text-[var(--text-secondary)]"
+                        />
+                      </div>
                     ) : (
                       <span
                         onClick={() => handleTogglePaid(entry._id, idx)}
@@ -901,6 +926,11 @@ export default function SalaryPage() {
                         }`}
                       >
                         {expense.name}
+                        {expense.note && (
+                          <span className="block text-[11px] font-normal no-underline text-[var(--text-secondary)]">
+                            {expense.note}
+                          </span>
+                        )}
                       </span>
                     )}
 

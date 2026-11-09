@@ -3,6 +3,7 @@ export type Expense = {
   name: string;
   amount: number;
   paid?: boolean;
+  note?: string;
 };
 
 export type SalaryEntry = {
