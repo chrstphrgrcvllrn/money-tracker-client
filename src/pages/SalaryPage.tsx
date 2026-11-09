@@ -66,6 +66,12 @@ const DETAIL_RE = new RegExp(
   `\\([^)]*(?:\\d|\\b(?:${MONTHS})\\b)[^)]*\\)|\\b(?:\\d+(?:st|nd|rd|th)|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\\b|\\b(?:installment|hulog)\\b`,
   "gi"
 );
+// Different names that are really the same thing in Totals (lowercase key).
+const TOTALS_ALIASES: Record<string, string> = {
+  "bengot budget": "Budget",
+  "shanen budget": "Budget",
+  shanen: "Budget",
+};
 const splitExpenseName = (raw: string) => {
   const name = (raw ?? "").trim();
   const parts: string[] = [];
@@ -77,7 +83,13 @@ const splitExpenseName = (raw: string) => {
     .replace(/\s+/g, " ")
     .replace(/[\s\-–]+$/, "")
     .trim();
-  return { label: label || name, detail: label ? parts.join(" ") : "" };
+  const base = label || name;
+  const alias = TOTALS_ALIASES[base.toLowerCase()];
+  if (alias) {
+    // Renamed group: keep the original wording as the sub-note.
+    return { label: alias, detail: [base, ...parts].join(" ") };
+  }
+  return { label: base, detail: label ? parts.join(" ") : "" };
 };
 
 // A salary card that can be dragged by its handle (so touch scrolling still
