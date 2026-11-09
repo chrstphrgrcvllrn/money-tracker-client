@@ -116,7 +116,7 @@ export default function LoanPage() {
   };
 
   const mask = (value: number) =>
-    "*".repeat(value.toLocaleString().length);
+    "*".repeat(value.toLocaleString(undefined, { maximumFractionDigits: 0 }).length);
 
   const handleAddLoan = async () => {
     if (!newLoanName || !newLoanAmount) return;
@@ -388,7 +388,7 @@ export default function LoanPage() {
       <div className="flex items-center justify-between text-xs mb-2 text-[var(--text-primary)]">
         <span>Initial amount</span>
         <span className="flex items-center gap-2">
-          <span className="font-semibold">{showAmounts ? Number(loan.initialAmount).toLocaleString() : mask(Number(loan.initialAmount))}</span>
+          <span className="font-semibold">{showAmounts ? Number(loan.initialAmount).toLocaleString(undefined, { maximumFractionDigits: 0 }) : mask(Number(loan.initialAmount))}</span>
           {editMode && (
             <button
               onClick={() => handleEditInitialAmount(loan)}
@@ -427,7 +427,7 @@ export default function LoanPage() {
                     Number(t.amount) < 0 ? "text-[var(--negative)]" : "text-[var(--text-primary)]"
                   }`}
                 >
-                  {Number(t.amount).toLocaleString("en-PH")}
+                  {Number(t.amount).toLocaleString("en-PH", { maximumFractionDigits: 0 })}
                 </span>
 
                 {editMode && t._id && (
@@ -652,12 +652,12 @@ export default function LoanPage() {
       <div className="mb-6 p-4 bg-[var(--bg-surface)] rounded-xl text-center">
         <p className="text-[var(--text-secondary)] text-sm">Total Remaining</p>
         <p className="text-[2.5rem] font-bold text-[var(--text-primary)]">
-          {showAmounts ? totalRemaining.toLocaleString() : mask(totalRemaining)}
+          {showAmounts ? totalRemaining.toLocaleString(undefined, { maximumFractionDigits: 0 }) : mask(totalRemaining)}
         </p>
         <p className="text-xs text-[var(--text-secondary)] mt-1">
           Total paid{" "}
           <span className="font-semibold text-[var(--text-primary)]">
-            {showAmounts ? totalPaid.toLocaleString() : mask(totalPaid)}
+            {showAmounts ? totalPaid.toLocaleString(undefined, { maximumFractionDigits: 0 }) : mask(totalPaid)}
           </span>
         </p>
       </div>
@@ -710,12 +710,12 @@ export default function LoanPage() {
                   <div className="flex justify-between items-baseline text-sm">
                     <span className="text-[var(--text-primary)]">{m.label}</span>
                     <span className="font-semibold text-[var(--text-primary)]">
-                      {showAmounts ? m.total.toLocaleString() : mask(m.total)}
+                      {showAmounts ? m.total.toLocaleString(undefined, { maximumFractionDigits: 0 }) : mask(m.total)}
                     </span>
                   </div>
                   <p className="text-[11px] text-[var(--text-secondary)]">
                     {showAmounts
-                      ? `Added +${m.added.toLocaleString()} · Net ${m.net.toLocaleString()}`
+                      ? `Added +${m.added.toLocaleString(undefined, { maximumFractionDigits: 0 })} · Net ${m.net.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
                       : `Added ${mask(m.added)} · Net ${mask(m.net)}`}
                   </p>
                   <div className="h-2 rounded-full bg-[var(--bg-input)] overflow-hidden">
@@ -747,7 +747,7 @@ export default function LoanPage() {
                             }`}
                           >
                             {showAmounts
-                              ? `${item.amount > 0 ? "+" : ""}${item.amount.toLocaleString()}`
+                              ? `${item.amount > 0 ? "+" : ""}${item.amount.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
                               : mask(item.amount)}
                           </span>
                         </li>
@@ -794,7 +794,7 @@ export default function LoanPage() {
                       ? loanTransactions
                           .filter((t) => t.amount < 0)
                           .reduce((s, t) => s + Math.abs(Number(t.amount)), 0)
-                          .toLocaleString()
+                          .toLocaleString(undefined, { maximumFractionDigits: 0 })
                       : mask(
                           loanTransactions
                             .filter((t) => t.amount < 0)
@@ -806,7 +806,7 @@ export default function LoanPage() {
                 </div>
 
                 <p className="font-bold text-[var(--danger)]">
-                  {showAmounts ? remaining.toLocaleString() : mask(remaining)}
+                  {showAmounts ? remaining.toLocaleString(undefined, { maximumFractionDigits: 0 }) : mask(remaining)}
                 </p>
               </button>
 
@@ -858,10 +858,10 @@ export default function LoanPage() {
                   </div>
                 </td>
                 <td className="py-2.5 text-right text-[var(--text-secondary)]">
-                  {showAmounts ? paid.toLocaleString() : mask(paid)}
+                  {showAmounts ? paid.toLocaleString(undefined, { maximumFractionDigits: 0 }) : mask(paid)}
                 </td>
                 <td className="py-2.5 pr-3 rounded-r-xl text-right font-bold text-[var(--danger)]">
-                  {showAmounts ? remaining.toLocaleString() : mask(remaining)}
+                  {showAmounts ? remaining.toLocaleString(undefined, { maximumFractionDigits: 0 }) : mask(remaining)}
                 </td>
               </tr>
             );
