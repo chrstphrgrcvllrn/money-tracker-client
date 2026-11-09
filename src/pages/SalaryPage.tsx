@@ -503,6 +503,8 @@ export default function SalaryPage() {
 
     salaryData.forEach((entry) => {
       const expenses = Array.isArray(entry.expenses) ? entry.expenses : [];
+      // Only completed salaries (every expense paid) count toward totals.
+      if (expenses.length === 0 || !expenses.every((e) => e.paid)) return;
       expenses.forEach((expense) => {
         if (!totalsMap[expense.name]) {
           totalsMap[expense.name] = 0;
