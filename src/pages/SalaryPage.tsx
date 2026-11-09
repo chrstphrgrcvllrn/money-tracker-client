@@ -657,7 +657,13 @@ export default function SalaryPage() {
               )}
 
               <ul className="border border-[var(--border-subtle)] rounded divide-y divide-mist-900 text-xs">
-                {expenses.map((expense, idx) =>
+                {/* Display-only sort (biggest first). Keeps each row's original
+                    index, which the toggle/edit handlers use. Sorts saved
+                    amounts, so rows don't jump while typing in edit mode. */}
+                {expenses
+                  .map((expense, idx) => ({ expense, idx }))
+                  .sort((a, b) => Number(b.expense.amount) - Number(a.expense.amount))
+                  .map(({ expense, idx }) =>
                   isHiddenBaon(expense.name) && !isEditingAll && !revealedExpenses.has(entry._id) ? null : (
                   <li key={idx} className="flex justify-between items-center gap-2 m-2">
                     {isEditingAll ? (
